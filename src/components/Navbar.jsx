@@ -53,10 +53,9 @@ export default function Navbar({ onMenuClick }) {
     };
   }, [query, notes, tasks, events]);
 
-  const dueSoon = useMemo(() => {
-    const threshold = Date.now() + 86400000;
-    return tasks.filter((t) => t.status !== 'Completed' && t.dueDate && new Date(t.dueDate) <= new Date(threshold));
-  }, [tasks]);
+  const dueSoon = tasks.filter(
+    (t) => t.status !== 'Completed' && t.dueDate && new Date(t.dueDate) <= new Date(Date.now() + 86400000)
+  );
 
   const initials = user?.name
     ?.split(' ')

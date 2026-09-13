@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Calendar, ArrowUpRight, Plus, Clock, FileText } from 'lucide-react';
+import { Check, ArrowUpRight, Plus, Clock, FileText } from 'lucide-react';
 import Card from '../components/Card';
-import EmptyState from '../components/EmptyState';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
@@ -22,7 +21,6 @@ export default function Dashboard() {
   const pending = tasks.filter((t) => t.status !== 'Completed');
   const today = new Date().toISOString().slice(0, 10);
   const todaysEvents = events.filter((e) => e.date === today).sort((a, b) => a.time.localeCompare(b.time));
-  const upcomingDeadlines = tasks.filter((t) => t.status !== 'Completed' && t.dueDate).slice(0, 4);
   const recentNotes = [...notes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
   const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
 

@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Plus, CheckSquare, LayoutGrid, Rows3 } from 'lucide-react';
 import Modal from '../components/Modal';
-import Card from '../components/Card';
 import TaskCard from '../components/TaskCard';
 import EmptyState from '../components/EmptyState';
 import { useData } from '../context/DataContext';

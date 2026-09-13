@@ -46,10 +46,7 @@ export default function Analytics() {
 
   const completed = tasks.filter((t) => t.status === 'Completed').length;
   const productivityScore = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
-  const notesThisWeek = useMemo(() => {
-    const now = Date.now();
-    return notes.filter((n) => (now - new Date(n.createdAt)) / 86400000 <= 7).length;
-  }, [notes]);
+  const notesThisWeek = notes.filter((n) => (Date.now() - new Date(n.createdAt)) / 86400000 <= 7).length;
 
   return (
     <div className="space-y-6 animate-fade-up max-w-6xl mx-auto">
