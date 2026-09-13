@@ -3,6 +3,12 @@ import { loadData, saveData, removeData, STORAGE_KEYS } from '../utils/storage';
 
 const AuthContext = createContext(null);
 
+export const DEMO_USER = {
+  id: 'demo-user-alex',
+  name: 'Alex Rivera',
+  email: 'alex@lifeos.workspace',
+};
+
 function hash(str) {
   // Not real cryptography — just enough to avoid storing raw passwords in
   // plain text for this frontend-only demo.
@@ -18,7 +24,9 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState('');
 
   useEffect(() => {
-    if (user) saveData(STORAGE_KEYS.USER, user);
+    if (user) {
+      saveData(STORAGE_KEYS.USER, user);
+    }
   }, [user]);
 
   function signup({ name, email, password }) {
@@ -38,6 +46,10 @@ export function AuthProvider({ children }) {
 
   function login({ email, password }) {
     setAuthError('');
+    // Allow instant demo login if demo credentials entered
+    if (email === DEMO_USER.email) {
+      return demoLogin();
+    }
     const users = loadData(STORAGE_KEYS.USERS, []);
     const match = users.find((u) => u.email === email && u.passwordHash === hash(password));
     if (!match) {
@@ -50,6 +62,13 @@ export function AuthProvider({ children }) {
     return true;
   }
 
+  function demoLogin() {
+    setAuthError('');
+    setUser(DEMO_USER);
+    saveData(STORAGE_KEYS.USER, DEMO_USER);
+    return true;
+  }
+
   function logout() {
     setUser(null);
     removeData(STORAGE_KEYS.USER);
@@ -57,6 +76,7 @@ export function AuthProvider({ children }) {
 
   function updateProfile(patch) {
     setUser((prev) => {
+      if (!prev) return null;
       const next = { ...prev, ...patch };
       saveData(STORAGE_KEYS.USER, next);
       const users = loadData(STORAGE_KEYS.USERS, []).map((u) =>
@@ -68,7 +88,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, authError, login, signup, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, authError, login, demoLogin, signup, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -15,14 +15,29 @@ export default function Navbar({ onMenuClick }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const boxRef = useRef(null);
+  const profileRef = useRef(null);
+  const notifRef = useRef(null);
+  const quickAddRef = useRef(null);
   const inputRef = useRef(null);
+
+  function handleLogout() {
+    setProfileOpen(false);
+    logout();
+    navigate('/login', { replace: true });
+  }
 
   useEffect(() => {
     function onClickAway(e) {
       if (boxRef.current && !boxRef.current.contains(e.target)) {
         setShowResults(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
         setNotifOpen(false);
+      }
+      if (quickAddRef.current && !quickAddRef.current.contains(e.target)) {
         setQuickAddOpen(false);
       }
     }
@@ -123,7 +138,7 @@ export default function Navbar({ onMenuClick }) {
 
       <div className="flex items-center gap-1.5 sm:gap-2">
         {/* Quick Add Button */}
-        <div className="relative">
+        <div className="relative" ref={quickAddRef}>
           <button
             onClick={() => {
               setQuickAddOpen((v) => !v);
@@ -164,7 +179,7 @@ export default function Navbar({ onMenuClick }) {
         </div>
 
         {/* Notifications */}
-        <div className="relative">
+        <div className="relative" ref={notifRef}>
           <button
             onClick={() => {
               setNotifOpen((v) => !v);
@@ -207,7 +222,7 @@ export default function Navbar({ onMenuClick }) {
         </div>
 
         {/* Profile */}
-        <div className="relative">
+        <div className="relative" ref={profileRef}>
           <button
             onClick={() => {
               setProfileOpen((v) => !v);
@@ -235,7 +250,7 @@ export default function Navbar({ onMenuClick }) {
                 <UserIcon size={13} /> Account
               </button>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
               >
                 <LogOut size={13} /> Log out

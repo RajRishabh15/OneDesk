@@ -1,5 +1,6 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutGrid, StickyNote, CheckSquare, Calendar, BarChart2, Sliders, X } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutGrid, StickyNote, CheckSquare, Calendar, BarChart2, Sliders, X, LogOut, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const links = [
   { to: '/', label: 'Overview', icon: LayoutGrid, end: true },
@@ -11,6 +12,22 @@ const links = [
 ];
 
 export default function Sidebar({ mobileOpen, onClose }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    onClose?.();
+    logout();
+    navigate('/login', { replace: true });
+  }
+
+  const initials = user?.name
+    ?.split(' ')
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'U';
+
   return (
     <>
       {mobileOpen && (
@@ -67,8 +84,29 @@ export default function Sidebar({ mobileOpen, onClose }) {
           ))}
         </nav>
 
+        {/* User profile & logout */}
+        <div className="px-3 py-2.5 border-t border-stone-200/60 dark:border-stone-800/60 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[10px] font-bold">
+              {initials || <UserIcon size={12} />}
+            </div>
+            <div className="min-w-0 flex-1 leading-none">
+              <p className="truncate text-xs font-semibold text-stone-800 dark:text-stone-200">{user?.name || 'Workspace'}</p>
+              <p className="truncate text-[10px] text-stone-400 font-mono mt-0.5">{user?.email || 'Logged in'}</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            title="Log out"
+            aria-label="Log out"
+            className="shrink-0 rounded-md p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+          >
+            <LogOut size={13} />
+          </button>
+        </div>
+
         {/* Footer shortcuts */}
-        <div className="px-3 py-2.5 border-t border-stone-200/60 dark:border-stone-800/60 text-[11px] text-stone-400 flex items-center justify-between">
+        <div className="px-3 py-2 border-t border-stone-200/60 dark:border-stone-800/60 text-[11px] text-stone-400 flex items-center justify-between">
           <span>Jump to</span>
           <kbd className="font-mono text-[10px] bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 px-1.5 py-0.5 rounded border border-stone-200 dark:border-stone-700">
             g + key

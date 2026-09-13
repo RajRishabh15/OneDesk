@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { Moon, Sun, Bell, Download, Upload, Trash2, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Moon, Sun, Bell, Download, Upload, Trash2, User, LogOut } from 'lucide-react';
 import Card from '../components/Card';
 import { LabeledInput } from './Notes';
 import { useTheme } from '../context/ThemeContext';
@@ -9,12 +10,18 @@ import { exportBackup, importBackup } from '../utils/storage';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
   const { clearAll } = useData();
+  const navigate = useNavigate();
   const [name, setName] = useState(user?.name || '');
   const [notifOn, setNotifOn] = useState(true);
   const [savedTick, setSavedTick] = useState(false);
   const fileRef = useRef(null);
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
 
   function saveProfile(e) {
     e.preventDefault();
@@ -28,7 +35,7 @@ export default function Settings() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'lifeos-backup.json';
+    a.download = 'onedesk-backup.json';
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -42,7 +49,7 @@ export default function Settings() {
         importBackup(JSON.parse(reader.result));
         window.location.reload();
       } catch {
-        alert('That file could not be read as a LifeOS backup.');
+        alert('That file could not be read as a OneDesk backup.');
       }
     };
     reader.readAsText(file);
@@ -85,6 +92,20 @@ export default function Settings() {
             {savedTick && <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Saved</span>}
           </div>
         </form>
+
+        <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-100 dark:border-stone-800/60">
+          <div>
+            <p className="text-xs font-medium text-stone-800 dark:text-stone-200">Account Session</p>
+            <p className="text-[11px] text-stone-500">Sign out of this browser session.</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 rounded-lg border border-stone-200/80 dark:border-stone-800 bg-stone-100/70 dark:bg-stone-900 px-3 py-1.5 text-xs font-medium text-stone-700 dark:text-stone-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+          >
+            <LogOut size={13} /> Log out
+          </button>
+        </div>
       </Card>
 
       <Card className="p-5" hover={false}>

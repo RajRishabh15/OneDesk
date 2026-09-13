@@ -7,27 +7,27 @@
   --font-editorial: "Newsreader", Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-ink: #1c1917;
-  --color-ink-soft: #78716c;
-  --color-ink-dark: #f5f5f4;
-  --color-ink-dark-soft: #a8a29e;
+  --color-ink: #f5f3ff;
+  --color-ink-soft: #a5a0c2;
+  --color-ink-dark: #f5f3ff;
+  --color-ink-dark-soft: #a5a0c2;
 
-  --color-bg: #fafaf9;
-  --color-bg-dark: #121211;
+  --color-bg: #090715;
+  --color-bg-dark: #090715;
 
-  --color-surface: #ffffff;
-  --color-surface-dark: #1a1a18;
+  --color-surface: rgba(18, 14, 36, 0.75);
+  --color-surface-dark: rgba(18, 14, 36, 0.85);
 
-  --color-line: rgba(28, 25, 23, 0.08);
+  --color-line: rgba(255, 255, 255, 0.08);
   --color-line-dark: rgba(255, 255, 255, 0.08);
 
-  --color-accent: #1c1917;
-  --color-accent-2: #292524;
-  --color-accent-soft: #f5f5f4;
+  --color-accent: #6366f1;
+  --color-accent-2: #8b5cf6;
+  --color-accent-soft: rgba(99, 102, 241, 0.15);
 
-  --color-high: #dc2626;
-  --color-med: #d97706;
-  --color-low: #059669;
+  --color-high: #f43f5e;
+  --color-med: #f59e0b;
+  --color-low: #10b981;
 }
 
 html {
@@ -61,17 +61,17 @@ body.dark {
   background: var(--color-line-dark);
 }
 
-.font-display {
-  font-family: var(--font-display);
-}
-.font-editorial {
-  font-family: var(--font-editorial);
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 .animate-fade-up {
-  animation: fade-up 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
