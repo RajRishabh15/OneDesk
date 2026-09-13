@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-editorial: "Newsreader", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-ink: #1c1917;
+  --color-ink-soft: #78716c;
+  --color-ink-dark: #f5f5f4;
+  --color-ink-dark-soft: #a8a29e;
+
+  --color-bg: #fafaf9;
+  --color-bg-dark: #121211;
+
+  --color-surface: #ffffff;
+  --color-surface-dark: #1a1a18;
+
+  --color-line: rgba(28, 25, 23, 0.08);
+  --color-line-dark: rgba(255, 255, 255, 0.08);
+
+  --color-accent: #1c1917;
+  --color-accent-2: #292524;
+  --color-accent-soft: #f5f5f4;
+
+  --color-high: #dc2626;
+  --color-med: #d97706;
+  --color-low: #059669;
+}
+
+html {
+  font-family: var(--font-body);
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dark body,
+body.dark {
+  background: var(--color-bg-dark);
+  color: var(--color-ink-dark);
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-line-dark);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+.font-editorial {
+  font-family: var(--font-editorial);
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
