@@ -123,39 +123,47 @@ export default function TopNavPill() {
     <header className="fixed top-3 sm:top-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none">
       <div className="pointer-events-auto relative w-full max-w-5xl rounded-2xl sm:rounded-full border border-white/10 dark:border-white/10 bg-[#0e0a1f]/80 dark:bg-[#0e0a1f]/85 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.45)] px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 transition-all">
         
-        {/* Left: Brand */}
-        <Link to="/" className="flex items-center gap-2 shrink-0 group">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-mono text-xs font-bold shadow-md shadow-indigo-500/25 group-hover:scale-105 transition-transform">
-            OD
+        {/* Left: Brand Pill */}
+        <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+          <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-pink-500 via-indigo-500 to-cyan-400 p-[1.5px] grid place-items-center shadow-md shadow-pink-500/20 group-hover:scale-105 transition-transform">
+            <div className="h-full w-full rounded-full bg-[#0e0a1f] grid place-items-center text-[10px] font-bold text-cyan-300">
+              ✦
+            </div>
           </div>
-          <span className="font-display text-sm font-bold tracking-tight text-white hidden xs:inline">
+          <span className="font-display text-sm font-extrabold tracking-tight text-white hidden xs:inline">
             OneDesk
           </span>
         </Link>
 
-        {/* Center: Nav Pills (Desktop) */}
-        <nav className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5">
-          {navLinks.slice(0, 5).map(({ to, label, icon: Icon, end }) => (
+        {/* Center: Nav Pills with Active White Capsule & Pink Indicator Dot */}
+        <nav className="hidden md:flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
+          {navLinks.slice(0, 5).map(({ to, label, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                `relative px-3.5 py-1.5 rounded-full text-[11px] font-extrabold tracking-wider uppercase transition-all duration-200 ${
                   isActive
-                    ? 'bg-white/15 text-white font-semibold shadow-xs border border-white/15'
+                    ? 'bg-white text-stone-950 shadow-[0_2px_10px_rgba(255,255,255,0.2)]'
                     : 'text-stone-300 hover:text-white hover:bg-white/5'
                 }`
               }
             >
-              <Icon size={13} className="opacity-80" />
-              <span>{label}</span>
+              {({ isActive }) => (
+                <>
+                  <span>{label === 'Overview' ? 'Home' : label}</span>
+                  {isActive && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-pink-500 shadow-[0_0_8px_#ec4899]" />
+                  )}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           
           {/* Search Trigger */}
           <div className="relative" ref={searchBoxRef}>
