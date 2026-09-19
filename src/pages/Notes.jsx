@@ -414,3 +414,32 @@ export default function Notes() {
     </div>
   );
 }
+
+export function LabeledInput({ label, value, onChange, placeholder = '', type = 'text', required = false, ...rest }) {
+  return (
+    <div>
+      {label && (
+        <label
+          className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          {label}
+        </label>
+      )}
+      <input
+        type={type}
+        required={required}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-xl px-3.5 py-2.5 text-xs sm:text-sm outline-none border transition-all"
+        style={{
+          background: 'var(--bg-surface)',
+          borderColor: 'var(--border-card)',
+          color: 'var(--text-primary)',
+        }}
+        {...rest}
+      />
+    </div>
+  );
+}

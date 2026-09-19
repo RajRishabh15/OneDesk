@@ -486,39 +486,58 @@ export default function Dashboard() {
           />
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-stone-300 mb-1">Priority</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Priority</label>
               <select
                 value={taskForm.priority}
                 onChange={(e) => setTaskForm((f) => ({ ...f, priority: e.target.value }))}
-                className="w-full rounded-xl border border-white/15 bg-[#120e24] px-3 py-2 text-xs text-white outline-none focus:border-indigo-400"
+                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
               >
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
+                <option value="High" style={{ background: 'var(--bg-card)' }}>High</option>
+                <option value="Medium" style={{ background: 'var(--bg-card)' }}>Medium</option>
+                <option value="Low" style={{ background: 'var(--bg-card)' }}>Low</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-stone-300 mb-1">Due Date</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Due Date</label>
               <input
                 type="date"
                 value={taskForm.dueDate}
                 onChange={(e) => setTaskForm((f) => ({ ...f, dueDate: e.target.value }))}
-                className="w-full rounded-xl border border-white/15 bg-[#120e24] px-3 py-2 text-xs text-white outline-none focus:border-indigo-400"
+                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <button
               type="button"
               onClick={() => setTaskModalOpen(false)}
-              className="rounded-xl px-4 py-2 text-xs font-medium text-stone-400 hover:text-white"
+              className="rounded-xl px-4 py-2 text-xs font-semibold transition-all"
+              style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-card)',
+                color: 'var(--text-muted)',
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-500/25"
+              className="rounded-xl px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-95"
+              style={{
+                background: 'var(--accent-gradient)',
+                boxShadow: '0 4px 16px var(--accent-glow)',
+              }}
             >
               Save Task
             </button>

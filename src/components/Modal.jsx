@@ -1,11 +1,14 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export default function Modal({ open, onClose, title, children, wide = false }) {
   const panelRef = useRef(null);
 
   useEffect(() => {
-    function onKey(e) { if (e.key === 'Escape') onClose?.(); }
+    function onKey(e) {
+      if (e.key === 'Escape') onClose?.();
+    }
     if (open) {
       document.addEventListener('keydown', onKey);
       // Lock page body scrolling while modal is open
@@ -25,15 +28,15 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overscroll-contain">
-      {/* Backdrop — theme-adaptive overlay with frosted glass blur */}
+      {/* Fullscreen Backdrop — mounted directly to document.body so it covers 100% of the entire viewport */}
       <div
-        className="absolute inset-0 transition-opacity"
+        className="fixed inset-0 transition-opacity"
         style={{
           background: 'var(--bg-overlay)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
         }}
         onClick={onClose}
       />
@@ -60,7 +63,10 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         {/* Thin accent line at the top */}
         <div
           className="absolute inset-x-0 top-0 h-[1px] rounded-t-3xl"
-          style={{ background: 'linear-gradient(90deg, transparent, var(--border-card) 40%, rgba(255,255,255,0.18) 50%, var(--border-card) 60%, transparent)' }}
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, var(--border-card) 40%, rgba(255,255,255,0.18) 50%, var(--border-card) 60%, transparent)',
+          }}
         />
 
         {/* Header */}
@@ -91,6 +97,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         {/* Body */}
         <div className="px-6 py-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
