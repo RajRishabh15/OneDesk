@@ -7,6 +7,7 @@ import {
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import Toggle from '../components/Toggle';
 
 /* ─── Small reusable pieces ──────────────────────────────── */
 
@@ -33,9 +34,12 @@ function Divider() {
   return <div className="my-3.5" style={{ borderTop: '1px solid var(--border-subtle)' }} />;
 }
 
-function Row({ label, sub, children, danger }) {
+function Row({ label, sub, children, danger, onClick }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div
+      onClick={onClick}
+      className={`flex items-center justify-between gap-4 ${onClick ? 'cursor-pointer select-none' : ''}`}
+    >
       <div className="min-w-0">
         <p
           className="text-sm font-medium leading-snug"
@@ -78,34 +82,10 @@ function PrimaryBtn({ children, type = 'button', onClick, disabled }) {
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all disabled:opacity-50 shadow-md"
-      style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 4px 16px rgba(99,102,241,0.3)' }}
+      className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all disabled:opacity-50 shadow-md hover:brightness-110 active:scale-95"
+      style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 16px var(--accent-glow)' }}
     >
       {children}
-    </button>
-  );
-}
-
-function Toggle({ on, onToggle, label }) {
-  return (
-    <button
-      onClick={onToggle}
-      aria-label={label}
-      className="relative h-6 w-11 rounded-full flex-shrink-0 transition-all duration-300"
-      style={{
-        background: on ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'var(--bg-surface)',
-        border: '1px solid var(--border-card)',
-        boxShadow: on ? '0 0 14px rgba(99,102,241,0.45)' : 'none',
-      }}
-    >
-      <span
-        className="absolute top-0.5 h-[18px] w-[18px] rounded-full shadow-md transition-all duration-300"
-        style={{
-          transform: on ? 'translateX(20px)' : 'translateX(2px)',
-          background: on ? '#fff' : 'var(--text-muted)',
-          boxShadow: on ? '0 2px 6px rgba(0,0,0,0.35)' : 'none',
-        }}
-      />
     </button>
   );
 }
@@ -154,6 +134,7 @@ export default function Settings() {
 
   const [name, setName] = useState(user?.name || user?.displayName || '');
   const [notifOn, setNotifOn] = useState(true);
+  const [remindersOn, setRemindersOn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileRef = useRef(null);
@@ -223,7 +204,7 @@ export default function Settings() {
           <div className="flex items-center gap-3 mb-4">
             <div
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white text-base font-black shadow-lg"
-              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}
+              style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 16px var(--accent-glow)' }}
             >
               {initials}
             </div>
@@ -334,12 +315,20 @@ export default function Settings() {
         <Panel>
           <SectionLabel>Notifications</SectionLabel>
           <div className="space-y-4">
-            <Row label="Due Task Badges" sub="Badges in nav for tasks due today.">
-              <Toggle on={notifOn} onToggle={() => setNotifOn(v => !v)} label="Toggle due task badges" />
+            <Row
+              label="Due Task Badges"
+              sub="Badges in nav for tasks due today."
+              onClick={() => setNotifOn((v) => !v)}
+            >
+              <Toggle on={notifOn} onToggle={() => setNotifOn((v) => !v)} label="Toggle due task badges" />
             </Row>
             <Divider />
-            <Row label="Reminder Alerts" sub="Desktop alerts for calendar reminders.">
-              <Toggle on={false} onToggle={() => {}} label="Toggle reminder alerts" />
+            <Row
+              label="Reminder Alerts"
+              sub="Desktop alerts for calendar reminders."
+              onClick={() => setRemindersOn((v) => !v)}
+            >
+              <Toggle on={remindersOn} onToggle={() => setRemindersOn((v) => !v)} label="Toggle reminder alerts" />
             </Row>
           </div>
         </Panel>
