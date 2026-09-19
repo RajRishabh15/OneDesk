@@ -177,6 +177,19 @@ body {
 }
 
 /* ─── Page overlay ───────────────────────────────────────── */
-.page-overlay {
+/* ─── Page soft blur overlay ─────────────────────────────── */
+.page-blur-layer {
+  backdrop-filter: blur(40px) saturate(1.4);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
   background: var(--bg-overlay);
 }
+
+/* ─── Modal slide-up animation ───────────────────────────── */
+@keyframes modalUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.animate-modal-up {
+  animation: modalUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+

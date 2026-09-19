@@ -91,14 +91,19 @@ function Toggle({ on, onToggle, label }) {
     <button
       onClick={onToggle}
       aria-label={label}
-      className="relative h-6 w-11 rounded-full transition-all duration-300"
-      style={{ background: on ? '#6366f1' : 'var(--bg-surface)', border: '1px solid var(--border-card)' }}
+      className="relative h-6 w-11 rounded-full flex-shrink-0 transition-all duration-300"
+      style={{
+        background: on ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'var(--bg-surface)',
+        border: '1px solid var(--border-card)',
+        boxShadow: on ? '0 0 14px rgba(99,102,241,0.45)' : 'none',
+      }}
     >
       <span
-        className="absolute top-0.5 h-[18px] w-[18px] rounded-full shadow transition-all duration-300"
+        className="absolute top-0.5 h-[18px] w-[18px] rounded-full shadow-md transition-all duration-300"
         style={{
-          transform: on ? 'translateX(20px)' : 'translateX(3px)',
+          transform: on ? 'translateX(20px)' : 'translateX(2px)',
           background: on ? '#fff' : 'var(--text-muted)',
+          boxShadow: on ? '0 2px 6px rgba(0,0,0,0.35)' : 'none',
         }}
       />
     </button>

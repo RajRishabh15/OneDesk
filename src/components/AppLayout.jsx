@@ -67,8 +67,8 @@ export default function AppLayout() {
             paused={false}
           />
         </div>
-        {/* Overlay darkens fibers so cards stay readable */}
-        <div className="absolute inset-0 page-overlay backdrop-blur-[0.5px]" />
+        {/* Soft blur overlay — diffuses background fibers so content stays crisp */}
+        <div className="absolute inset-0 page-blur-layer" />
       </div>
 
       <TopNavPill />
