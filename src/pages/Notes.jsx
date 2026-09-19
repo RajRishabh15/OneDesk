@@ -1,12 +1,37 @@
 import { useMemo, useState } from 'react';
-import { Plus, Search, StickyNote, Download, X } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  StickyNote,
+  X,
+  Pin,
+  Sparkles,
+  Tag,
+  Filter,
+  Layers,
+  FileText
+} from 'lucide-react';
 import Modal from '../components/Modal';
 import NoteCard from '../components/NoteCard';
 import EmptyState from '../components/EmptyState';
+import Card from '../components/Card';
 import { useData } from '../context/DataContext';
 
-const colors = ['violet', 'cyan', 'green', 'amber', 'rose'];
-const emptyForm = { title: '', description: '', category: '', tags: '', color: 'violet' };
+const NOTE_COLORS = [
+  { id: 'violet', label: 'Violet', hex: '#8b5cf6' },
+  { id: 'cyan',   label: 'Cyan',   hex: '#38bdf8' },
+  { id: 'green',  label: 'Emerald',hex: '#34d399' },
+  { id: 'amber',  label: 'Amber',  hex: '#fbbf24' },
+  { id: 'rose',   label: 'Rose',   hex: '#fb7185' },
+];
+
+const emptyForm = {
+  title: '',
+  description: '',
+  category: 'Personal',
+  tags: '',
+  color: 'violet',
+};
 
 export default function Notes() {
   const { notes, addNote, updateNote, deleteNote, togglePinNote } = useData();
@@ -16,17 +41,28 @@ export default function Notes() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
-  const categories = ['All', ...new Set(notes.map((n) => n.category).filter(Boolean))];
+  const categories = useMemo(() => {
+    return ['All', ...new Set(notes.map((n) => n.category).filter(Boolean))];
+  }, [notes]);
 
   const filtered = useMemo(() => {
     let list = notes;
-    if (category !== 'All') list = list.filter((n) => n.category === category);
+    if (category !== 'All') {
+      list = list.filter((n) => n.category === category);
+    }
     if (query.trim()) {
       const q = query.toLowerCase();
-      list = list.filter((n) => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q) || n.tags?.some((t) => t.toLowerCase().includes(q)));
+      list = list.filter(
+        (n) =>
+          n.title.toLowerCase().includes(q) ||
+          n.description?.toLowerCase().includes(q) ||
+          n.tags?.some((t) => t.toLowerCase().includes(q))
+      );
     }
-    return [...list].sort((a, b) => (b.pinned - a.pinned) || new Date(b.createdAt) - new Date(a.createdAt));
+    return [...list].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   }, [notes, query, category]);
+
+  const pinnedCount = notes.filter((n) => n.pinned).length;
 
   function openNew() {
     setEditing(null);
@@ -36,7 +72,13 @@ export default function Notes() {
 
   function openEdit(note) {
     setEditing(note);
-    setForm({ ...note, tags: note.tags?.join(', ') || '' });
+    setForm({
+      title: note.title || '',
+      description: note.description || '',
+      category: note.category || 'General',
+      tags: note.tags?.join(', ') || '',
+      color: note.color || 'violet',
+    });
     setModalOpen(true);
   }
 
@@ -46,7 +88,10 @@ export default function Notes() {
       title: form.title.trim(),
       description: form.description,
       category: form.category.trim() || 'General',
-      tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
+      tags: form.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
       color: form.color,
     };
     if (editing) updateNote(editing.id, payload);
@@ -54,142 +99,312 @@ export default function Notes() {
     setModalOpen(false);
   }
 
-  function exportNote(note) {
-    const text = `${note.title}\n\n${note.description}\n\nTags: ${note.tags?.join(', ')}\nCategory: ${note.category}\nCreated: ${new Date(note.createdAt).toLocaleString()}`;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${note.title.replace(/\s+/g, '_') || 'note'}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
   return (
-    <div className="space-y-5 animate-fade-up max-w-6xl mx-auto pb-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-stone-200/80 dark:border-stone-800/80 pb-4">
+    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-12">
+      {/* ── Header ───────────────────────────────────────────── */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-4 pb-4"
+        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+      >
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">Notes</h1>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{notes.length} notes captured</p>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              Notes &amp; Ideas
+            </h1>
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border"
+              style={{
+                color: 'var(--accent-color)',
+                borderColor: 'var(--border-card)',
+                background: 'var(--bg-surface)',
+              }}
+            >
+              <FileText size={11} /> {notes.length} saved
+            </span>
+            {pinnedCount > 0 && (
+              <span
+                className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border text-amber-400"
+                style={{
+                  background: 'rgba(251,191,36,0.1)',
+                  borderColor: 'rgba(251,191,36,0.25)',
+                }}
+              >
+                <Pin size={10} fill="currentColor" /> {pinnedCount} pinned
+              </span>
+            )}
+          </div>
+          <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            Capture thoughts, documentation, quick links, and study notes in one place.
+          </p>
         </div>
+
         <button
           onClick={openNew}
-          className="flex items-center gap-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-white dark:text-stone-900 text-stone-100 px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors"
+          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all shadow-lg hover:brightness-110 active:scale-95"
+          style={{
+            background: 'var(--accent-gradient)',
+            boxShadow: '0 4px 18px var(--accent-glow)',
+          }}
         >
-          <Plus size={13} /> New note
+          <Plus size={15} /> New note
         </button>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+      {/* ── Search & Filter Bar ───────────────────────────────── */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        {/* Search Box */}
+        <div className="relative flex-1 max-w-md">
+          <Search
+            size={14}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--text-muted)' }}
+          />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search notes or tags…"
-            className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1c1c1a] py-1.5 pl-8 pr-7 text-xs outline-none transition-all placeholder:text-stone-400 focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-400"
+            placeholder="Search notes, tags, or content…"
+            className="w-full rounded-xl py-2.5 pl-10 pr-9 text-xs sm:text-sm outline-none border transition-all glass-card"
+            style={{
+              color: 'var(--text-primary)',
+              borderColor: 'var(--border-card)',
+            }}
           />
           {query && (
-            <button onClick={() => setQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-all hover:bg-[var(--bg-surface)]"
+              style={{ color: 'var(--text-muted)' }}
+            >
               <X size={13} />
             </button>
           )}
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          {categories.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCategory(c)}
-              className={[
-                'rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
-                category === c
-                  ? 'bg-stone-900 text-stone-100 dark:bg-stone-100 dark:text-stone-900 shadow-xs'
-                  : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100/60 dark:hover:bg-stone-800/60',
-              ].join(' ')}
-            >
-              {c}
-            </button>
-          ))}
+        {/* Category Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+          {categories.map((c) => {
+            const count = c === 'All' ? notes.length : notes.filter((n) => n.category === c).length;
+            const active = category === c;
+            return (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all border shrink-0"
+                style={{
+                  background: active ? 'var(--accent-gradient)' : 'var(--bg-surface)',
+                  borderColor: active ? 'transparent' : 'var(--border-subtle)',
+                  color: active ? '#ffffff' : 'var(--text-muted)',
+                  boxShadow: active ? '0 2px 10px var(--accent-glow)' : 'none',
+                }}
+              >
+                <span>{c}</span>
+                <span
+                  className="text-[10px] font-mono px-1.5 py-0.2 rounded-full"
+                  style={{
+                    background: active ? 'rgba(255,255,255,0.25)' : 'var(--border-subtle)',
+                    color: active ? '#ffffff' : 'var(--text-muted)',
+                  }}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Grid */}
+      {/* ── Notes Grid ────────────────────────────────────────── */}
       {filtered.length === 0 ? (
-        <EmptyState
-          icon={StickyNote}
-          title={notes.length === 0 ? 'No notes yet' : 'No matching notes'}
-          description={notes.length === 0 ? 'Capture your thoughts, plans, and ideas in one place.' : 'Try a different search term or category.'}
-          action={notes.length === 0 && (
-            <button onClick={openNew} className="mt-2 rounded-lg bg-stone-900 text-stone-100 dark:bg-stone-100 dark:text-stone-900 px-3.5 py-1.5 text-xs font-semibold">
-              Create your first note
-            </button>
-          )}
-        />
+        <Card className="p-8 sm:p-12 text-center" hover={false}>
+          <EmptyState
+            icon={StickyNote}
+            title={notes.length === 0 ? 'No notes captured yet' : 'No matching notes found'}
+            description={
+              notes.length === 0
+                ? 'Capture your thoughts, plans, and ideas in one place.'
+                : `No notes matched "${query}". Try a different keyword or category.`
+            }
+            actionLabel={notes.length === 0 ? 'Create first note' : 'Clear search'}
+            onAction={notes.length === 0 ? openNew : () => { setQuery(''); setCategory('All'); }}
+          />
+        </Card>
       ) : (
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((note) => (
-            <div key={note.id} className="relative group">
-              <NoteCard note={note} onEdit={openEdit} onDelete={deleteNote} onTogglePin={togglePinNote} />
-              <button
-                onClick={() => exportNote(note)}
-                aria-label="Export note as text file"
-                title="Export as .txt"
-                className="absolute right-3.5 bottom-3.5 opacity-0 group-hover:opacity-100 rounded-md bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-1 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 shadow-xs transition-opacity"
-              >
-                <Download size={11} />
-              </button>
-            </div>
+            <NoteCard
+              key={note.id}
+              note={note}
+              onEdit={openEdit}
+              onDelete={deleteNote}
+              onTogglePin={togglePinNote}
+            />
           ))}
         </div>
       )}
 
-      {/* Note Modal */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit note' : 'New note'} wide>
+      {/* ── Enhanced Note Creation / Edit Modal ────────────────── */}
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? 'Edit note' : 'New note'}
+        wide
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <LabeledInput label="Title" required value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v }))} placeholder="Note title..." />
+          {/* Note Title */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-stone-600 dark:text-stone-300">Description</label>
+            <label
+              className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Note title
+            </label>
+            <input
+              required
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="Give your note a title…"
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none border transition-all"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--text-primary)',
+              }}
+            />
+          </div>
+
+          {/* Description Textarea */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                className="text-[10px] font-bold uppercase tracking-[0.1em]"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Content
+              </label>
+              <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                {form.description.length} chars
+              </span>
+            </div>
             <textarea
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              rows={7}
-              placeholder="Jot down notes, links, thoughts..."
-              className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 p-3 text-xs sm:text-sm font-sans outline-none leading-relaxed transition-all placeholder:text-stone-400 focus:bg-white dark:focus:bg-stone-900 focus:border-stone-400"
+              rows={8}
+              placeholder="Write your notes, lists, references, or markdown here…"
+              className="w-full rounded-xl p-3.5 text-xs sm:text-sm outline-none border transition-all resize-none leading-relaxed"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <LabeledInput label="Category" placeholder="e.g. Work, Ideas" value={form.category} onChange={(v) => setForm((f) => ({ ...f, category: v }))} />
-            <LabeledInput label="Tags (comma separated)" placeholder="roadmap, design" value={form.tags} onChange={(v) => setForm((f) => ({ ...f, tags: v }))} />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-stone-600 dark:text-stone-300">Accent strip</label>
-            <div className="flex gap-2">
-              {colors.map((c) => (
-                <button
-                  type="button"
-                  key={c}
-                  onClick={() => setForm((f) => ({ ...f, color: c }))}
-                  className={`h-5 w-5 rounded-full border-2 transition-transform ${form.color === c ? 'border-stone-900 dark:border-stone-100 scale-110 shadow-xs' : 'border-transparent hover:scale-105'}`}
-                  style={{ background: { violet: '#292524', cyan: '#0284c7', green: '#059669', amber: '#d97706', rose: '#e11d48' }[c] }}
-                  aria-label={c}
-                />
-              ))}
+
+          {/* Category & Tags */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label
+                className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Category
+              </label>
+              <input
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                placeholder="e.g., College, Work, Personal, Ideas"
+                className="w-full rounded-xl px-3.5 py-2 text-xs sm:text-sm outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+            </div>
+
+            <div>
+              <label
+                className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Tags (comma-separated)
+              </label>
+              <input
+                value={form.tags}
+                onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
+                placeholder="e.g., AI, roadmap, exam"
+                className="w-full rounded-xl px-3.5 py-2 text-xs sm:text-sm outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
+              />
             </div>
           </div>
-          <div className="flex justify-end gap-2 pt-3 border-t border-stone-100 dark:border-stone-800">
+
+          {/* Color Swatches */}
+          <div>
+            <label
+              className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Card accent color
+            </label>
+            <div className="flex items-center gap-2.5">
+              {NOTE_COLORS.map((c) => {
+                const active = form.color === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, color: c.id }))}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all"
+                    style={{
+                      background: active ? `${c.hex}22` : 'var(--bg-surface)',
+                      borderColor: active ? c.hex : 'var(--border-subtle)',
+                      boxShadow: active ? `0 0 12px ${c.hex}44` : 'none',
+                    }}
+                  >
+                    <span
+                      className="h-3 w-3 rounded-full"
+                      style={{ background: c.hex }}
+                    />
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: active ? 'var(--text-primary)' : 'var(--text-muted)' }}
+                    >
+                      {c.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Modal Actions */}
+          <div
+            className="flex items-center justify-end gap-2.5 pt-3"
+            style={{ borderTop: '1px solid var(--border-subtle)' }}
+          >
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="rounded-lg border border-stone-200 dark:border-stone-800 px-3 py-1.5 text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              className="rounded-xl px-4 py-2 text-xs font-semibold transition-all"
+              style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-card)',
+                color: 'var(--text-muted)',
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-white dark:text-stone-900 text-stone-100 px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors"
+              className="rounded-xl px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-95"
+              style={{
+                background: 'var(--accent-gradient)',
+                boxShadow: '0 4px 16px var(--accent-glow)',
+              }}
             >
               {editing ? 'Save changes' : 'Add note'}
             </button>
@@ -199,20 +414,3 @@ export default function Notes() {
     </div>
   );
 }
-
-function LabeledInput({ label, value, onChange, placeholder = '', ...rest }) {
-  return (
-    <div>
-      <label className="mb-1 block text-xs font-semibold text-stone-600 dark:text-stone-300">{label}</label>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 px-2.5 py-1.5 text-xs outline-none transition-all placeholder:text-stone-400 focus:bg-white dark:focus:bg-stone-900 focus:border-stone-400"
-        {...rest}
-      />
-    </div>
-  );
-}
-
-export { LabeledInput };

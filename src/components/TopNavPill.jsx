@@ -121,22 +121,44 @@ export default function TopNavPill() {
 
   return (
     <header className="fixed top-3 sm:top-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none">
-      <div className="pointer-events-auto relative w-full max-w-5xl rounded-2xl sm:rounded-full border border-white/10 dark:border-white/10 bg-[#0e0a1f]/80 dark:bg-[#0e0a1f]/85 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.45)] px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 transition-all">
+      <div
+        className="pointer-events-auto relative w-full max-w-5xl rounded-2xl sm:rounded-full border backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.45)] px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 transition-all"
+        style={{
+          background: 'var(--bg-card)',
+          borderColor: 'var(--border-card)',
+          color: 'var(--text-primary)',
+        }}
+      >
         
         {/* Left: Brand Pill */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-pink-500 via-indigo-500 to-cyan-400 p-[1.5px] grid place-items-center shadow-md shadow-pink-500/20 group-hover:scale-105 transition-transform">
-            <div className="h-full w-full rounded-full bg-[#0e0a1f] grid place-items-center text-[10px] font-bold text-cyan-300">
+          <div
+            className="h-7 w-7 rounded-full p-[1.5px] grid place-items-center shadow-md transition-transform group-hover:scale-105"
+            style={{
+              background: 'var(--accent-gradient)',
+              boxShadow: '0 2px 10px var(--accent-glow)',
+            }}
+          >
+            <div
+              className="h-full w-full rounded-full grid place-items-center text-[10px] font-bold"
+              style={{
+                background: 'var(--bg-page)',
+                color: 'var(--accent-color)',
+              }}
+            >
               ✦
             </div>
           </div>
-          <span className="font-display text-sm font-extrabold tracking-tight text-white hidden xs:inline">
+          <span className="font-display text-sm font-extrabold tracking-tight hidden xs:inline" style={{ color: 'var(--text-primary)' }}>
             OneDesk
           </span>
         </Link>
 
-        {/* Center: Nav Pills with Active White Capsule & Pink Indicator Dot */}
-        <nav className="hidden md:flex items-center gap-1 bg-black/40 p-1 rounded-full border border-white/10">
+        {/* Center: Nav Pills with Active White Capsule & Theme-adaptive Indicator Dot */}
+        <nav
+          className="hidden md:flex items-center gap-1 p-1 rounded-full border"
+          style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+        >
           {navLinks.slice(0, 5).map(({ to, label, end }) => (
             <NavLink
               key={to}
@@ -146,15 +168,22 @@ export default function TopNavPill() {
                 `relative px-3.5 py-1.5 rounded-full text-[11px] font-extrabold tracking-wider uppercase transition-all duration-200 ${
                   isActive
                     ? 'bg-white text-stone-950 shadow-[0_2px_10px_rgba(255,255,255,0.2)]'
-                    : 'text-stone-300 hover:text-white hover:bg-white/5'
+                    : 'hover:bg-white/5 opacity-75 hover:opacity-100'
                 }`
               }
+              style={({ isActive }) => (!isActive ? { color: 'var(--text-primary)' } : {})}
             >
               {({ isActive }) => (
                 <>
                   <span>{label === 'Overview' ? 'Home' : label}</span>
                   {isActive && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-pink-500 shadow-[0_0_8px_#ec4899]" />
+                    <span
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full"
+                      style={{
+                        background: 'var(--accent-color)',
+                        boxShadow: '0 0 8px var(--accent-color)',
+                      }}
+                    />
                   )}
                 </>
               )}
@@ -184,20 +213,34 @@ export default function TopNavPill() {
 
             {/* Search Dropdown / Popover */}
             {searchOpen && (
-              <div className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-80 sm:w-96 rounded-2xl border border-white/15 bg-[#120e24]/95 backdrop-blur-2xl shadow-2xl p-3 space-y-3 animate-fade-up z-50">
+              <div
+                className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-80 sm:w-96 rounded-2xl border shadow-2xl p-3 space-y-3 animate-fade-up z-50"
+                style={{
+                  background: 'var(--bg-card)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(28px)',
+                  color: 'var(--text-primary)',
+                }}
+              >
                 <div className="relative">
-                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
                   <input
                     ref={searchInputRef}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Type to search tasks, notes, schedule…"
-                    className="w-full rounded-xl border border-white/15 bg-white/5 py-2 pl-9 pr-8 text-xs text-white outline-none placeholder:text-stone-400 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                    className="w-full rounded-xl border py-2 pl-9 pr-8 text-xs outline-none transition-all"
+                    style={{
+                      background: 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                    }}
                   />
                   {query && (
                     <button
                       onClick={() => setQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 hover:opacity-100"
+                      style={{ color: 'var(--text-muted)' }}
                     >
                       <X size={13} />
                     </button>
@@ -225,7 +268,7 @@ export default function TopNavPill() {
                       onSee={() => { setSearchOpen(false); navigate('/calendar'); }}
                     />
                     {results.notes.length + results.tasks.length + results.events.length === 0 && (
-                      <p className="text-xs text-stone-400 py-2 text-center">No results for "{query}".</p>
+                      <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
                     )}
                   </div>
                 )}
@@ -241,33 +284,47 @@ export default function TopNavPill() {
                 setProfileOpen(false);
                 setNotifOpen(false);
               }}
-              className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white px-3 py-1 text-xs font-semibold shadow-md shadow-indigo-500/25 transition-all"
+              className="flex items-center gap-1.5 rounded-full text-white px-3 py-1 text-xs font-semibold shadow-md transition-all hover:brightness-110 active:scale-95"
+              style={{
+                background: 'var(--accent-gradient)',
+                boxShadow: '0 2px 10px var(--accent-glow)',
+              }}
             >
               <Plus size={13} />
               <span className="hidden sm:inline">New</span>
             </button>
 
             {quickAddOpen && (
-              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-white/15 bg-[#120e24]/95 backdrop-blur-2xl shadow-2xl p-1.5 animate-fade-up z-50">
+              <div
+                className="absolute right-0 mt-2 w-44 rounded-xl border shadow-2xl p-1.5 animate-fade-up z-50"
+                style={{
+                  background: 'var(--bg-card)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(28px)',
+                }}
+              >
                 <button
                   onClick={() => { setQuickAddOpen(false); navigate('/tasks'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-stone-200 hover:bg-white/10 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
+                  style={{ color: 'var(--text-primary)' }}
                 >
-                  <CheckSquare size={14} className="text-indigo-400" />
+                  <CheckSquare size={14} style={{ color: 'var(--accent-color)' }} />
                   Task
                 </button>
                 <button
                   onClick={() => { setQuickAddOpen(false); navigate('/notes'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-stone-200 hover:bg-white/10 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
+                  style={{ color: 'var(--text-primary)' }}
                 >
-                  <FileText size={14} className="text-emerald-400" />
+                  <FileText size={14} style={{ color: '#34d399' }} />
                   Note
                 </button>
                 <button
                   onClick={() => { setQuickAddOpen(false); navigate('/calendar'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-stone-200 hover:bg-white/10 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
+                  style={{ color: 'var(--text-primary)' }}
                 >
-                  <CalendarPlus size={14} className="text-amber-400" />
+                  <CalendarPlus size={14} style={{ color: '#fbbf24' }} />
                   Event
                 </button>
               </div>
@@ -282,19 +339,27 @@ export default function TopNavPill() {
                 setProfileOpen(false);
                 setQuickAddOpen(false);
               }}
-              className="relative rounded-full p-1.5 text-stone-300 hover:text-white hover:bg-white/10 transition-colors"
+              className="relative rounded-full p-1.5 hover:bg-white/10 transition-colors"
+              style={{ color: 'var(--text-muted)' }}
               aria-label="Notifications"
             >
               <Bell size={16} />
               {dueSoon.length > 0 && (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-[#0e0a1f]" />
+                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-[var(--bg-card)]" />
               )}
             </button>
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-white/15 bg-[#120e24]/95 backdrop-blur-2xl shadow-2xl p-3 animate-fade-up z-50">
+              <div
+                className="absolute right-0 mt-2 w-72 rounded-2xl border shadow-2xl p-3 animate-fade-up z-50"
+                style={{
+                  background: 'var(--bg-card)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(28px)',
+                }}
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold text-white">Upcoming Deadlines</p>
+                  <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
                   {dueSoon.length > 0 && (
                     <span className="text-[10px] font-semibold bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded border border-rose-500/30">
                       {dueSoon.length} due
@@ -302,17 +367,17 @@ export default function TopNavPill() {
                   )}
                 </div>
                 {dueSoon.length === 0 ? (
-                  <p className="text-xs text-stone-400 py-2 text-center">All caught up.</p>
+                  <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>All caught up.</p>
                 ) : (
                   <ul className="space-y-1.5 max-h-56 overflow-y-auto">
                     {dueSoon.slice(0, 5).map((t) => (
                       <li
                         key={t.id}
-                        className="text-xs p-1.5 rounded-lg hover:bg-white/10 cursor-pointer"
+                        className="text-xs p-1.5 rounded-lg hover:bg-[var(--bg-surface)] cursor-pointer"
                         onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
                       >
-                        <span className="font-medium block text-stone-200 truncate">{t.title}</span>
-                        <span className="block text-[10px] text-stone-400 font-mono">Due {t.dueDate}</span>
+                        <span className="font-medium block truncate" style={{ color: 'var(--text-primary)' }}>{t.title}</span>
+                        <span className="block text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>Due {t.dueDate}</span>
                       </li>
                     ))}
                   </ul>
@@ -327,9 +392,10 @@ export default function TopNavPill() {
             title="Settings"
             className={({ isActive }) =>
               `rounded-full p-1.5 transition-colors ${
-                isActive ? 'bg-white/15 text-white' : 'text-stone-300 hover:text-white hover:bg-white/10'
+                isActive ? 'bg-white/15 text-white' : 'opacity-70 hover:opacity-100'
               }`
             }
+            style={{ color: 'var(--text-primary)' }}
           >
             <Sliders size={15} />
           </NavLink>
@@ -342,22 +408,33 @@ export default function TopNavPill() {
                 setNotifOpen(false);
                 setQuickAddOpen(false);
               }}
-              className="flex items-center gap-1.5 rounded-full p-0.5 hover:ring-2 hover:ring-white/20 transition-all"
+              className="flex items-center gap-1.5 rounded-full p-0.5 hover:ring-2 hover:ring-[var(--border-card)] transition-all"
             >
-              <div className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white text-[10px] font-bold shadow-xs">
+              <div
+                className="grid h-6 w-6 place-items-center rounded-full text-white text-[10px] font-bold shadow-xs"
+                style={{ background: 'var(--accent-gradient)' }}
+              >
                 {initials || <UserIcon size={12} />}
               </div>
             </button>
 
             {profileOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-white/15 bg-[#120e24]/95 backdrop-blur-2xl shadow-2xl p-1.5 animate-fade-up z-50">
-                <div className="px-3 py-2 border-b border-white/10 mb-1">
-                  <p className="text-xs font-semibold text-white truncate">{user?.name || 'User'}</p>
-                  <p className="text-[10px] text-stone-400 truncate font-mono">{user?.email || 'Logged in'}</p>
+              <div
+                className="absolute right-0 mt-2 w-48 rounded-2xl border shadow-2xl p-1.5 animate-fade-up z-50"
+                style={{
+                  background: 'var(--bg-card)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(28px)',
+                }}
+              >
+                <div className="px-3 py-2 mb-1" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
+                  <p className="text-[10px] truncate font-mono" style={{ color: 'var(--text-muted)' }}>{user?.email || 'Logged in'}</p>
                 </div>
                 <button
                   onClick={() => { setProfileOpen(false); navigate('/settings'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-stone-200 hover:bg-white/10 transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
+                  style={{ color: 'var(--text-primary)' }}
                 >
                   <UserIcon size={13} /> Account
                 </button>
@@ -375,7 +452,8 @@ export default function TopNavPill() {
           <div className="md:hidden relative" ref={mobileMenuRef}>
             <button
               onClick={() => setMobileMenuOpen((v) => !v)}
-              className="rounded-full p-1.5 text-stone-300 hover:text-white hover:bg-white/10 transition-colors"
+              className="rounded-full p-1.5 transition-colors"
+              style={{ color: 'var(--text-muted)' }}
               aria-label="Toggle menu"
             >
               <Menu size={16} />
@@ -383,7 +461,14 @@ export default function TopNavPill() {
 
             {/* Mobile Dropdown Menu */}
             {mobileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-white/15 bg-[#120e24]/95 backdrop-blur-2xl shadow-2xl p-2 animate-fade-up z-50">
+              <div
+                className="absolute right-0 mt-2 w-52 rounded-2xl border shadow-2xl p-2 animate-fade-up z-50"
+                style={{
+                  background: 'var(--bg-card)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(28px)',
+                }}
+              >
                 <div className="space-y-1">
                   {navLinks.map(({ to, label, icon: Icon, end }) => (
                     <NavLink

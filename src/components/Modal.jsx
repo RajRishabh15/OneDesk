@@ -6,8 +6,16 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
 
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') onClose?.(); }
-    if (open) document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    if (open) {
+      document.addEventListener('keydown', onKey);
+      // Lock page body scrolling while modal is open
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.removeEventListener('keydown', onKey);
+        document.body.style.overflow = originalOverflow;
+      };
+    }
   }, [open, onClose]);
 
   // Trap focus inside modal
@@ -18,11 +26,15 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      {/* Backdrop — heavy blur for a dramatic frosted glass effect */}
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overscroll-contain">
+      {/* Backdrop — theme-adaptive overlay with frosted glass blur */}
       <div
-        className="absolute inset-0"
-        style={{ background: 'rgba(5,3,15,0.65)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)' }}
+        className="absolute inset-0 transition-opacity"
+        style={{
+          background: 'var(--bg-overlay)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
         onClick={onClose}
       />
 
@@ -33,16 +45,16 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         className={[
           'relative w-full outline-none',
           'rounded-t-3xl sm:rounded-3xl',
-          'max-h-[92vh] overflow-y-auto',
+          'max-h-[90vh] overflow-y-auto overscroll-contain',
           wide ? 'sm:max-w-2xl' : 'sm:max-w-md',
-          'animate-modal-up',
+          'animate-modal-up shadow-2xl',
         ].join(' ')}
         style={{
           background: 'var(--bg-card)',
           border: '1px solid var(--border-card)',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
+          backdropFilter: 'blur(28px)',
+          WebkitBackdropFilter: 'blur(28px)',
         }}
       >
         {/* Thin accent line at the top */}

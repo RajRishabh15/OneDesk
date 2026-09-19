@@ -1,41 +1,90 @@
 import { useMemo, useState } from 'react';
-import { Plus, CheckSquare, LayoutGrid, Rows3 } from 'lucide-react';
+import {
+  Plus,
+  CheckSquare,
+  LayoutGrid,
+  Rows3,
+  Search,
+  X,
+  Calendar,
+  Sparkles,
+  Layers,
+  Clock,
+  ArrowRight
+} from 'lucide-react';
 import Modal from '../components/Modal';
 import TaskCard from '../components/TaskCard';
 import EmptyState from '../components/EmptyState';
+import Card from '../components/Card';
 import { useData } from '../context/DataContext';
-import { LabeledInput } from './Notes';
 
 const columns = ['Todo', 'In Progress', 'Completed'];
-const emptyForm = { title: '', description: '', priority: 'Medium', dueDate: '', category: '', status: 'Todo' };
+
+const emptyForm = {
+  title: '',
+  description: '',
+  priority: 'Medium',
+  dueDate: '',
+  category: 'General',
+  status: 'Todo',
+};
+
+function localToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 export default function Tasks() {
   const { tasks, addTask, updateTask, deleteTask, setTaskStatus } = useData();
   const [view, setView] = useState('list');
   const [filter, setFilter] = useState('All');
+  const [query, setQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [dragId, setDragId] = useState(null);
-  const [inlineTask, setInlineTask] = useState('');
+
+  // Quick inline add state
+  const [inlineTitle, setInlineTitle] = useState('');
+  const [inlinePriority, setInlinePriority] = useState('Medium');
+  const [inlineDue, setInlineDue] = useState(localToday());
 
   const filtered = useMemo(() => {
-    if (filter === 'All') return tasks;
-    return tasks.filter((t) => t.status === filter);
-  }, [tasks, filter]);
+    let list = tasks;
+    if (filter !== 'All') {
+      list = list.filter((t) => t.status === filter);
+    }
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter(
+        (t) =>
+          t.title.toLowerCase().includes(q) ||
+          t.description?.toLowerCase().includes(q) ||
+          t.category?.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [tasks, filter, query]);
 
   const completedCount = tasks.filter((t) => t.status === 'Completed').length;
   const pct = tasks.length ? Math.round((completedCount / tasks.length) * 100) : 0;
 
   function openNew() {
     setEditing(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, dueDate: localToday() });
     setModalOpen(true);
   }
 
   function openEdit(task) {
     setEditing(task);
-    setForm(task);
+    setForm({
+      title: task.title || '',
+      description: task.description || '',
+      priority: task.priority || 'Medium',
+      dueDate: task.dueDate || localToday(),
+      category: task.category || 'General',
+      status: task.status || 'Todo',
+    });
     setModalOpen(true);
   }
 
@@ -49,15 +98,15 @@ export default function Tasks() {
 
   function handleInlineAdd(e) {
     e.preventDefault();
-    if (!inlineTask.trim()) return;
+    if (!inlineTitle.trim()) return;
     addTask({
-      title: inlineTask.trim(),
-      priority: 'Medium',
-      dueDate: new Date().toISOString().slice(0, 10),
+      title: inlineTitle.trim(),
+      priority: inlinePriority,
+      dueDate: inlineDue || localToday(),
       status: filter === 'Completed' ? 'Completed' : filter === 'In Progress' ? 'In Progress' : 'Todo',
       category: 'General',
     });
-    setInlineTask('');
+    setInlineTitle('');
   }
 
   function toggleComplete(task) {
@@ -65,99 +114,226 @@ export default function Tasks() {
   }
 
   return (
-    <div className="space-y-5 animate-fade-up max-w-6xl mx-auto pb-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-stone-200/80 dark:border-stone-800/80 pb-4">
+    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-12">
+      {/* ── Page Header ────────────────────────────────────────── */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-4 pb-4"
+        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+      >
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">Tasks</h1>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-            {completedCount} of {tasks.length} tasks completed ({pct}%)
+          <div className="flex items-center gap-2">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              Tasks &amp; Execution
+            </h1>
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border"
+              style={{
+                color: 'var(--accent-color)',
+                borderColor: 'var(--border-card)',
+                background: 'var(--bg-surface)',
+              }}
+            >
+              <CheckSquare size={11} /> {completedCount}/{tasks.length} Done ({pct}%)
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            Track your action items, sprints, and priorities with live progress tracking.
           </p>
         </div>
+
         <button
           onClick={openNew}
-          className="flex items-center gap-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-white dark:text-stone-900 text-stone-100 px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors"
+          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all shadow-lg hover:brightness-110 active:scale-95"
+          style={{
+            background: 'var(--accent-gradient)',
+            boxShadow: '0 4px 18px var(--accent-glow)',
+          }}
         >
-          <Plus size={13} /> Detailed task
+          <Plus size={15} /> Detailed task
         </button>
       </div>
 
-      {/* Filter and View Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-1.5">
-          {['All', ...columns].map((c) => (
-            <button
-              key={c}
-              onClick={() => setFilter(c)}
-              className={[
-                'rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
-                filter === c
-                  ? 'bg-stone-900 text-stone-100 dark:bg-stone-100 dark:text-stone-900 shadow-xs'
-                  : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:bg-stone-100/60 dark:hover:bg-stone-800/60',
-              ].join(' ')}
-            >
-              {c}
-            </button>
-          ))}
+      {/* ── Enhanced Inline Quick-Add Bar ─────────────────────── */}
+      <form
+        onSubmit={handleInlineAdd}
+        className="p-3 sm:p-3.5 rounded-2xl border transition-all glass-card flex flex-wrap items-center gap-2.5 sm:gap-3"
+        style={{ borderColor: 'var(--border-card)' }}
+      >
+        <div
+          className="h-6 w-6 rounded-full flex items-center justify-center shrink-0"
+          style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-card)' }}
+        >
+          <Plus size={12} style={{ color: 'var(--accent-color)' }} />
         </div>
 
-        <div className="flex rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-0.5">
-          <button
-            onClick={() => setView('list')}
-            aria-label="List view"
-            className={`rounded-md p-1.5 transition-colors ${view === 'list' ? 'bg-stone-200/80 dark:bg-stone-800 text-stone-900 dark:text-stone-100' : 'text-stone-400 hover:text-stone-700'}`}
+        <input
+          type="text"
+          value={inlineTitle}
+          onChange={(e) => setInlineTitle(e.target.value)}
+          placeholder="Quick add a task… (Type and press Enter)"
+          className="flex-1 min-w-[180px] text-xs sm:text-sm bg-transparent outline-none"
+          style={{ color: 'var(--text-primary)' }}
+        />
+
+        {/* Priority quick selector */}
+        <div className="flex items-center gap-1">
+          {['Low', 'Medium', 'High'].map((p) => {
+            const active = inlinePriority === p;
+            const color = p === 'High' ? '#fb7185' : p === 'Medium' ? '#fbbf24' : '#34d399';
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setInlinePriority(p)}
+                className="px-2 py-1 rounded-lg text-[10px] font-bold border transition-all"
+                style={{
+                  background: active ? `${color}25` : 'transparent',
+                  borderColor: active ? color : 'transparent',
+                  color: active ? color : 'var(--text-muted)',
+                }}
+              >
+                {p}
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          type="submit"
+          disabled={!inlineTitle.trim()}
+          className="px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40"
+          style={{
+            background: 'var(--accent-gradient)',
+            boxShadow: inlineTitle.trim() ? '0 2px 10px var(--accent-glow)' : 'none',
+          }}
+        >
+          Add
+        </button>
+      </form>
+
+      {/* ── Search & Filter Controls ───────────────────────────── */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        {/* Search Box */}
+        <div className="relative flex-1 max-w-sm">
+          <Search
+            size={14}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--text-muted)' }}
+          />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search tasks…"
+            className="w-full rounded-xl py-2 pl-9 pr-8 text-xs outline-none border transition-all glass-card"
+            style={{
+              color: 'var(--text-primary)',
+              borderColor: 'var(--border-card)',
+            }}
+          />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
+
+        {/* Filter Pills & View Switcher */}
+        <div className="flex items-center justify-between sm:justify-end gap-2.5">
+          <div className="flex items-center gap-1 overflow-x-auto">
+            {['All', ...columns].map((c) => {
+              const active = filter === c;
+              const count = c === 'All' ? tasks.length : tasks.filter((t) => t.status === c).length;
+              return (
+                <button
+                  key={c}
+                  onClick={() => setFilter(c)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0"
+                  style={{
+                    background: active ? 'var(--accent-gradient)' : 'var(--bg-surface)',
+                    borderColor: active ? 'transparent' : 'var(--border-subtle)',
+                    color: active ? '#ffffff' : 'var(--text-muted)',
+                  }}
+                >
+                  <span>{c}</span>
+                  <span className="text-[10px] font-mono opacity-70">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            className="flex rounded-xl p-1 gap-1 border"
+            style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)' }}
           >
-            <Rows3 size={14} />
-          </button>
-          <button
-            onClick={() => setView('kanban')}
-            aria-label="Kanban view"
-            className={`rounded-md p-1.5 transition-colors ${view === 'kanban' ? 'bg-stone-200/80 dark:bg-stone-800 text-stone-900 dark:text-stone-100' : 'text-stone-400 hover:text-stone-700'}`}
-          >
-            <LayoutGrid size={14} />
-          </button>
+            <button
+              onClick={() => setView('list')}
+              aria-label="List view"
+              className="p-1.5 rounded-lg transition-all"
+              style={
+                view === 'list'
+                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)' }
+                  : { color: 'var(--text-muted)' }
+              }
+            >
+              <Rows3 size={14} />
+            </button>
+            <button
+              onClick={() => setView('kanban')}
+              aria-label="Kanban view"
+              className="p-1.5 rounded-lg transition-all"
+              style={
+                view === 'kanban'
+                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)' }
+                  : { color: 'var(--text-muted)' }
+              }
+            >
+              <LayoutGrid size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Things 3 Style Inline Task Input */}
-      <form
-        onSubmit={handleInlineAdd}
-        className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1a1a18] shadow-[0_1px_2px_rgba(0,0,0,0.02)] focus-within:border-stone-400 dark:focus-within:border-stone-600 transition-all"
-      >
-        <div className="h-4 w-4 rounded-full border border-dashed border-stone-300 dark:border-stone-600 flex items-center justify-center shrink-0">
-          <Plus size={10} className="text-stone-400" />
-        </div>
-        <input
-          type="text"
-          value={inlineTask}
-          onChange={(e) => setInlineTask(e.target.value)}
-          placeholder="Add a new task... (Type and press Enter)"
-          className="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-stone-400 text-stone-900 dark:text-stone-100"
-        />
-        {inlineTask.trim() && (
-          <button
-            type="submit"
-            className="shrink-0 text-xs font-semibold bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 px-2.5 py-1 rounded-md"
-          >
-            Add
-          </button>
-        )}
-      </form>
-
-      {/* Task Content */}
+      {/* ── Task Content (List or Kanban) ──────────────────────── */}
       {tasks.length === 0 ? (
-        <EmptyState icon={CheckSquare} title="No tasks yet" description="Type above or click Detailed task to begin." />
+        <Card className="p-8 sm:p-12 text-center" hover={false}>
+          <EmptyState
+            icon={CheckSquare}
+            title="No tasks yet"
+            description="Type in the quick add bar above or click Detailed task to begin."
+            actionLabel="Create detailed task"
+            onAction={openNew}
+          />
+        </Card>
       ) : view === 'list' ? (
         filtered.length === 0 ? (
-          <EmptyState icon={CheckSquare} title="No matching tasks" description="Try selecting a different filter tab." />
+          <Card className="p-8 text-center" hover={false}>
+            <EmptyState
+              icon={CheckSquare}
+              title="No matching tasks found"
+              description={`No tasks match "${query}". Try adjusting your filters.`}
+              actionLabel="Clear filter"
+              onAction={() => { setFilter('All'); setQuery(''); }}
+            />
+          </Card>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {filtered.map((task) => (
-              <TaskCard key={task.id} task={task} onToggleComplete={toggleComplete} onEdit={openEdit} onDelete={deleteTask} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                onToggleComplete={toggleComplete}
+                onEdit={openEdit}
+                onDelete={deleteTask}
+              />
             ))}
           </div>
         )
       ) : (
+        /* Kanban Columns */
         <div className="grid gap-4 md:grid-cols-3">
           {columns.map((col) => {
             const colTasks = tasks.filter((t) => t.status === col);
@@ -169,14 +345,33 @@ export default function Tasks() {
                   if (dragId) setTaskStatus(dragId, col);
                   setDragId(null);
                 }}
-                className="min-h-[220px] rounded-xl bg-stone-50/60 dark:bg-stone-900/40 border border-stone-200/80 dark:border-stone-800 p-3 flex flex-col"
+                className="min-h-[260px] rounded-2xl border p-3.5 flex flex-col glass-card"
+                style={{ borderColor: 'var(--border-card)' }}
               >
-                <div className="mb-2.5 flex items-center justify-between px-1">
-                  <p className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider font-mono">{col}</p>
-                  <span className="rounded-md bg-white dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-stone-500">
+                <div className="mb-3 flex items-center justify-between pb-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{
+                        background: col === 'Completed' ? '#34d399' : col === 'In Progress' ? '#38bdf8' : '#818cf8',
+                      }}
+                    />
+                    <p className="text-xs font-bold font-display uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>
+                      {col}
+                    </p>
+                  </div>
+                  <span
+                    className="rounded-lg px-2 py-0.5 text-[10px] font-mono font-bold border"
+                    style={{
+                      background: 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
                     {colTasks.length}
                   </span>
                 </div>
+
                 <div className="space-y-2 flex-1">
                   {colTasks.map((task) => (
                     <TaskCard
@@ -190,7 +385,13 @@ export default function Tasks() {
                     />
                   ))}
                   {colTasks.length === 0 && (
-                    <div className="h-24 grid place-items-center border border-dashed border-stone-200 dark:border-stone-800 rounded-lg text-xs text-stone-400">
+                    <div
+                      className="h-28 grid place-items-center border border-dashed rounded-xl text-xs font-mono"
+                      style={{
+                        borderColor: 'var(--border-subtle)',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
                       Drop tasks here
                     </div>
                   )}
@@ -201,59 +402,157 @@ export default function Tasks() {
         </div>
       )}
 
-      {/* Modal for detailed task configuration */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit task' : 'New task'}>
+      {/* ── Detailed Task Modal ────────────────────────────────── */}
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editing ? 'Edit task' : 'New task'}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <LabeledInput label="Task title" required value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v }))} placeholder="Task title..." />
+          {/* Title */}
           <div>
-            <label className="mb-1 block text-xs font-semibold text-stone-600 dark:text-stone-300">Description</label>
+            <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              Task title
+            </label>
+            <input
+              required
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="What needs to be done…"
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none border transition-all"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--text-primary)',
+              }}
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
+              Description / Notes
+            </label>
             <textarea
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
-              placeholder="Add extra details..."
-              className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 p-2.5 text-xs outline-none transition-all placeholder:text-stone-400 focus:bg-white dark:focus:bg-stone-900 focus:border-stone-400"
+              placeholder="Add extra context, links, or checklist…"
+              className="w-full rounded-xl p-3 text-xs sm:text-sm outline-none border transition-all resize-none leading-relaxed"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--text-primary)',
+              }}
             />
           </div>
+
+          {/* Priority & Status */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-xs font-semibold text-stone-600 dark:text-stone-300">Priority</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                Priority
+              </label>
               <select
                 value={form.priority}
                 onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
-                className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 px-2.5 py-1.5 text-xs outline-none focus:border-stone-400"
+                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
               >
-                <option>High</option>
-                <option>Medium</option>
-                <option>Low</option>
+                <option value="High" style={{ background: 'var(--bg-card)' }}>High</option>
+                <option value="Medium" style={{ background: 'var(--bg-card)' }}>Medium</option>
+                <option value="Low" style={{ background: 'var(--bg-card)' }}>Low</option>
               </select>
             </div>
+
             <div>
-              <label className="mb-1 block text-xs font-semibold text-stone-600 dark:text-stone-300">Status</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                Status
+              </label>
               <select
                 value={form.status}
                 onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-                className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 px-2.5 py-1.5 text-xs outline-none focus:border-stone-400"
+                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
               >
-                {columns.map((c) => <option key={c}>{c}</option>)}
+                {columns.map((c) => (
+                  <option key={c} value={c} style={{ background: 'var(--bg-card)' }}>
+                    {c}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
+
+          {/* Due Date & Category */}
           <div className="grid grid-cols-2 gap-3">
-            <LabeledInput label="Due date" type="date" value={form.dueDate} onChange={(v) => setForm((f) => ({ ...f, dueDate: v }))} />
-            <LabeledInput label="Category" placeholder="e.g. Work, Personal" value={form.category} onChange={(v) => setForm((f) => ({ ...f, category: v }))} />
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                Due date
+              </label>
+              <input
+                type="date"
+                value={form.dueDate}
+                onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
+                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                Category
+              </label>
+              <input
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                placeholder="e.g. Work, College"
+                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+            </div>
           </div>
-          <div className="flex justify-end gap-2 pt-3 border-t border-stone-100 dark:border-stone-800">
+
+          {/* Modal Actions */}
+          <div
+            className="flex items-center justify-end gap-2.5 pt-3"
+            style={{ borderTop: '1px solid var(--border-subtle)' }}
+          >
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="rounded-lg border border-stone-200 dark:border-stone-800 px-3 py-1.5 text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              className="rounded-xl px-4 py-2 text-xs font-semibold transition-all"
+              style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-card)',
+                color: 'var(--text-muted)',
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-white dark:text-stone-900 text-stone-100 px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-colors"
+              className="rounded-xl px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-95"
+              style={{
+                background: 'var(--accent-gradient)',
+                boxShadow: '0 4px 16px var(--accent-glow)',
+              }}
             >
               {editing ? 'Save changes' : 'Add task'}
             </button>

@@ -1,10 +1,12 @@
-import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import {
   collection,
   onSnapshot,
   addDoc,
   updateDoc,
   deleteDoc,
+  getDoc,
+  setDoc,
   getDocs,
   doc,
   query,
@@ -26,7 +28,6 @@ export function DataProvider({ children }) {
   const [tasks, setTasks] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const seededRef = useRef(false);
 
   // Collection refs helpers
   const col = (name) => collection(db, 'users', uid, name);
@@ -38,21 +39,80 @@ export function DataProvider({ children }) {
       setTasks([]);
       setEvents([]);
       setLoading(false);
-      seededRef.current = false;
       return;
     }
 
     setLoading(true);
     let resolved = 0;
-    const tryDone = () => { resolved++; if (resolved === 3) setLoading(false); };
+    const tryDone = () => {
+      resolved++;
+      if (resolved === 3) setLoading(false);
+    };
 
+    // 1. One-time check for first-time account initialization
+    async function checkAndSeedInitialData() {
+      try {
+        const userDocRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userDocRef);
+        const userData = userSnap.data();
+
+        // If user document already exists and has been seeded, do nothing!
+        if (userSnap.exists() && userData?.seeded === true) {
+          return;
+        }
+
+        // Check if user already has any items across collections
+        const [notesSnap, tasksSnap, eventsSnap] = await Promise.all([
+          getDocs(query(col('notes'))),
+          getDocs(query(col('tasks'))),
+          getDocs(query(col('events'))),
+        ]);
+
+        const hasAnyData = !notesSnap.empty || !tasksSnap.empty || !eventsSnap.empty;
+
+        if (!hasAnyData) {
+          // Brand new account: seed sample data in a single atomic batch
+          const batch = writeBatch(db);
+
+          makeSampleNotes().forEach((item) => {
+            const { id: _id, ...rest } = item;
+            const ref = doc(collection(db, 'users', uid, 'notes'));
+            batch.set(ref, { ...rest, createdAt: serverTimestamp() });
+          });
+
+          makeSampleTasks().forEach((item) => {
+            const { id: _id, ...rest } = item;
+            const ref = doc(collection(db, 'users', uid, 'tasks'));
+            batch.set(ref, { ...rest, createdAt: serverTimestamp() });
+          });
+
+          makeSampleEvents().forEach((item) => {
+            const { id: _id, ...rest } = item;
+            const ref = doc(collection(db, 'users', uid, 'events'));
+            batch.set(ref, { ...rest, createdAt: serverTimestamp() });
+          });
+
+          // Mark user as seeded in Firestore permanently
+          batch.set(userDocRef, { seeded: true, initializedAt: serverTimestamp() }, { merge: true });
+          await batch.commit();
+        } else {
+          // User already has data from before, mark as seeded so we never overwrite
+          await setDoc(userDocRef, { seeded: true }, { merge: true });
+        }
+      } catch (err) {
+        console.error('Error during initial data check:', err);
+      }
+    }
+
+    checkAndSeedInitialData();
+
+    // 2. Real-time multi-device listeners (pure sync, zero auto-re-seeding)
     const unsubNotes = onSnapshot(
       query(col('notes'), orderBy('createdAt', 'desc')),
       (snap) => {
         const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
         setNotes(docs);
         tryDone();
-        seedIfEmpty(docs, 'notes', makeSampleNotes, uid);
       }
     );
 
@@ -62,7 +122,6 @@ export function DataProvider({ children }) {
         const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
         setTasks(docs);
         tryDone();
-        seedIfEmpty(docs, 'tasks', makeSampleTasks, uid);
       }
     );
 
@@ -72,27 +131,16 @@ export function DataProvider({ children }) {
         const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
         setEvents(docs);
         tryDone();
-        seedIfEmpty(docs, 'events', makeSampleEvents, uid);
       }
     );
 
-    return () => { unsubNotes(); unsubTasks(); unsubEvents(); };
+    return () => {
+      unsubNotes();
+      unsubTasks();
+      unsubEvents();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid]);
-
-  // Seed sample data only once per new account
-  async function seedIfEmpty(docs, colName, maker, userId) {
-    if (seededRef.current || docs.length > 0) return;
-    seededRef.current = true;
-    const batch = writeBatch(db);
-    const items = maker();
-    items.forEach((item) => {
-      const { id: _id, ...rest } = item;
-      const ref = doc(collection(db, 'users', userId, colName));
-      batch.set(ref, { ...rest, createdAt: serverTimestamp() });
-    });
-    try { await batch.commit(); } catch { /* ignore seed failure */ }
-  }
 
   // ---- Notes ----
   async function addNote(note) {
