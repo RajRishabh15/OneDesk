@@ -6,20 +6,19 @@ import { LabeledInput } from './Notes';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { exportBackup, importBackup } from '../utils/storage';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { user, updateProfile, logout } = useAuth();
-  const { clearAll } = useData();
+  const { notes, tasks, events, clearAll, addNote, addTask, addEvent } = useData();
   const navigate = useNavigate();
-  const [name, setName] = useState(user?.name || '');
+  const [name, setName] = useState(user?.name || user?.displayName || '');
   const [notifOn, setNotifOn] = useState(true);
   const [savedTick, setSavedTick] = useState(false);
   const fileRef = useRef(null);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     navigate('/login', { replace: true });
   }
 
@@ -31,7 +30,8 @@ export default function Settings() {
   }
 
   function handleExport() {
-    const blob = new Blob([JSON.stringify(exportBackup(), null, 2)], { type: 'application/json' });
+    const backup = { notes, tasks, events, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -44,10 +44,20 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
-        importBackup(JSON.parse(reader.result));
-        window.location.reload();
+        const backup = JSON.parse(reader.result);
+        // Bulk-add all items from the backup into Firestore
+        if (Array.isArray(backup.notes)) {
+          for (const n of backup.notes) { const { id: _, createdAt: __, ...rest } = n; await addNote(rest); }
+        }
+        if (Array.isArray(backup.tasks)) {
+          for (const t of backup.tasks) { const { id: _, createdAt: __, ...rest } = t; await addTask(rest); }
+        }
+        if (Array.isArray(backup.events)) {
+          for (const ev of backup.events) { const { id: _, createdAt: __, ...rest } = ev; await addEvent(rest); }
+        }
+        alert('Backup imported successfully!');
       } catch {
         alert('That file could not be read as a OneDesk backup.');
       }

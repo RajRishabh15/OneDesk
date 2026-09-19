@@ -1,21 +1,21 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Zap } from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import GhostFibers from '../components/GhostFibers';
 
 export default function Login() {
-  const { login, demoLogin, authError } = useAuth();
+  const { login, authError } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (login(form)) navigate('/');
-  }
-
-  function handleDemo() {
-    if (demoLogin()) navigate('/');
+    setIsLoading(true);
+    const ok = await login(form);
+    setIsLoading(false);
+    if (ok) navigate('/');
   }
 
   return (
@@ -23,31 +23,7 @@ export default function Login() {
       <h1 className="font-serif text-2xl font-normal text-white">Welcome back</h1>
       <p className="mt-1 text-xs text-stone-400">Sign in to your OneDesk workspace.</p>
 
-      {/* Quick Demo Login CTA */}
-      <div className="mt-5 p-3 rounded-xl border border-white/10 bg-white/5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Zap size={14} className="text-amber-400" />
-            <span className="text-xs font-semibold text-stone-200">Demo Account</span>
-          </div>
-          <button
-            type="button"
-            onClick={handleDemo}
-            className="flex items-center gap-1 text-xs font-semibold text-indigo-400 hover:text-indigo-300 hover:underline"
-          >
-            Instant Sign-in <ArrowRight size={12} />
-          </button>
-        </div>
-      </div>
-
-      <div className="relative my-4 flex items-center justify-center">
-        <div className="w-full border-t border-white/10" />
-        <span className="absolute bg-[#120e24] px-2 text-[10px] uppercase tracking-wider text-stone-400">
-          or with email
-        </span>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-3.5">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-3.5">
         <Field
           icon={Mail}
           type="email"
@@ -69,9 +45,11 @@ export default function Login() {
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white py-2.5 text-xs font-semibold transition-all shadow-md shadow-indigo-500/25"
+          disabled={isLoading}
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-2.5 text-xs font-semibold transition-all shadow-md shadow-indigo-500/25"
         >
-          Sign in
+          {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
+          {isLoading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
 

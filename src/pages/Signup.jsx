@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock } from 'lucide-react';
+import { User, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AuthShell, Field } from './Login';
 
@@ -8,10 +8,14 @@ export default function Signup() {
   const { signup, authError } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (signup(form)) navigate('/');
+    setIsLoading(true);
+    const ok = await signup(form);
+    setIsLoading(false);
+    if (ok) navigate('/');
   }
 
   return (
@@ -39,9 +43,9 @@ export default function Signup() {
         <Field
           icon={Lock}
           type="password"
-          placeholder="Choose password"
+          placeholder="Choose password (min 6 chars)"
           required
-          minLength={4}
+          minLength={6}
           value={form.password}
           onChange={(v) => setForm((f) => ({ ...f, password: v }))}
         />
@@ -50,9 +54,11 @@ export default function Signup() {
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white py-2.5 text-xs font-semibold transition-all shadow-md shadow-indigo-500/25"
+          disabled={isLoading}
+          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-2.5 text-xs font-semibold transition-all shadow-md shadow-indigo-500/25"
         >
-          Create account
+          {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
+          {isLoading ? 'Creating account…' : 'Create account'}
         </button>
       </form>
 

@@ -1,81 +1,158 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { loadData, saveData, STORAGE_KEYS } from '../utils/storage';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
+  doc,
+  query,
+  orderBy,
+  serverTimestamp,
+  writeBatch,
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from './AuthContext';
 import { makeSampleNotes, makeSampleTasks, makeSampleEvents } from '../utils/sampleData';
 
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
-  const [notes, setNotes] = useState(() => loadData(STORAGE_KEYS.NOTES, null));
-  const [tasks, setTasks] = useState(() => loadData(STORAGE_KEYS.TASKS, null));
-  const [events, setEvents] = useState(() => loadData(STORAGE_KEYS.EVENTS, null));
+  const { user } = useAuth();
+  const uid = user?.id;
 
-  // Seed believable sample data on a brand-new install only.
+  const [notes, setNotes] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const seededRef = useRef(false);
+
+  // Collection refs helpers
+  const col = (name) => collection(db, 'users', uid, name);
+  const docRef = (name, id) => doc(db, 'users', uid, name, id);
+
   useEffect(() => {
-    if (notes === null) setNotes(makeSampleNotes());
-    if (tasks === null) setTasks(makeSampleTasks());
-    if (events === null) setEvents(makeSampleEvents());
+    if (!uid) {
+      setNotes([]);
+      setTasks([]);
+      setEvents([]);
+      setLoading(false);
+      seededRef.current = false;
+      return;
+    }
+
+    setLoading(true);
+    let resolved = 0;
+    const tryDone = () => { resolved++; if (resolved === 3) setLoading(false); };
+
+    const unsubNotes = onSnapshot(
+      query(col('notes'), orderBy('createdAt', 'desc')),
+      (snap) => {
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setNotes(docs);
+        tryDone();
+        seedIfEmpty(docs, 'notes', makeSampleNotes, uid);
+      }
+    );
+
+    const unsubTasks = onSnapshot(
+      query(col('tasks'), orderBy('createdAt', 'desc')),
+      (snap) => {
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setTasks(docs);
+        tryDone();
+        seedIfEmpty(docs, 'tasks', makeSampleTasks, uid);
+      }
+    );
+
+    const unsubEvents = onSnapshot(
+      query(col('events'), orderBy('createdAt', 'desc')),
+      (snap) => {
+        const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setEvents(docs);
+        tryDone();
+        seedIfEmpty(docs, 'events', makeSampleEvents, uid);
+      }
+    );
+
+    return () => { unsubNotes(); unsubTasks(); unsubEvents(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [uid]);
 
-  useEffect(() => {
-    if (notes !== null) saveData(STORAGE_KEYS.NOTES, notes);
-  }, [notes]);
-  useEffect(() => {
-    if (tasks !== null) saveData(STORAGE_KEYS.TASKS, tasks);
-  }, [tasks]);
-  useEffect(() => {
-    if (events !== null) saveData(STORAGE_KEYS.EVENTS, events);
-  }, [events]);
+  // Seed sample data only once per new account
+  async function seedIfEmpty(docs, colName, maker, userId) {
+    if (seededRef.current || docs.length > 0) return;
+    seededRef.current = true;
+    const batch = writeBatch(db);
+    const items = maker();
+    items.forEach((item) => {
+      const { id: _id, ...rest } = item;
+      const ref = doc(collection(db, 'users', userId, colName));
+      batch.set(ref, { ...rest, createdAt: serverTimestamp() });
+    });
+    try { await batch.commit(); } catch { /* ignore seed failure */ }
+  }
 
   // ---- Notes ----
-  function addNote(note) {
-    setNotes((prev) => [{ id: crypto.randomUUID(), createdAt: new Date().toISOString(), pinned: false, ...note }, ...(prev || [])]);
+  async function addNote(note) {
+    const { id: _id, ...rest } = note;
+    await addDoc(col('notes'), { ...rest, pinned: false, createdAt: serverTimestamp() });
   }
-  function updateNote(id, patch) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)));
+  async function updateNote(id, patch) {
+    await updateDoc(docRef('notes', id), patch);
   }
-  function deleteNote(id) {
-    setNotes((prev) => prev.filter((n) => n.id !== id));
+  async function deleteNote(id) {
+    await deleteDoc(docRef('notes', id));
   }
-  function togglePinNote(id) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, pinned: !n.pinned } : n)));
+  async function togglePinNote(id) {
+    const note = notes.find((n) => n.id === id);
+    if (note) await updateDoc(docRef('notes', id), { pinned: !note.pinned });
   }
 
   // ---- Tasks ----
-  function addTask(task) {
-    setTasks((prev) => [{ id: crypto.randomUUID(), status: 'Todo', ...task }, ...(prev || [])]);
+  async function addTask(task) {
+    const { id: _id, ...rest } = task;
+    await addDoc(col('tasks'), { ...rest, status: rest.status || 'Todo', createdAt: serverTimestamp() });
   }
-  function updateTask(id, patch) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  async function updateTask(id, patch) {
+    await updateDoc(docRef('tasks', id), patch);
   }
-  function deleteTask(id) {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  async function deleteTask(id) {
+    await deleteDoc(docRef('tasks', id));
   }
-  function setTaskStatus(id, status) {
-    updateTask(id, { status });
+  async function setTaskStatus(id, status) {
+    await updateDoc(docRef('tasks', id), { status });
   }
 
   // ---- Events ----
-  function addEvent(event) {
-    setEvents((prev) => [{ id: crypto.randomUUID(), reminder: false, ...event }, ...(prev || [])]);
+  async function addEvent(event) {
+    const { id: _id, ...rest } = event;
+    await addDoc(col('events'), { ...rest, reminder: rest.reminder ?? false, createdAt: serverTimestamp() });
   }
-  function updateEvent(id, patch) {
-    setEvents((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+  async function updateEvent(id, patch) {
+    await updateDoc(docRef('events', id), patch);
   }
-  function deleteEvent(id) {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
+  async function deleteEvent(id) {
+    await deleteDoc(docRef('events', id));
   }
 
-  function clearAll() {
-    setNotes([]);
-    setTasks([]);
-    setEvents([]);
+  // ---- Bulk ----
+  async function clearAll() {
+    const deleteCollection = async (colName) => {
+      const batch = writeBatch(db);
+      const snap = await getDocs(col(colName));
+      snap.docs.forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    };
+    await Promise.all([deleteCollection('notes'), deleteCollection('tasks'), deleteCollection('events')]);
   }
 
   const value = {
-    notes: notes || [],
-    tasks: tasks || [],
-    events: events || [],
+    notes,
+    tasks,
+    events,
+    loading,
     addNote, updateNote, deleteNote, togglePinNote,
     addTask, updateTask, deleteTask, setTaskStatus,
     addEvent, updateEvent, deleteEvent,
