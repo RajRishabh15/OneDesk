@@ -15,18 +15,27 @@ import {
   Calendar,
   BarChart2,
   Sliders,
-  Menu
+  Home,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
 const navLinks = [
-  { to: '/', label: 'Overview', icon: LayoutGrid, end: true },
-  { to: '/tasks', label: 'Tasks', icon: CheckSquare },
-  { to: '/notes', label: 'Notes', icon: StickyNote },
+  { to: '/', label: 'Home',     icon: Home,        end: true },
+  { to: '/tasks',    label: 'Tasks',    icon: CheckSquare },
+  { to: '/notes',    label: 'Notes',    icon: StickyNote },
   { to: '/calendar', label: 'Schedule', icon: Calendar },
-  { to: '/analytics', label: 'Insights', icon: BarChart2 },
-  { to: '/settings', label: 'Settings', icon: Sliders },
+  { to: '/analytics',label: 'Insights', icon: BarChart2 },
+];
+
+const mobileLinks = [
+  { to: '/',         label: 'Home',     icon: Home,        end: true },
+  { to: '/tasks',    label: 'Tasks',    icon: CheckSquare },
+  { to: '/notes',    label: 'Notes',    icon: StickyNote },
+  { to: '/calendar', label: 'Schedule', icon: Calendar },
+  { to: '/analytics',label: 'Insights', icon: BarChart2 },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function TopNavPill() {
@@ -34,53 +43,39 @@ export default function TopNavPill() {
   const { tasks, notes, events } = useData();
   const navigate = useNavigate();
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery]           = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifOpen, setNotifOpen]   = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const searchBoxRef = useRef(null);
-  const searchInputRef = useRef(null);
-  const profileRef = useRef(null);
-  const notifRef = useRef(null);
-  const quickAddRef = useRef(null);
-  const mobileMenuRef = useRef(null);
+  const searchBoxRef  = useRef(null);
+  const searchInputRef= useRef(null);
+  const profileRef    = useRef(null);
+  const notifRef      = useRef(null);
+  const quickAddRef   = useRef(null);
 
   function handleLogout() {
     setProfileOpen(false);
-    setMobileMenuOpen(false);
     logout();
     navigate('/login', { replace: true });
   }
 
-  // Close menus on click outside
+  /* ── close on outside click ── */
   useEffect(() => {
-    function onClickAway(e) {
-      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
-        setSearchOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
-        setNotifOpen(false);
-      }
-      if (quickAddRef.current && !quickAddRef.current.contains(e.target)) {
-        setQuickAddOpen(false);
-      }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
-        setMobileMenuOpen(false);
-      }
+    function onDown(e) {
+      if (searchBoxRef.current  && !searchBoxRef.current.contains(e.target))  setSearchOpen(false);
+      if (profileRef.current    && !profileRef.current.contains(e.target))    setProfileOpen(false);
+      if (notifRef.current      && !notifRef.current.contains(e.target))      setNotifOpen(false);
+      if (quickAddRef.current   && !quickAddRef.current.contains(e.target))   setQuickAddOpen(false);
     }
-    document.addEventListener('mousedown', onClickAway);
-    return () => document.removeEventListener('mousedown', onClickAway);
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
   }, []);
 
-  // Keyboard shortcut Ctrl+K to open search
+  /* ── Ctrl+K ── */
   useEffect(() => {
-    function onKeyDown(e) {
+    function onKey(e) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setSearchOpen(true);
@@ -91,441 +86,560 @@ export default function TopNavPill() {
         setProfileOpen(false);
         setNotifOpen(false);
         setQuickAddOpen(false);
-        setMobileMenuOpen(false);
       }
     }
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   const results = useMemo(() => {
     if (!query.trim()) return { notes: [], tasks: [], events: [] };
     const q = query.toLowerCase();
     return {
-      notes: notes.filter((n) => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q)),
-      tasks: tasks.filter((t) => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)),
-      events: events.filter((e) => e.title.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q)),
+      notes:  notes.filter(n  => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q)),
+      tasks:  tasks.filter(t  => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)),
+      events: events.filter(ev => ev.title.toLowerCase().includes(q) || ev.description?.toLowerCase().includes(q)),
     };
   }, [query, notes, tasks, events]);
 
   const dueSoon = tasks.filter(
-    (t) => t.status !== 'Completed' && t.dueDate && new Date(t.dueDate) <= new Date(Date.now() + 86400000)
+    t => t.status !== 'Completed' && t.dueDate && new Date(t.dueDate) <= new Date(Date.now() + 86400000)
   );
 
-  const initials = user?.name
-    ?.split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() || 'OD';
+  const initials = (user?.name || user?.email || 'OD')
+    .split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <header className="fixed top-3 sm:top-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none">
-      <div
-        className="pointer-events-auto relative w-full max-w-5xl rounded-2xl sm:rounded-full border backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.45)] px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 transition-all"
-        style={{
-          background: 'var(--bg-card)',
-          borderColor: 'var(--border-card)',
-          color: 'var(--text-primary)',
-        }}
-      >
-        
-        {/* Left: Brand Pill */}
-        <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <div
-            className="h-7 w-7 rounded-full p-[1.5px] grid place-items-center shadow-md transition-transform group-hover:scale-105"
-            style={{
-              background: 'var(--accent-gradient)',
-              boxShadow: '0 2px 10px var(--accent-glow)',
-            }}
-          >
-            <div
-              className="h-full w-full rounded-full grid place-items-center text-[10px] font-bold"
-              style={{
-                background: 'var(--bg-page)',
-                color: 'var(--accent-color)',
-              }}
-            >
-              ✦
+    <>
+      {/* ════════════════════════════════════════════
+          DESKTOP NAV  (md+)
+      ════════════════════════════════════════════ */}
+      <header className="hidden md:flex fixed top-4 inset-x-0 z-40 justify-center px-6 pointer-events-none">
+        <div
+          className="pointer-events-auto relative flex items-center gap-3 px-3 py-2 transition-all duration-300"
+          style={{
+            background:     'var(--bg-card)',
+            borderRadius:   '20px',
+            border:         '1px solid var(--border-card)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            boxShadow:      '0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset',
+            width:          'fit-content',
+            maxWidth:       '860px',
+          }}
+        >
+          {/* ── LEFT CLUSTER: Logo + Notifications ─────────── */}
+          <div className="flex items-center gap-1.5 shrink-0">
+
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 group shrink-0">
+              <div
+                className="h-7 w-7 rounded-[10px] p-[1.5px] grid place-items-center shadow-md transition-transform group-hover:scale-105"
+                style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 10px var(--accent-glow)' }}
+              >
+                <div
+                  className="h-full w-full rounded-[8px] grid place-items-center text-[11px] font-bold"
+                  style={{ background: 'var(--bg-page)', color: 'var(--accent-color)' }}
+                >✦</div>
+              </div>
+              <span
+                className="font-display text-sm font-extrabold tracking-tight"
+                style={{ color: 'var(--text-primary)' }}
+              >OneDesk</span>
+            </Link>
+
+            {/* Divider */}
+            <div className="h-4 w-px mx-1" style={{ background: 'var(--border-card)' }} />
+
+            {/* Notification Bell */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => { setNotifOpen(v => !v); setProfileOpen(false); setQuickAddOpen(false); setSearchOpen(false); }}
+                className="relative h-[30px] w-[30px] rounded-[10px] flex items-center justify-center transition-all hover:brightness-125 active:scale-95"
+                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}
+                aria-label="Notifications"
+              >
+                <Bell size={13} />
+                {dueSoon.length > 0 && (
+                  <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
+                )}
+              </button>
+
+              {notifOpen && (
+                <div
+                  className="absolute left-0 mt-2.5 w-72 rounded-2xl border shadow-2xl p-3 animate-menu-pop z-50"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                >
+                  <div className="flex items-center justify-between mb-2.5">
+                    <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
+                    {dueSoon.length > 0 && (
+                      <span className="text-[10px] font-semibold bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full border border-rose-500/30">
+                        {dueSoon.length} due
+                      </span>
+                    )}
+                  </div>
+                  {dueSoon.length === 0 ? (
+                    <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>All caught up ✓</p>
+                  ) : (
+                    <ul className="space-y-1.5 max-h-56 overflow-y-auto">
+                      {dueSoon.slice(0, 5).map(t => (
+                        <li
+                          key={t.id}
+                          className="text-xs p-2 rounded-xl cursor-pointer transition-colors"
+                          style={{ color: 'var(--text-primary)' }}
+                          onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span className="font-semibold block truncate">{t.title}</span>
+                          <span className="block text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>Due {t.dueDate}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-          <span className="font-display text-sm font-extrabold tracking-tight hidden xs:inline" style={{ color: 'var(--text-primary)' }}>
-            OneDesk
-          </span>
-        </Link>
 
-        {/* Center: Nav Pills with Active White Capsule & Theme-adaptive Indicator Dot */}
-        <nav
-          className="hidden md:flex items-center gap-1 p-1 rounded-full border"
-          style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+          {/* ── CENTER: Nav Tabs ────────────────────────── */}
+          <nav
+            className="flex items-center gap-0.5 px-1 py-1 rounded-[14px]"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
+          >
+            {navLinks.map(({ to, label, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `relative px-3.5 py-1.5 rounded-[10px] text-[11px] font-bold tracking-wide transition-all duration-200 ${
+                    isActive
+                      ? 'shadow-sm'
+                      : 'hover:opacity-90'
+                  }`
+                }
+                style={({ isActive }) => isActive
+                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }
+                  : { color: 'var(--text-muted)' }
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {label}
+                    {isActive && (
+                      <span
+                        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[3px] w-3 rounded-full"
+                        style={{ background: 'var(--accent-gradient)', boxShadow: '0 0 6px var(--accent-glow)' }}
+                      />
+                    )}
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* ── RIGHT CLUSTER: Search + Add + Account ─── */}
+          <div className="flex items-center gap-1.5 shrink-0">
+
+            {/* Search — single morphing pill, spring-width transition */}
+            <div className="relative" ref={searchBoxRef}>
+              {/* The pill itself — width springs open/closed */}
+              <div
+                className="flex items-center overflow-hidden rounded-[10px] border"
+                style={{
+                  height: '30px',
+                  width: searchOpen ? '178px' : '30px',
+                  /* Spring easing: fast out, slight overshoot, then settle */
+                  transition: 'width 0.42s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.25s ease, background 0.25s ease',
+                  background: searchOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
+                  borderColor: searchOpen ? 'var(--border-card)' : 'var(--border-subtle)',
+                  boxShadow: searchOpen ? '0 2px 12px rgba(0,0,0,0.25)' : 'none',
+                }}
+              >
+                {/* Search icon — always the leftmost element, acts as trigger */}
+                <button
+                  onClick={() => {
+                    setSearchOpen(v => !v);
+                    if (!searchOpen) setTimeout(() => searchInputRef.current?.focus(), 220);
+                  }}
+                  title="Search (Ctrl+K)"
+                  className="h-full w-[30px] shrink-0 flex items-center justify-center transition-colors duration-200"
+                  style={{ color: searchOpen ? 'var(--accent-color)' : 'var(--text-muted)' }}
+                >
+                  <Search size={13} />
+                </button>
+
+                {/* Input — fades in after pill opens */}
+                <input
+                  ref={searchInputRef}
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Search…"
+                  className="flex-1 min-w-0 bg-transparent text-[11px] outline-none"
+                  style={{
+                    color: 'var(--text-primary)',
+                    opacity: searchOpen ? 1 : 0,
+                    transition: 'opacity 0.18s ease',
+                    transitionDelay: searchOpen ? '0.18s' : '0s',
+                    pointerEvents: searchOpen ? 'auto' : 'none',
+                  }}
+                />
+
+                {/* Clear or close — fades in when open */}
+                <button
+                  onClick={() => query ? setQuery('') : setSearchOpen(false)}
+                  className="h-7 w-7 shrink-0 flex items-center justify-center"
+                  style={{
+                    color: 'var(--text-muted)',
+                    opacity: searchOpen ? 0.55 : 0,
+                    transition: 'opacity 0.15s ease',
+                    transitionDelay: searchOpen ? '0.22s' : '0s',
+                    pointerEvents: searchOpen ? 'auto' : 'none',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = searchOpen ? '0.55' : '0'}
+                >
+                  <X size={11} />
+                </button>
+              </div>
+
+              {/* Search Results Dropdown */}
+              {searchOpen && query.trim() && (
+                <div
+                  className="absolute right-0 top-full mt-2.5 w-80 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                >
+                  <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
+                  <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
+                  <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
+                  {results.notes.length + results.tasks.length + results.events.length === 0 && (
+                    <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Quick Add — plus icon expands to options */}
+            <div className="relative" ref={quickAddRef}>
+              <button
+                onClick={() => { setQuickAddOpen(v => !v); setProfileOpen(false); setNotifOpen(false); setSearchOpen(false); }}
+                className="h-[30px] w-[30px] rounded-[10px] flex items-center justify-center transition-all hover:brightness-110 active:scale-95 text-white"
+                style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 12px var(--accent-glow)' }}
+                aria-label="Quick add"
+              >
+                <Plus
+                  size={16}
+                  style={{ transition: 'transform 0.2s ease', transform: quickAddOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
+                />
+              </button>
+
+              {quickAddOpen && (
+                <div
+                  className="absolute right-0 mt-2.5 w-48 rounded-2xl border shadow-2xl overflow-hidden animate-menu-pop z-50"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                >
+                  <div className="px-3 pt-2.5 pb-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Quick Create</p>
+                  </div>
+                  <div className="p-1.5 space-y-0.5">
+                    {[
+                      { label: 'New Task',  icon: CheckSquare, color: 'var(--accent-color)', to: '/tasks' },
+                      { label: 'New Note',  icon: FileText,    color: '#34d399',             to: '/notes' },
+                      { label: 'New Event', icon: CalendarPlus,color: '#fbbf24',             to: '/calendar' },
+                    ].map(({ label, icon: Icon, color, to }) => (
+                      <button
+                        key={to}
+                        onClick={() => { setQuickAddOpen(false); navigate(to); }}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all"
+                        style={{ color: 'var(--text-primary)' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <span
+                          className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ background: `${color}20`, color }}
+                        >
+                          <Icon size={13} />
+                        </span>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Thin divider */}
+            <div className="h-4 w-px" style={{ background: 'var(--border-card)' }} />
+
+            {/* Account + Settings merged */}
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setQuickAddOpen(false); setSearchOpen(false); }}
+                className="flex items-center gap-1.5 rounded-[12px] px-2 py-1 transition-all hover:brightness-110 active:scale-95"
+                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
+              >
+                <div
+                  className="h-5 w-5 rounded-[7px] grid place-items-center text-white text-[9px] font-black shrink-0"
+                  style={{ background: 'var(--accent-gradient)' }}
+                >
+                  {initials || <UserIcon size={10} />}
+                </div>
+                <span className="text-[11px] font-semibold max-w-[72px] truncate" style={{ color: 'var(--text-primary)' }}>
+                  {user?.name?.split(' ')[0] || 'Account'}
+                </span>
+              </button>
+
+              {profileOpen && (
+                <div
+                  className="absolute right-0 mt-2.5 w-52 rounded-2xl border shadow-2xl animate-menu-pop z-50 overflow-hidden"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                >
+                  {/* User info */}
+                  <div
+                    className="px-4 py-3"
+                    style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                  >
+                    <div className="flex items-center gap-2.5 mb-0.5">
+                      <div
+                        className="h-8 w-8 rounded-[10px] grid place-items-center text-white text-xs font-black shrink-0"
+                        style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
+                      >
+                        {initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
+                        <p className="text-[10px] truncate font-mono" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="p-1.5 space-y-0.5">
+                    <button
+                      onClick={() => { setProfileOpen(false); navigate('/settings'); }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition-all"
+                      style={{ color: 'var(--text-primary)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span
+                        className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+                      >
+                        <Sliders size={12} />
+                      </span>
+                      Settings & Preferences
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition-all text-rose-400"
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(251,113,133,0.08)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <span
+                        className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: 'rgba(251,113,133,0.1)', color: '#fb7185', border: '1px solid rgba(251,113,133,0.2)' }}
+                      >
+                        <LogOut size={12} />
+                      </span>
+                      Log out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ════════════════════════════════════════════
+          MOBILE TOP BAR  (< md)
+      ════════════════════════════════════════════ */}
+      <header className="md:hidden fixed top-0 inset-x-0 z-40">
+        <div
+          className="flex items-center justify-between px-4 py-3"
+          style={{
+            background:     'var(--bg-card)',
+            borderBottom:   '1px solid var(--border-subtle)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+          }}
         >
-          {navLinks.slice(0, 5).map(({ to, label, end }) => (
+          {/* Left: Logo + Name */}
+          <Link to="/" className="flex items-center gap-2 shrink-0 group">
+            <div
+              className="h-7 w-7 rounded-[10px] p-[1.5px] grid place-items-center shadow-md"
+              style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
+            >
+              <div
+                className="h-full w-full rounded-[8px] grid place-items-center text-[11px] font-bold"
+                style={{ background: 'var(--bg-page)', color: 'var(--accent-color)' }}
+              >✦</div>
+            </div>
+            <span className="font-display text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              OneDesk
+            </span>
+          </Link>
+
+          {/* Right: Search morphing pill */}
+          <div className="relative flex items-center" ref={searchBoxRef}>
+            <div
+              className="flex items-center overflow-hidden rounded-[10px] border"
+              style={{
+                height: '32px',
+                width: searchOpen ? '180px' : '32px',
+                transition: 'width 0.42s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.25s ease, background 0.25s ease',
+                background: searchOpen ? 'var(--bg-surface)' : 'var(--bg-surface)',
+                borderColor: searchOpen ? 'var(--border-card)' : 'var(--border-subtle)',
+                boxShadow: searchOpen ? '0 2px 12px rgba(0,0,0,0.2)' : 'none',
+              }}
+            >
+              <button
+                onClick={() => {
+                  setSearchOpen(v => !v);
+                  if (!searchOpen) setTimeout(() => searchInputRef.current?.focus(), 220);
+                }}
+                className="h-full w-8 shrink-0 flex items-center justify-center transition-colors duration-200"
+                style={{ color: searchOpen ? 'var(--accent-color)' : 'var(--text-muted)' }}
+              >
+                <Search size={14} />
+              </button>
+
+              <input
+                ref={searchInputRef}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search…"
+                className="flex-1 min-w-0 bg-transparent text-[12px] outline-none"
+                style={{
+                  color: 'var(--text-primary)',
+                  opacity: searchOpen ? 1 : 0,
+                  transition: 'opacity 0.18s ease',
+                  transitionDelay: searchOpen ? '0.18s' : '0s',
+                  pointerEvents: searchOpen ? 'auto' : 'none',
+                }}
+              />
+
+              <button
+                onClick={() => query ? setQuery('') : setSearchOpen(false)}
+                className="h-full w-8 shrink-0 flex items-center justify-center"
+                style={{
+                  color: 'var(--text-muted)',
+                  opacity: searchOpen ? 0.55 : 0,
+                  transition: 'opacity 0.15s ease',
+                  transitionDelay: searchOpen ? '0.22s' : '0s',
+                  pointerEvents: searchOpen ? 'auto' : 'none',
+                }}
+              >
+                <X size={12} />
+              </button>
+            </div>
+
+            {/* Mobile search results dropdown */}
+            {searchOpen && query.trim() && (
+              <div
+                className="absolute right-0 top-full mt-2 w-72 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50"
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+              >
+                <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
+                <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
+                <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
+                {results.notes.length + results.tasks.length + results.events.length === 0 && (
+                  <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* ════════════════════════════════════════════
+          MOBILE BOTTOM TAB BAR  (< md)
+      ════════════════════════════════════════════ */}
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 animate-tab-bar pb-safe"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        {/* Bleed gradient above bar */}
+        <div
+          className="absolute inset-x-0 -top-8 h-8 pointer-events-none"
+          style={{ background: 'linear-gradient(to top, var(--bg-page), transparent)' }}
+        />
+        <div
+          className="mx-3 mb-3 flex items-center justify-around rounded-[22px] px-1 py-2 border"
+          style={{
+            background:     'var(--bg-card)',
+            borderColor:    'var(--border-card)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            boxShadow:      '0 -4px 32px rgba(0,0,0,0.35)',
+          }}
+        >
+          {mobileLinks.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `relative px-3.5 py-1.5 rounded-full text-[11px] font-extrabold tracking-wider uppercase transition-all duration-200 ${
-                  isActive
-                    ? 'bg-white text-stone-950 shadow-[0_2px_10px_rgba(255,255,255,0.2)]'
-                    : 'hover:bg-white/5 opacity-75 hover:opacity-100'
+                `flex flex-col items-center gap-0.5 px-3 py-1 rounded-[14px] transition-all ${
+                  isActive ? '' : 'opacity-50 hover:opacity-80'
                 }`
               }
-              style={({ isActive }) => (!isActive ? { color: 'var(--text-primary)' } : {})}
+              style={({ isActive }) =>
+                isActive
+                  ? { background: 'var(--bg-surface)', color: 'var(--accent-color)' }
+                  : { color: 'var(--text-muted)' }
+              }
             >
               {({ isActive }) => (
                 <>
-                  <span>{label === 'Overview' ? 'Home' : label}</span>
+                  <Icon size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="text-[9px] font-bold tracking-wide">{label}</span>
                   {isActive && (
                     <span
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full"
-                      style={{
-                        background: 'var(--accent-color)',
-                        boxShadow: '0 0 8px var(--accent-color)',
-                      }}
+                      className="h-1 w-3 rounded-full"
+                      style={{ background: 'var(--accent-gradient)', boxShadow: '0 0 6px var(--accent-glow)' }}
                     />
                   )}
                 </>
               )}
             </NavLink>
           ))}
-        </nav>
-
-        {/* Right: Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          
-          {/* Search Trigger */}
-          <div className="relative" ref={searchBoxRef}>
-            <button
-              onClick={() => {
-                setSearchOpen((v) => !v);
-                setTimeout(() => searchInputRef.current?.focus(), 50);
-              }}
-              title="Search (Ctrl+K)"
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-2.5 py-1 text-xs text-stone-300 transition-colors"
-            >
-              <Search size={13} />
-              <span className="hidden sm:inline text-[11px] text-stone-400">Search</span>
-              <kbd className="hidden sm:inline font-mono text-[9px] bg-white/10 text-stone-400 px-1.5 py-0.5 rounded">
-                Ctrl+K
-              </kbd>
-            </button>
-
-            {/* Search Dropdown / Popover */}
-            {searchOpen && (
-              <div
-                className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 mt-2 w-80 sm:w-96 rounded-2xl border shadow-2xl p-3 space-y-3 animate-fade-up z-50"
-                style={{
-                  background: 'var(--bg-card)',
-                  borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(28px)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                <div className="relative">
-                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-                  <input
-                    ref={searchInputRef}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Type to search tasks, notes, schedule…"
-                    className="w-full rounded-xl border py-2 pl-9 pr-8 text-xs outline-none transition-all"
-                    style={{
-                      background: 'var(--bg-surface)',
-                      borderColor: 'var(--border-subtle)',
-                      color: 'var(--text-primary)',
-                    }}
-                  />
-                  {query && (
-                    <button
-                      onClick={() => setQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 hover:opacity-100"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      <X size={13} />
-                    </button>
-                  )}
-                </div>
-
-                {query.trim() && (
-                  <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                    <SearchGroup
-                      label="Tasks"
-                      count={results.tasks.length}
-                      items={results.tasks.map((t) => t.title)}
-                      onSee={() => { setSearchOpen(false); navigate('/tasks'); }}
-                    />
-                    <SearchGroup
-                      label="Notes"
-                      count={results.notes.length}
-                      items={results.notes.map((n) => n.title)}
-                      onSee={() => { setSearchOpen(false); navigate('/notes'); }}
-                    />
-                    <SearchGroup
-                      label="Schedule"
-                      count={results.events.length}
-                      items={results.events.map((e) => e.title)}
-                      onSee={() => { setSearchOpen(false); navigate('/calendar'); }}
-                    />
-                    {results.notes.length + results.tasks.length + results.events.length === 0 && (
-                      <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Quick Add Pill Button */}
-          <div className="relative" ref={quickAddRef}>
-            <button
-              onClick={() => {
-                setQuickAddOpen((v) => !v);
-                setProfileOpen(false);
-                setNotifOpen(false);
-              }}
-              className="flex items-center gap-1.5 rounded-full text-white px-3 py-1 text-xs font-semibold shadow-md transition-all hover:brightness-110 active:scale-95"
-              style={{
-                background: 'var(--accent-gradient)',
-                boxShadow: '0 2px 10px var(--accent-glow)',
-              }}
-            >
-              <Plus size={13} />
-              <span className="hidden sm:inline">New</span>
-            </button>
-
-            {quickAddOpen && (
-              <div
-                className="absolute right-0 mt-2 w-44 rounded-xl border shadow-2xl p-1.5 animate-fade-up z-50"
-                style={{
-                  background: 'var(--bg-card)',
-                  borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(28px)',
-                }}
-              >
-                <button
-                  onClick={() => { setQuickAddOpen(false); navigate('/tasks'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <CheckSquare size={14} style={{ color: 'var(--accent-color)' }} />
-                  Task
-                </button>
-                <button
-                  onClick={() => { setQuickAddOpen(false); navigate('/notes'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <FileText size={14} style={{ color: '#34d399' }} />
-                  Note
-                </button>
-                <button
-                  onClick={() => { setQuickAddOpen(false); navigate('/calendar'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <CalendarPlus size={14} style={{ color: '#fbbf24' }} />
-                  Event
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Deadline Notifications */}
-          <div className="relative" ref={notifRef}>
-            <button
-              onClick={() => {
-                setNotifOpen((v) => !v);
-                setProfileOpen(false);
-                setQuickAddOpen(false);
-              }}
-              className="relative rounded-full p-1.5 hover:bg-white/10 transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              aria-label="Notifications"
-            >
-              <Bell size={16} />
-              {dueSoon.length > 0 && (
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-[var(--bg-card)]" />
-              )}
-            </button>
-
-            {notifOpen && (
-              <div
-                className="absolute right-0 mt-2 w-72 rounded-2xl border shadow-2xl p-3 animate-fade-up z-50"
-                style={{
-                  background: 'var(--bg-card)',
-                  borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(28px)',
-                }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
-                  {dueSoon.length > 0 && (
-                    <span className="text-[10px] font-semibold bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded border border-rose-500/30">
-                      {dueSoon.length} due
-                    </span>
-                  )}
-                </div>
-                {dueSoon.length === 0 ? (
-                  <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>All caught up.</p>
-                ) : (
-                  <ul className="space-y-1.5 max-h-56 overflow-y-auto">
-                    {dueSoon.slice(0, 5).map((t) => (
-                      <li
-                        key={t.id}
-                        className="text-xs p-1.5 rounded-lg hover:bg-[var(--bg-surface)] cursor-pointer"
-                        onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
-                      >
-                        <span className="font-medium block truncate" style={{ color: 'var(--text-primary)' }}>{t.title}</span>
-                        <span className="block text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>Due {t.dueDate}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Settings Link */}
-          <NavLink
-            to="/settings"
-            title="Settings"
-            className={({ isActive }) =>
-              `rounded-full p-1.5 transition-colors ${
-                isActive ? 'bg-white/15 text-white' : 'opacity-70 hover:opacity-100'
-              }`
-            }
-            style={{ color: 'var(--text-primary)' }}
-          >
-            <Sliders size={15} />
-          </NavLink>
-
-          {/* User Profile & Dropdown */}
-          <div className="relative" ref={profileRef}>
-            <button
-              onClick={() => {
-                setProfileOpen((v) => !v);
-                setNotifOpen(false);
-                setQuickAddOpen(false);
-              }}
-              className="flex items-center gap-1.5 rounded-full p-0.5 hover:ring-2 hover:ring-[var(--border-card)] transition-all"
-            >
-              <div
-                className="grid h-6 w-6 place-items-center rounded-full text-white text-[10px] font-bold shadow-xs"
-                style={{ background: 'var(--accent-gradient)' }}
-              >
-                {initials || <UserIcon size={12} />}
-              </div>
-            </button>
-
-            {profileOpen && (
-              <div
-                className="absolute right-0 mt-2 w-48 rounded-2xl border shadow-2xl p-1.5 animate-fade-up z-50"
-                style={{
-                  background: 'var(--bg-card)',
-                  borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(28px)',
-                }}
-              >
-                <div className="px-3 py-2 mb-1" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
-                  <p className="text-[10px] truncate font-mono" style={{ color: 'var(--text-muted)' }}>{user?.email || 'Logged in'}</p>
-                </div>
-                <button
-                  onClick={() => { setProfileOpen(false); navigate('/settings'); }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--bg-surface)]"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <UserIcon size={13} /> Account
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 transition-colors"
-                >
-                  <LogOut size={13} /> Log out
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Hamburger Toggle */}
-          <div className="md:hidden relative" ref={mobileMenuRef}>
-            <button
-              onClick={() => setMobileMenuOpen((v) => !v)}
-              className="rounded-full p-1.5 transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              aria-label="Toggle menu"
-            >
-              <Menu size={16} />
-            </button>
-
-            {/* Mobile Dropdown Menu */}
-            {mobileMenuOpen && (
-              <div
-                className="absolute right-0 mt-2 w-52 rounded-2xl border shadow-2xl p-2 animate-fade-up z-50"
-                style={{
-                  background: 'var(--bg-card)',
-                  borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(28px)',
-                }}
-              >
-                <div className="space-y-1">
-                  {navLinks.map(({ to, label, icon: Icon, end }) => (
-                    <NavLink
-                      key={to}
-                      to={to}
-                      end={end}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-                          isActive
-                            ? 'bg-white/15 text-white font-semibold'
-                            : 'text-stone-300 hover:text-white hover:bg-white/10'
-                        }`
-                      }
-                    >
-                      <Icon size={14} />
-                      <span>{label}</span>
-                    </NavLink>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
         </div>
-
-      </div>
-    </header>
+      </nav>
+    </>
   );
 }
 
+/* ── Search results group helper ── */
 function SearchGroup({ label, count, items, onSee }) {
+  if (count === 0) return null;
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
-          {label} ({count})
+        <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          {label} <span className="opacity-60">({count})</span>
         </p>
-        {count > 0 && (
-          <button onClick={onSee} className="text-[11px] font-semibold text-indigo-400 hover:underline">
-            View all
-          </button>
-        )}
+        <button onClick={onSee} className="text-[10px] font-semibold" style={{ color: 'var(--accent-color)' }}>
+          View all
+        </button>
       </div>
-      {count > 0 && (
-        <ul className="space-y-1">
-          {items.slice(0, 3).map((t, i) => (
-            <li
-              key={i}
-              onClick={onSee}
-              className="truncate text-xs text-stone-300 py-1 px-2 rounded-lg hover:bg-white/10 cursor-pointer"
-            >
-              {t}
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="space-y-0.5">
+        {items.slice(0, 3).map((t, i) => (
+          <li
+            key={i}
+            onClick={onSee}
+            className="truncate text-xs py-1 px-2.5 rounded-lg cursor-pointer transition-colors"
+            style={{ color: 'var(--text-primary)' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            {t}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

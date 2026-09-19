@@ -214,3 +214,41 @@ body {
   animation: modalUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* ─── Navbar search expand ──────────────────────────────── */
+@keyframes searchSlideIn {
+  from {
+    opacity: 0;
+    max-width: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    max-width: 220px;
+    transform: translateX(0);
+  }
+}
+.search-expand {
+  animation: searchSlideIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: right center;
+  overflow: hidden;
+}
+
+/* ─── Quick-add / dropdown pop animation ─────────────────── */
+@keyframes menuPop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-menu-pop {
+  animation: menuPop 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ─── Mobile tab bar slide-up ────────────────────────────── */
+@keyframes tabBarIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-tab-bar {
+  animation: tabBarIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
+
+
