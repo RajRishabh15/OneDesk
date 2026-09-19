@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -12,6 +12,14 @@ import {
   ArrowUpRight,
   Wifi
 } from 'lucide-react';
+
+// Use local date to avoid UTC timezone shift for IST (+5:30)
+function localISO(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 import Card from '../components/Card';
 import Modal from '../components/Modal';
 import { LabeledInput } from './Notes';
@@ -41,9 +49,26 @@ export default function Dashboard() {
   const completed = tasks.filter((t) => t.status === 'Completed');
   const pending = tasks.filter((t) => t.status !== 'Completed');
   const inProgress = tasks.filter((t) => t.status === 'In Progress');
-  const today = new Date().toISOString().slice(0, 10);
-  const todaysEvents = events.filter((e) => e.date === today).sort((a, b) => a.time.localeCompare(b.time));
+  const today = localISO(new Date());
+  const todaysEvents = events.filter((e) => e.date === today).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   const recentNotes = [...notes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+
+  // Nearest upcoming deadline (task or event, today or future)
+  const nextDeadline = useMemo(() => {
+    const all = [
+      ...events.filter((e) => e.date >= today).map((e) => ({ ...e, isTask: false })),
+      ...tasks.filter((t) => t.dueDate && t.dueDate >= today && t.status !== 'Completed').map((t) => ({ id: t.id, title: t.title, date: t.dueDate, time: '', isTask: true })),
+    ];
+    return all.sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))[0] || null;
+  }, [events, tasks, today]);
+
+  function relativeDay(iso) {
+    if (!iso) return '';
+    const tomorrow = localISO(new Date(Date.now() + 86400000));
+    if (iso === today) return 'Today';
+    if (iso === tomorrow) return 'Tomorrow';
+    return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
   const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 80;
 
   // Dynamic greeting based on time of day
@@ -195,7 +220,7 @@ export default function Dashboard() {
         </div>
 
         {/* Card 3: NEXT DEADLINE (Amber top rim highlight) */}
-        <div className="relative rounded-2xl border border-white/10 bg-[#120e24]/75 backdrop-blur-xl p-5 shadow-xl transition-all duration-200 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(245,158,11,0.15)] group before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-amber-500/70 before:to-transparent">
+        <Link to="/calendar" className="relative rounded-2xl border border-white/10 bg-[#120e24]/75 backdrop-blur-xl p-5 shadow-xl transition-all duration-200 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(245,158,11,0.15)] group before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-amber-500/70 before:to-transparent">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-extrabold uppercase tracking-widest text-stone-400 font-mono">
               NEXT DEADLINE
@@ -205,15 +230,15 @@ export default function Dashboard() {
             </div>
           </div>
           <p className="text-xl sm:text-2xl font-bold tracking-tight text-white mt-2 truncate">
-            {todaysEvents[0]?.title || nextTask?.title || 'Daily Standup'}
+            {nextDeadline?.title || 'All clear!'}
           </p>
           <div className="flex items-center justify-between text-xs mt-3 pt-2.5 border-t border-white/5 font-mono">
-            <span className="text-stone-400">Schedule</span>
+            <span className="text-stone-400">{nextDeadline?.isTask ? 'Task due' : 'Event'}</span>
             <span className="font-extrabold text-amber-400 truncate">
-              {todaysEvents[0]?.time ? `${todaysEvents[0].time} (Today)` : 'Today, 2:00 PM'}
+              {nextDeadline ? `${relativeDay(nextDeadline.date)}${nextDeadline.time ? ' · ' + nextDeadline.time : ''}` : 'No upcoming'}
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Card 4: HEALTH INDEX (Emerald top rim highlight) */}
         <div className="relative rounded-2xl border border-white/10 bg-[#120e24]/75 backdrop-blur-xl p-5 shadow-xl transition-all duration-200 hover:border-white/20 hover:shadow-[0_8px_30px_rgba(16,185,129,0.15)] group before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-emerald-500/70 before:to-transparent">
