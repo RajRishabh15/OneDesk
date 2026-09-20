@@ -251,9 +251,8 @@ export default function CalendarPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => openNew()}
-            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all shadow-lg hover:brightness-110 active:scale-95"
+            className="btn-glass-primary rounded-full px-5 py-2.5 text-xs font-bold text-white transition-all shadow-lg active:scale-95"
             style={{
-              background: 'var(--accent-gradient)',
               boxShadow: '0 4px 18px var(--accent-glow)',
             }}
           >
@@ -262,270 +261,405 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* ── Main Dual-Rail Architecture ───────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ── LEFT RAIL: Mini Calendar, Filters & Deadlines (col 4) ── */}
-        <div className="lg:col-span-4 xl:col-span-3 space-y-4">
-          {/* Mini Calendar Widget */}
-          <Card className="p-4 overflow-hidden" hover={false}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold font-display" style={{ color: 'var(--text-primary)' }}>
-                {MONTHS[cursor.getMonth()]} {cursor.getFullYear()}
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => {
-                    const prev = new Date(cursor);
-                    prev.setMonth(prev.getMonth() - 1);
-                    setCursor(prev);
-                  }}
-                  className="h-6 w-6 flex items-center justify-center rounded-lg transition-all"
-                  style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)' }}
-                  aria-label="Previous month"
-                >
-                  <ChevronLeft size={13} />
-                </button>
-                <button
-                  onClick={() => {
-                    const next = new Date(cursor);
-                    next.setMonth(next.getMonth() + 1);
-                    setCursor(next);
-                  }}
-                  className="h-6 w-6 flex items-center justify-center rounded-lg transition-all"
-                  style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)' }}
-                  aria-label="Next month"
-                >
-                  <ChevronRight size={13} />
-                </button>
+      {/* ── TOP HERO ROW: Interactive Calendar Matrix & Important Items ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        
+        {/* TOP LEFT (5 cols): Interactive Calendar & Date Navigator */}
+        <div className="lg:col-span-5 flex flex-col">
+          <Card className="p-4 sm:p-5 flex-1 flex flex-col justify-between" hover={false}>
+            <div>
+              <div className="flex items-center justify-between mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-xl"
+                    style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)' }}
+                  >
+                    <CalendarIcon size={15} style={{ color: 'var(--accent-color, #818cf8)' }} />
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold font-display" style={{ color: 'var(--text-primary)' }}>
+                      {MONTHS[cursor.getMonth()]} {cursor.getFullYear()}
+                    </span>
+                    <span className="text-[10px] font-mono block opacity-70" style={{ color: 'var(--text-muted)' }}>
+                      {cursor.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setCursor(new Date())}
+                    className="btn-glass rounded-full px-2.5 py-1 text-[11px] font-bold"
+                    style={{ color: 'var(--accent-color, #818cf8)' }}
+                  >
+                    Today
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => {
+                        const prev = new Date(cursor);
+                        prev.setMonth(prev.getMonth() - 1);
+                        setCursor(prev);
+                      }}
+                      className="h-7 w-7 flex items-center justify-center rounded-full btn-glass text-xs"
+                      aria-label="Previous month"
+                    >
+                      <ChevronLeft size={13} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        const next = new Date(cursor);
+                        next.setMonth(next.getMonth() + 1);
+                        setCursor(next);
+                      }}
+                      className="h-7 w-7 flex items-center justify-center rounded-full btn-glass text-xs"
+                      aria-label="Next month"
+                    >
+                      <ChevronRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mini Weekday Row */}
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                  <div key={i} className="py-0.5">{d}</div>
+                ))}
+              </div>
+
+              {/* Mini Days Matrix */}
+              <div className="grid grid-cols-7 gap-1">
+                {(() => {
+                  const year = cursor.getFullYear();
+                  const month = cursor.getMonth();
+                  const firstDay = new Date(year, month, 1);
+                  const startDay = startOfWeek(firstDay);
+                  const days = Array.from({ length: 35 }, (_, i) => {
+                    const d = new Date(startDay);
+                    d.setDate(d.getDate() + i);
+                    return d;
+                  });
+
+                  return days.map((d) => {
+                    const iso = localISO(d);
+                    const inCurrentMonth = d.getMonth() === month;
+                    const isSelected = iso === localISO(cursor);
+                    const isToday = iso === today;
+                    const dayHasItems = filteredItems.some((item) => item.date === iso);
+
+                    return (
+                      <button
+                        key={iso}
+                        onClick={() => setCursor(new Date(d))}
+                        className="relative h-8 w-full flex flex-col items-center justify-center rounded-xl text-[11px] font-semibold transition-all active:scale-95"
+                        style={{
+                          background: isSelected
+                            ? 'var(--accent-gradient)'
+                            : isToday
+                            ? 'var(--bg-surface)'
+                            : 'transparent',
+                          color: isSelected
+                            ? '#ffffff'
+                            : isToday
+                            ? 'var(--accent-color)'
+                            : inCurrentMonth
+                            ? 'var(--text-primary)'
+                            : 'var(--text-muted)',
+                          opacity: inCurrentMonth ? 1 : 0.35,
+                          border: isToday && !isSelected ? '1px solid var(--border-card)' : '1px solid transparent',
+                          boxShadow: isSelected ? '0 2px 10px var(--accent-glow)' : 'none',
+                        }}
+                      >
+                        <span>{d.getDate()}</span>
+                        {dayHasItems && (
+                          <span
+                            className="absolute bottom-1 h-1 w-1 rounded-full"
+                            style={{
+                              background: isSelected ? '#ffffff' : 'var(--accent-color)',
+                            }}
+                          />
+                        )}
+                      </button>
+                    );
+                  });
+                })()}
               </div>
             </div>
 
-            {/* Mini Weekday Row */}
-            <div className="grid grid-cols-7 gap-1 text-center text-[9px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
-              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                <div key={i} className="py-0.5">{d}</div>
-              ))}
-            </div>
-
-            {/* Mini Days Matrix */}
-            <div className="grid grid-cols-7 gap-1">
-              {(() => {
-                const year = cursor.getFullYear();
-                const month = cursor.getMonth();
-                const firstDay = new Date(year, month, 1);
-                const startDay = startOfWeek(firstDay);
-                const days = Array.from({ length: 35 }, (_, i) => {
-                  const d = new Date(startDay);
-                  d.setDate(d.getDate() + i);
-                  return d;
-                });
-
-                return days.map((d) => {
-                  const iso = localISO(d);
-                  const inCurrentMonth = d.getMonth() === month;
-                  const isSelected = iso === localISO(cursor);
-                  const isToday = iso === today;
-                  const dayHasItems = filteredItems.some((item) => item.date === iso);
-
-                  return (
-                    <button
-                      key={iso}
-                      onClick={() => setCursor(new Date(d))}
-                      className="relative h-7 w-full flex flex-col items-center justify-center rounded-lg text-[10px] font-semibold transition-all"
-                      style={{
-                        background: isSelected
-                          ? 'var(--accent-gradient)'
-                          : isToday
-                          ? 'var(--bg-surface)'
-                          : 'transparent',
-                        color: isSelected
-                          ? '#ffffff'
-                          : isToday
-                          ? 'var(--accent-color)'
-                          : inCurrentMonth
-                          ? 'var(--text-primary)'
-                          : 'var(--text-muted)',
-                        opacity: inCurrentMonth ? 1 : 0.35,
-                        border: isToday && !isSelected ? '1px solid var(--border-card)' : '1px solid transparent',
-                        boxShadow: isSelected ? '0 2px 8px var(--accent-glow)' : 'none',
-                      }}
-                    >
-                      <span>{d.getDate()}</span>
-                      {dayHasItems && (
-                        <span
-                          className="absolute bottom-0.5 h-1 w-1 rounded-full"
-                          style={{
-                            background: isSelected ? '#ffffff' : 'var(--accent-color)',
-                          }}
-                        />
-                      )}
-                    </button>
-                  );
-                });
-              })()}
-            </div>
-
-            <div className="flex items-center justify-between mt-3 pt-2.5" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+            {/* Bottom info */}
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-[var(--border-subtle)] text-[11px]">
+              <span className="font-mono text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                {filteredItems.filter((i) => i.date === localISO(cursor)).length} items on {relativeDay(localISO(cursor))}
+              </span>
               <button
-                onClick={() => setCursor(new Date())}
-                className="text-[11px] font-bold transition-all hover:underline"
+                onClick={() => openNew(localISO(cursor))}
+                className="text-[11px] font-bold flex items-center gap-1 hover:underline"
                 style={{ color: 'var(--accent-color)' }}
               >
-                Jump to today
+                <Plus size={12} /> Schedule event
               </button>
-              <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
-                {localISO(cursor)}
-              </span>
             </div>
           </Card>
-
-          {/* Quick Filters */}
-          <Card className="p-3.5 space-y-2" hover={false}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--text-muted)' }}>
-              Filter Views
-            </p>
-            <div className="grid grid-cols-3 gap-1.5">
-              {[
-                { id: 'all', label: 'All', count: allItems.length },
-                { id: 'events', label: 'Events', count: events.length },
-                { id: 'tasks', label: 'Tasks', count: taskEvents.length },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setFilterType(tab.id)}
-                  className="rounded-xl py-1.5 px-2 text-[11px] font-bold transition-all flex flex-col items-center"
-                  style={{
-                    background: filterType === tab.id ? 'var(--bg-surface)' : 'transparent',
-                    border: `1px solid ${filterType === tab.id ? 'var(--border-card)' : 'transparent'}`,
-                    color: filterType === tab.id ? 'var(--text-primary)' : 'var(--text-muted)',
-                  }}
-                >
-                  <span>{tab.label}</span>
-                  <span className="text-[9px] font-mono opacity-60">({tab.count})</span>
-                </button>
-              ))}
-            </div>
-          </Card>
-
-          {/* Upcoming Deadlines Widget */}
-          <DeadlineWidget deadlines={upcomingDeadlines} today={today} onItemClick={openEdit} />
         </div>
 
-        {/* ── RIGHT RAIL: Schedule Workspace Canvas (col 8/9) ───── */}
-        <div className="lg:col-span-8 xl:col-span-9 space-y-4">
-          {/* Controls Bar: Navigation & View Switcher */}
-          <div
-            className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl border glass-card"
-            style={{ borderColor: 'var(--border-card)' }}
-          >
-            {/* Prev / Title / Next */}
-            <div className="flex items-center gap-2">
-              <NavBtn onClick={() => shift(-1)}>
-                <ChevronLeft size={15} />
-              </NavBtn>
-              <div className="px-2 text-center min-w-[160px] sm:min-w-[220px]">
-                <p className="text-sm sm:text-base font-bold font-display truncate" style={{ color: 'var(--text-primary)' }}>
-                  {title}
-                </p>
-                {localISO(cursor) === today && (
-                  <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-emerald-400">
-                    ● Today
-                  </span>
-                )}
-              </div>
-              <NavBtn onClick={() => shift(1)}>
-                <ChevronRight size={15} />
-              </NavBtn>
-              <button
-                onClick={() => setCursor(new Date())}
-                className="hidden sm:inline-block ml-1 rounded-xl px-2.5 py-1 text-[11px] font-bold transition-all"
-                style={{
-                  background: 'rgba(99,102,241,0.1)',
-                  border: '1px solid rgba(99,102,241,0.25)',
-                  color: '#818cf8',
-                }}
-              >
-                Today
-              </button>
-            </div>
-
-            {/* Segmented View Switcher */}
-            <div
-              className="flex rounded-xl p-1 gap-1"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-card)' }}
-            >
-              {[
-                { id: 'planner', label: 'Planner', icon: Clock },
-                { id: 'agenda', label: 'Agenda', icon: ListTodo },
-                { id: 'week', label: 'Week', icon: Layers },
-                { id: 'month', label: 'Month', icon: CalendarDays },
-              ].map((mode) => {
-                const Icon = mode.icon;
-                const active = view === mode.id;
-                return (
-                  <button
-                    key={mode.id}
-                    onClick={() => setView(mode.id)}
-                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all"
-                    style={
-                      active
-                        ? {
-                            background: 'var(--bg-card)',
-                            color: 'var(--text-primary)',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                            border: '1px solid var(--border-card)',
-                          }
-                        : { color: 'var(--text-muted)' }
-                    }
+        {/* TOP RIGHT (7 cols): Important Items & Deadlines */}
+        <div className="lg:col-span-7 flex flex-col">
+          <Card className="p-4 sm:p-5 flex-1 flex flex-col justify-between" hover={false}>
+            <div>
+              <div className="flex items-center justify-between mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-xl"
+                    style={{ background: 'rgba(251,113,133,0.12)', border: '1px solid rgba(251,113,133,0.25)' }}
                   >
-                    <Icon size={12} />
-                    <span className="hidden sm:inline">{mode.label}</span>
-                  </button>
-                );
-              })}
+                    <AlertCircle size={15} style={{ color: '#fb7185' }} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                      Important Items &amp; Deadlines
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                        {displayImportantItems.length}
+                      </span>
+                    </h3>
+                    <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                      High-priority tasks, urgent milestones &amp; nearest deadlines
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => openNew()}
+                  className="btn-glass rounded-full px-3 py-1.5 text-xs font-bold flex items-center gap-1"
+                >
+                  <Plus size={12} /> Add
+                </button>
+              </div>
+
+              {displayImportantItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <CheckCircle2 size={30} className="text-emerald-400 mb-2 opacity-80" />
+                  <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    All clear! No urgent items or near deadlines.
+                  </p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    Your schedule is completely up-to-date.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {displayImportantItems.map((item) => {
+                    const isToday = item.date === today;
+                    const isTmrw = item.date === tomorrow;
+                    const accentColor = isToday ? '#fb7185' : isTmrw ? '#fbbf24' : 'var(--text-muted)';
+                    const bgColor = isToday
+                      ? 'rgba(251,113,133,0.08)'
+                      : isTmrw
+                      ? 'rgba(251,191,36,0.08)'
+                      : 'var(--bg-surface)';
+                    const borderColor = isToday
+                      ? 'rgba(251,113,133,0.25)'
+                      : isTmrw
+                      ? 'rgba(251,191,36,0.25)'
+                      : 'var(--border-subtle)';
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => openEdit(item)}
+                        className="w-full flex items-center gap-3 p-2.5 rounded-2xl border text-left transition-all hover:scale-[1.01] hover:brightness-110"
+                        style={{ background: bgColor, borderColor }}
+                      >
+                        {/* Date badge */}
+                        <div
+                          className="shrink-0 flex flex-col items-center justify-center w-10 h-10 rounded-xl border text-center"
+                          style={{ background: bgColor, borderColor, color: accentColor }}
+                        >
+                          <span className="text-[8px] font-bold uppercase leading-none">
+                            {new Date(item.date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short' })}
+                          </span>
+                          <span className="text-sm font-black leading-tight">
+                            {new Date(item.date + 'T00:00:00').getDate()}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                            {item.isTask ? '☑ ' : '📅 '}
+                            {item.title}
+                          </p>
+                          <p className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                            {relativeDay(item.date)}
+                            {item.time ? ` · ${item.time}` : ''}
+                            {item.priority ? ` · ${item.priority} priority` : ''}
+                          </p>
+                        </div>
+
+                        <span
+                          className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                          style={{ color: accentColor, borderColor, background: bgColor }}
+                        >
+                          {isToday ? 'Today' : isTmrw ? 'Tmrw' : relativeDay(item.date)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* ── Active View Rendering ─────────────────────────── */}
-          {view === 'planner' && (
-            <PlannerView
-              cursor={cursor}
-              today={today}
-              itemsOn={itemsOn}
-              onSlotClick={(time) => openNew(localISO(cursor), time)}
-              onItemClick={openEdit}
-            />
-          )}
-
-          {view === 'agenda' && (
-            <AgendaView
-              allItems={filteredItems}
-              today={today}
-              onItemClick={openEdit}
-              onNewClick={openNew}
-            />
-          )}
-
-          {view === 'week' && (
-            <WeekView
-              cursor={cursor}
-              today={today}
-              itemsOn={itemsOn}
-              onDayClick={(iso) => openNew(iso)}
-              onItemClick={openEdit}
-            />
-          )}
-
-          {view === 'month' && (
-            <MonthView
-              cursor={cursor}
-              today={today}
-              itemsOn={itemsOn}
-              onDayClick={(iso) => openNew(iso)}
-              onItemClick={openEdit}
-            />
-          )}
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-[var(--border-subtle)] text-[11px]">
+              <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                {allItems.length} total calendar &amp; task items tracked
+              </span>
+              <button
+                onClick={() => setFilterType('all')}
+                className="text-[11px] font-bold hover:underline"
+                style={{ color: 'var(--accent-color)' }}
+              >
+                View full schedule ↓
+              </button>
+            </div>
+          </Card>
         </div>
+
+      </div>
+
+      {/* ── Controls Bar: Schedule Navigation, Filter Views & Segmented View Switcher ── */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-[26px] border glass-card"
+        style={{ borderColor: 'var(--border-card)' }}
+      >
+        {/* Prev / Title / Next */}
+        <div className="flex items-center gap-2">
+          <NavBtn onClick={() => shift(-1)}>
+            <ChevronLeft size={15} />
+          </NavBtn>
+          <div className="px-2 text-center min-w-[160px] sm:min-w-[220px]">
+            <p className="text-sm sm:text-base font-bold font-display truncate" style={{ color: 'var(--text-primary)' }}>
+              {title}
+            </p>
+            {localISO(cursor) === today && (
+              <span className="inline-block text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                ● Today
+              </span>
+            )}
+          </div>
+          <NavBtn onClick={() => shift(1)}>
+            <ChevronRight size={15} />
+          </NavBtn>
+          <button
+            onClick={() => setCursor(new Date())}
+            className="hidden sm:inline-block ml-1 btn-glass rounded-full px-3 py-1 text-[11px] font-bold"
+            style={{
+              color: 'var(--accent-color, #818cf8)',
+            }}
+          >
+            Today
+          </button>
+        </div>
+
+        {/* Filter Chips: All, Events, Tasks */}
+        <div
+          className="flex items-center gap-1 p-1 rounded-full border shrink-0"
+          style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+        >
+          {[
+            { id: 'all', label: 'All', count: allItems.length },
+            { id: 'events', label: 'Events', count: events.length },
+            { id: 'tasks', label: 'Tasks', count: taskEvents.length },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setFilterType(tab.id)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                filterType === tab.id
+                  ? 'btn-glass-primary shadow-sm text-white'
+                  : 'text-[var(--text-muted)] hover:text-white'
+              }`}
+            >
+              {tab.label} <span className="text-[10px] opacity-70 font-mono">({tab.count})</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Segmented View Switcher */}
+        <div
+          className="flex rounded-full p-1 gap-1"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-card)' }}
+        >
+          {[
+            { id: 'planner', label: 'Planner', icon: Clock },
+            { id: 'agenda', label: 'Agenda', icon: ListTodo },
+            { id: 'week', label: 'Week', icon: Layers },
+            { id: 'month', label: 'Month', icon: CalendarDays },
+          ].map((mode) => {
+            const Icon = mode.icon;
+            const active = view === mode.id;
+            return (
+              <button
+                key={mode.id}
+                onClick={() => setView(mode.id)}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
+                style={
+                  active
+                    ? {
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-primary)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                        border: '1px solid var(--border-card)',
+                      }
+                    : { color: 'var(--text-muted)' }
+                }
+              >
+                <Icon size={12} />
+                <span className="hidden sm:inline">{mode.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Active View Rendering (Full-width 12 cols!) ── */}
+      <div className="space-y-4">
+        {view === 'planner' && (
+          <PlannerView
+            cursor={cursor}
+            today={today}
+            itemsOn={itemsOn}
+            onSlotClick={(time) => openNew(localISO(cursor), time)}
+            onItemClick={openEdit}
+          />
+        )}
+
+        {view === 'agenda' && (
+          <AgendaView
+            allItems={filteredItems}
+            today={today}
+            onItemClick={openEdit}
+            onNewClick={openNew}
+          />
+        )}
+
+        {view === 'week' && (
+          <WeekView
+            cursor={cursor}
+            today={today}
+            itemsOn={itemsOn}
+            onDayClick={(iso) => openNew(iso)}
+            onItemClick={openEdit}
+          />
+        )}
+
+        {view === 'month' && (
+          <MonthView
+            cursor={cursor}
+            today={today}
+            itemsOn={itemsOn}
+            onDayClick={(iso) => openNew(iso)}
+            onItemClick={openEdit}
+          />
+        )}
       </div>
 
       {/* ── Event Modal ────────────────────────────────────────── */}
@@ -589,7 +723,7 @@ export default function CalendarPage() {
                     key={cat.id}
                     type="button"
                     onClick={() => setForm((f) => ({ ...f, category: cat.id }))}
-                    className="flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs font-semibold border transition-all"
+                    className="flex items-center justify-center gap-1.5 rounded-full py-2 px-2.5 text-xs font-semibold border transition-all active:scale-95"
                     style={{
                       background: form.category === cat.id ? cat.bg : 'var(--bg-surface)',
                       borderColor: form.category === cat.id ? cat.color : 'var(--border-subtle)',
@@ -623,7 +757,7 @@ export default function CalendarPage() {
           {/* Reminder Toggle (Using new robust Toggle) */}
           {!editing?.isTask && (
             <div
-              className="flex items-center justify-between rounded-xl px-4 py-3"
+              className="flex items-center justify-between rounded-2xl px-4 py-3"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
             >
               <div>
@@ -651,7 +785,7 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={handleDelete}
-                className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all hover:brightness-125"
+                className="flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold transition-all hover:brightness-125"
                 style={{
                   background: 'rgba(251,113,133,0.1)',
                   border: '1px solid rgba(251,113,133,0.3)',
@@ -668,23 +802,14 @@ export default function CalendarPage() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="rounded-xl px-4 py-2 text-xs font-semibold transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-card)',
-                  color: 'var(--text-muted)',
-                }}
+                className="btn-glass rounded-full px-5 py-2 text-xs font-semibold"
               >
                 Cancel
               </button>
               {!editing?.isTask && (
                 <button
                   type="submit"
-                  className="rounded-xl px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-95"
-                  style={{
-                    background: 'var(--accent-gradient)',
-                    boxShadow: '0 4px 16px var(--accent-glow)',
-                  }}
+                  className="btn-glass-primary rounded-full px-6 py-2 text-xs font-bold text-white shadow-md active:scale-95"
                 >
                   {editing ? 'Save changes' : 'Add event'}
                 </button>
@@ -1011,7 +1136,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
         return (
           <div
             key={iso}
-            className="rounded-2xl p-3 min-h-[220px] flex flex-col border glass-card transition-all"
+            className="rounded-[26px] p-3.5 min-h-[220px] flex flex-col border glass-card transition-all"
             style={{
               borderColor: isToday ? 'rgba(99,102,241,0.5)' : 'var(--border-card)',
               boxShadow: isToday ? '0 0 16px rgba(99,102,241,0.15)' : 'none',
@@ -1037,8 +1162,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
               <button
                 type="button"
                 onClick={() => onDayClick(iso)}
-                className="h-6 w-6 flex items-center justify-center rounded-lg transition-all hover:brightness-125"
-                style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)' }}
+                className="h-6 w-6 flex items-center justify-center rounded-full btn-glass transition-all hover:brightness-125"
                 aria-label="Add event on this day"
               >
                 <Plus size={12} />
@@ -1056,7 +1180,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
                   <div
                     key={item.id}
                     onClick={() => onItemClick(item)}
-                    className="p-2 rounded-xl text-xs font-semibold cursor-pointer transition-all hover:scale-[1.02] border"
+                    className="p-2.5 rounded-2xl text-xs font-semibold cursor-pointer transition-all hover:scale-[1.02] border"
                     style={{
                       background: item.isTask ? 'rgba(251,191,36,0.1)' : 'rgba(99,102,241,0.12)',
                       borderColor: item.isTask ? 'rgba(251,191,36,0.25)' : 'rgba(99,102,241,0.25)',
@@ -1094,7 +1218,7 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
   });
 
   return (
-    <Card className="p-4 overflow-hidden" hover={false}>
+    <Card className="p-4 sm:p-5 overflow-hidden" hover={false}>
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
         {WEEKDAYS.map((d) => (
@@ -1116,7 +1240,7 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
             <button
               key={iso}
               onClick={() => onDayClick(iso)}
-              className="min-h-[86px] rounded-xl p-2 text-left flex flex-col transition-all duration-150 relative group"
+              className="min-h-[92px] rounded-2xl p-2.5 text-left flex flex-col transition-all duration-150 relative group active:scale-[0.98]"
               style={{
                 background: isToday
                   ? 'rgba(99,102,241,0.1)'
@@ -1183,107 +1307,14 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
   );
 }
 
-/* ── Upcoming Deadlines Widget ───────────────────────────── */
-function DeadlineWidget({ deadlines, today, onItemClick }) {
-  const tomorrow = localISO(new Date(Date.now() + 86400000));
-
-  return (
-    <Card className="p-4 overflow-hidden" hover={false}>
-      <div className="flex items-center gap-2.5 mb-3 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-        <div
-          className="flex h-7 w-7 items-center justify-center rounded-xl"
-          style={{ background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.25)' }}
-        >
-          <Clock size={13} style={{ color: '#fbbf24' }} />
-        </div>
-        <div>
-          <h3 className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
-            Upcoming Deadlines
-          </h3>
-          <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-            Next {deadlines.length} key milestones
-          </p>
-        </div>
-      </div>
-
-      {deadlines.length === 0 ? (
-        <p className="text-[11px] text-center py-3 font-mono" style={{ color: 'var(--text-muted)' }}>
-          No upcoming deadlines. You're all clear!
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {deadlines.map((item) => {
-            const isToday = item.date === today;
-            const isTmrw = item.date === tomorrow;
-            const accentColor = isToday ? '#fb7185' : isTmrw ? '#fbbf24' : 'var(--text-muted)';
-            const bgColor = isToday
-              ? 'rgba(251,113,133,0.08)'
-              : isTmrw
-              ? 'rgba(251,191,36,0.08)'
-              : 'var(--bg-surface)';
-            const borderColor = isToday
-              ? 'rgba(251,113,133,0.25)'
-              : isTmrw
-              ? 'rgba(251,191,36,0.25)'
-              : 'var(--border-subtle)';
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => onItemClick(item)}
-                className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all hover:brightness-110"
-                style={{ background: bgColor, borderColor }}
-              >
-                {/* Date badge */}
-                <div
-                  className="shrink-0 flex flex-col items-center justify-center w-9 h-9 rounded-lg border text-center"
-                  style={{ background: bgColor, borderColor, color: accentColor }}
-                >
-                  <span className="text-[8px] font-bold uppercase leading-none">
-                    {new Date(item.date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short' })}
-                  </span>
-                  <span className="text-sm font-black leading-tight">
-                    {new Date(item.date + 'T00:00:00').getDate()}
-                  </span>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                    {item.isTask ? '☑ ' : '📅 '}
-                    {item.title}
-                  </p>
-                  <p className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                    {relativeDay(item.date)}
-                    {item.time ? ` · ${item.time}` : ''}
-                  </p>
-                </div>
-
-                <span
-                  className="shrink-0 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border"
-                  style={{ color: accentColor, borderColor, background: bgColor }}
-                >
-                  {isToday ? 'Today' : isTmrw ? 'Tmrw' : relativeDay(item.date)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </Card>
-  );
-}
-
 /* ── Nav button helper ───────────────────────────────────── */
 function NavBtn({ children, onClick }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="flex h-8 w-8 items-center justify-center rounded-xl transition-all hover:brightness-110"
-      style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-card)',
-        color: 'var(--text-primary)',
-      }}
+      className="flex h-8 w-8 items-center justify-center rounded-full btn-glass transition-all active:scale-90"
+      aria-label="Navigate"
     >
       {children}
     </button>
