@@ -1,6 +1,6 @@
 # LifeOS — Personal Productivity Dashboard
 
-A full-stack-style productivity dashboard combining notes, tasks, a calendar, and analytics into one cohesive app. Built with React, Vite, Tailwind CSS, and plain JavaScript. All data lives in the browser via `localStorage` — there's no backend to run.
+A full-stack-style productivity dashboard combining notes, tasks, a calendar, and analytics into one cohesive app. Built with React, Vite, Tailwind CSS, and plain JavaScript. Every data is real time synced safely using backend service-Firebase.
 
 ## Features
 
