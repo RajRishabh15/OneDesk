@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus,
@@ -8,7 +8,8 @@ import {
   Trash2,
   CheckCircle2,
   Clock,
-  TrendingUp
+  TrendingUp,
+  ChevronDown
 } from 'lucide-react';
 
 // Local date string to prevent timezone offset issues
@@ -33,7 +34,20 @@ export default function Dashboard() {
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [inlineTaskTitle, setInlineTaskTitle] = useState('');
   const [inlinePriority, setInlinePriority] = useState('Medium');
+  const [priorityOpen, setPriorityOpen] = useState(false);
+  const priorityRef = useRef(null);
   const [activeFilter, setActiveFilter] = useState('All'); // 'All' | 'Today' | 'Completed'
+
+  // Close priority dropdown on outside click
+  useEffect(() => {
+    function onDown(e) {
+      if (priorityRef.current && !priorityRef.current.contains(e.target)) {
+        setPriorityOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, []);
 
   // Right column tab ('scratchpad' | 'notes')
   const [sideTab, setSideTab] = useState('scratchpad');
@@ -254,7 +268,7 @@ export default function Dashboard() {
         
         {/* 1. Dynamic Typewriter Greeting: Large Hero */}
         <div
-          className="inline-flex items-center justify-center text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-tight select-none text-center max-w-4xl"
+          className="inline-flex items-center justify-center text-[clamp(2rem,7vw,5.5rem)] font-black tracking-tight leading-tight select-none text-center max-w-4xl px-2"
           style={{ color: 'var(--text-primary)', minHeight: '1.2em' }}
         >
           <span className="inline-block">{typedGreeting || '\u00A0'}</span>
@@ -455,20 +469,70 @@ export default function Dashboard() {
               style={{ color: 'var(--text-primary)' }}
             />
 
-            <select
-              value={inlinePriority}
-              onChange={(e) => setInlinePriority(e.target.value)}
-              className="text-[11px] font-bold rounded-lg px-2 py-1 outline-none border cursor-pointer shrink-0"
-              style={{
-                background: 'var(--bg-card)',
-                borderColor: 'var(--border-subtle)',
-                color: inlinePriority === 'High' ? '#f43f5e' : inlinePriority === 'Medium' ? '#f59e0b' : '#10b981',
-              }}
-            >
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
+            {/* Custom Frosted Glass Priority Selector */}
+            <div className="relative shrink-0" ref={priorityRef}>
+              <button
+                type="button"
+                onClick={() => setPriorityOpen((v) => !v)}
+                className="chip-glass px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all flex items-center gap-1.5 cursor-pointer select-none"
+                style={{
+                  color: inlinePriority === 'High' ? '#fb7185' : inlinePriority === 'Medium' ? '#fbbf24' : '#34d399',
+                  borderColor: inlinePriority === 'High' ? 'rgba(251,113,133,0.35)' : inlinePriority === 'Medium' ? 'rgba(251,191,36,0.35)' : 'rgba(52,211,153,0.35)',
+                  background: inlinePriority === 'High' ? 'rgba(251,113,133,0.12)' : inlinePriority === 'Medium' ? 'rgba(251,191,36,0.12)' : 'rgba(52,211,153,0.12)',
+                }}
+              >
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{
+                    background: inlinePriority === 'High' ? '#fb7185' : inlinePriority === 'Medium' ? '#fbbf24' : '#34d399',
+                  }}
+                />
+                <span>{inlinePriority}</span>
+                <ChevronDown size={11} className={`transition-transform duration-200 ${priorityOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {priorityOpen && (
+                <div
+                  className="absolute right-0 mt-1.5 w-32 rounded-xl border p-1 shadow-2xl animate-menu-pop z-30 overflow-hidden"
+                  style={{
+                    background: 'var(--bg-card)',
+                    borderColor: 'var(--border-card)',
+                    backdropFilter: 'blur(28px)',
+                    WebkitBackdropFilter: 'blur(28px)',
+                    boxShadow: '0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
+                  }}
+                >
+                  {[
+                    { id: 'High', color: '#fb7185' },
+                    { id: 'Medium', color: '#fbbf24' },
+                    { id: 'Low', color: '#34d399' },
+                  ].map(({ id, color }) => {
+                    const isSelected = inlinePriority === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => {
+                          setInlinePriority(id);
+                          setPriorityOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                          isSelected
+                            ? 'bg-white/10 text-white font-bold'
+                            : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
+                          <span style={{ color: isSelected ? color : undefined }}>{id}</span>
+                        </div>
+                        {isSelected && <Check size={11} style={{ color }} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </form>
 
           {/* Task List */}

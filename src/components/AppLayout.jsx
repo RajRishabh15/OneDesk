@@ -73,7 +73,7 @@ export default function AppLayout() {
 
       <TopNavPill />
 
-      <main className="relative z-10 pt-[52px] md:pt-24 pb-28 md:pb-10 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
+      <main className="relative z-10 pt-[52px] md:pt-28 pb-28 md:pb-10 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         <Outlet />
       </main>
     </div>

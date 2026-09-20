@@ -5,11 +5,7 @@ import {
   StickyNote,
   X,
   Pin,
-  Sparkles,
-  Tag,
-  Filter,
-  Layers,
-  FileText
+  FileText,
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import NoteCard from '../components/NoteCard';
@@ -139,14 +135,11 @@ export default function Notes() {
         </div>
 
         <button
+          type="button"
           onClick={openNew}
-          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all shadow-lg hover:brightness-110 active:scale-95"
-          style={{
-            background: 'var(--accent-gradient)',
-            boxShadow: '0 4px 18px var(--accent-glow)',
-          }}
+          className="btn-glass-primary rounded-xl px-4 py-2.5 text-xs font-bold shrink-0 shadow-md"
         >
-          <Plus size={15} /> New note
+          <Plus size={15} /> <span>New note</span>
         </button>
       </div>
 
@@ -181,32 +174,21 @@ export default function Notes() {
         </div>
 
         {/* Category Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
           {categories.map((c) => {
             const count = c === 'All' ? notes.length : notes.filter((n) => n.category === c).length;
             const active = category === c;
             return (
               <button
                 key={c}
+                type="button"
                 onClick={() => setCategory(c)}
-                className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all border shrink-0"
-                style={{
-                  background: active ? 'var(--accent-gradient)' : 'var(--bg-surface)',
-                  borderColor: active ? 'transparent' : 'var(--border-subtle)',
-                  color: active ? '#ffffff' : 'var(--text-muted)',
-                  boxShadow: active ? '0 2px 10px var(--accent-glow)' : 'none',
-                }}
+                className={`chip-glass px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 ${
+                  active ? 'chip-glass-active' : ''
+                }`}
               >
                 <span>{c}</span>
-                <span
-                  className="text-[10px] font-mono px-1.5 py-0.2 rounded-full"
-                  style={{
-                    background: active ? 'rgba(255,255,255,0.25)' : 'var(--border-subtle)',
-                    color: active ? '#ffffff' : 'var(--text-muted)',
-                  }}
-                >
-                  {count}
-                </span>
+                <span className="text-[10px] font-mono opacity-70">({count})</span>
               </button>
             );
           })}

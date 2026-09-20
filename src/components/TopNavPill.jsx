@@ -10,7 +10,6 @@ import {
   FileText,
   CalendarPlus,
   X,
-  LayoutGrid,
   StickyNote,
   Calendar,
   BarChart2,
@@ -117,9 +116,18 @@ export default function TopNavPill() {
     };
   }, [query, notes, tasks, events]);
 
-  const dueSoon = tasks.filter(
-    t => t.status !== 'Completed' && t.dueDate && new Date(t.dueDate) <= new Date(Date.now() + 86400000)
-  );
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  const dueSoon = useMemo(() => {
+    const cutoff = now + 86400000;
+    return tasks.filter(
+      t => t.status !== 'Completed' && t.dueDate && new Date(t.dueDate).getTime() <= cutoff
+    );
+  }, [tasks, now]);
 
   const initials = (user?.name || user?.email || 'OD')
     .split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
@@ -129,54 +137,55 @@ export default function TopNavPill() {
       {/* ════════════════════════════════════════════
           DESKTOP NAV  (md+)
       ════════════════════════════════════════════ */}
-      <header className="hidden md:flex fixed top-4 inset-x-0 z-40 justify-center px-6 pointer-events-none">
+      <header className="hidden md:flex fixed top-4 sm:top-5 inset-x-0 z-40 justify-center px-6 pointer-events-none">
         <div
-          className="pointer-events-auto relative flex items-center gap-3 px-3 py-2 transition-all duration-300"
+          className="pointer-events-auto relative flex items-center gap-3 px-4 sm:px-5 py-2.5 transition-all duration-300"
           style={{
             background:     'var(--bg-card)',
-            borderRadius:   '20px',
+            borderRadius:   '24px',
             border:         '1px solid var(--border-card)',
             backdropFilter: 'blur(28px)',
             WebkitBackdropFilter: 'blur(28px)',
-            boxShadow:      '0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset',
+            boxShadow:      '0 10px 45px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.08) inset',
             width:          'fit-content',
-            maxWidth:       '860px',
+            maxWidth:       'min(1100px, calc(100vw - 48px))',
           }}
         >
           {/* ── LEFT CLUSTER: Logo + Notifications ─────────── */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group shrink-0">
+            <Link to="/" className="flex items-center gap-2.5 group shrink-0">
               <div
-                className="h-7 w-7 rounded-[10px] p-[1.5px] grid place-items-center shadow-md transition-transform group-hover:scale-105"
-                style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 10px var(--accent-glow)' }}
+                className="h-8 w-8 rounded-[11px] p-[1.5px] grid place-items-center shadow-md transition-transform group-hover:scale-105"
+                style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 12px var(--accent-glow)' }}
               >
                 <div
-                  className="h-full w-full rounded-[8px] grid place-items-center text-[11px] font-bold"
+                  className="h-full w-full rounded-[9px] grid place-items-center text-xs font-bold"
                   style={{ background: 'var(--bg-page)', color: 'var(--accent-color)' }}
                 >✦</div>
               </div>
               <span
-                className="font-display text-sm font-extrabold tracking-tight"
+                className="font-display text-[15px] font-extrabold tracking-tight"
                 style={{ color: 'var(--text-primary)' }}
               >OneDesk</span>
             </Link>
 
             {/* Divider */}
-            <div className="h-4 w-px mx-1" style={{ background: 'var(--border-card)' }} />
+            <div className="h-5 w-px mx-1.5" style={{ background: 'var(--border-card)' }} />
 
             {/* Notification Bell */}
             <div className="relative" ref={desktopNotifRef}>
               <button
+                type="button"
                 onClick={() => { setNotifOpen(v => !v); setProfileOpen(false); setQuickAddOpen(false); setSearchOpen(false); }}
-                className="relative h-[30px] w-[30px] rounded-[10px] flex items-center justify-center transition-all hover:brightness-125 active:scale-95"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}
+                className="relative h-[34px] w-[34px] rounded-[11px] flex items-center justify-center transition-all hover:brightness-125 active:scale-95 border"
+                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
                 aria-label="Notifications"
               >
-                <Bell size={13} />
+                <Bell size={15} />
                 {dueSoon.length > 0 && (
-                  <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
+                  <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
                 )}
               </button>
 
@@ -219,7 +228,7 @@ export default function TopNavPill() {
 
           {/* ── CENTER: Nav Tabs ────────────────────────── */}
           <nav
-            className="flex items-center gap-0.5 px-1 py-1 rounded-[14px]"
+            className="flex items-center gap-1 px-1.5 py-1 rounded-[16px]"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
           >
             {navLinks.map(({ to, label, end }) => (
@@ -228,14 +237,14 @@ export default function TopNavPill() {
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `relative px-3.5 py-1.5 rounded-[10px] text-[11px] font-bold tracking-wide transition-all duration-200 ${
+                  `relative px-4 py-2 rounded-[12px] text-xs font-bold tracking-wide transition-all duration-200 ${
                     isActive
                       ? 'shadow-sm'
                       : 'hover:opacity-90'
                   }`
                 }
                 style={({ isActive }) => isActive
-                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }
+                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }
                   : { color: 'var(--text-muted)' }
                 }
               >
@@ -244,7 +253,7 @@ export default function TopNavPill() {
                     {label}
                     {isActive && (
                       <span
-                        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[3px] w-3 rounded-full"
+                        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[3px] w-3.5 rounded-full"
                         style={{ background: 'var(--accent-gradient)', boxShadow: '0 0 6px var(--accent-glow)' }}
                       />
                     )}
@@ -255,21 +264,21 @@ export default function TopNavPill() {
           </nav>
 
           {/* ── RIGHT CLUSTER: Search + Add + Account ─── */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
 
             {/* Search — single morphing pill, spring-width transition */}
             <div className="relative" ref={desktopSearchBoxRef}>
               {/* The pill itself — width springs open/closed */}
               <div
-                className="flex items-center overflow-hidden rounded-[10px] border"
+                className="flex items-center overflow-hidden rounded-[11px] border"
                 style={{
-                  height: '30px',
-                  width: searchOpen ? '192px' : '30px',
+                  height: '34px',
+                  width: searchOpen ? '175px' : '34px',
                   /* Spring easing: fast out, slight overshoot, then settle */
-                  transition: 'width 0.42s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.25s ease, background 0.25s ease',
+                  transition: 'width 0.38s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.25s ease, background 0.25s ease',
                   background: searchOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
                   borderColor: searchOpen ? 'var(--border-card)' : 'var(--border-subtle)',
-                  boxShadow: searchOpen ? '0 2px 12px rgba(0,0,0,0.25)' : 'none',
+                  boxShadow: searchOpen ? '0 2px 14px rgba(0,0,0,0.25)' : 'none',
                 }}
               >
                 {/* Search icon — always the leftmost element, acts as trigger */}
@@ -283,10 +292,10 @@ export default function TopNavPill() {
                     });
                   }}
                   title="Search (Ctrl+K)"
-                  className="h-full w-[30px] shrink-0 flex items-center justify-center transition-colors duration-200"
+                  className="h-full w-[34px] shrink-0 flex items-center justify-center transition-colors duration-200"
                   style={{ color: searchOpen ? 'var(--accent-color)' : 'var(--text-muted)' }}
                 >
-                  <Search size={13} />
+                  <Search size={14} />
                 </button>
 
                 {/* Input — fades in after pill opens */}
@@ -295,7 +304,7 @@ export default function TopNavPill() {
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   placeholder="Search…"
-                  className="flex-1 min-w-0 bg-transparent text-[11px] outline-none"
+                  className="flex-1 min-w-0 bg-transparent text-xs outline-none"
                   style={{
                     color: 'var(--text-primary)',
                     opacity: searchOpen ? 1 : 0,
@@ -317,7 +326,7 @@ export default function TopNavPill() {
                       setSearchOpen(false);
                     }
                   }}
-                  className="h-7 w-7 shrink-0 flex items-center justify-center"
+                  className="h-8 w-8 shrink-0 flex items-center justify-center"
                   style={{
                     color: 'var(--text-muted)',
                     opacity: searchOpen ? 0.55 : 0,
@@ -328,7 +337,7 @@ export default function TopNavPill() {
                   onMouseEnter={e => e.currentTarget.style.opacity = '1'}
                   onMouseLeave={e => e.currentTarget.style.opacity = searchOpen ? '0.55' : '0'}
                 >
-                  <X size={11} />
+                  <X size={12} />
                 </button>
               </div>
 
@@ -351,13 +360,14 @@ export default function TopNavPill() {
             {/* Quick Add — plus icon expands to options */}
             <div className="relative" ref={quickAddRef}>
               <button
+                type="button"
                 onClick={() => { setQuickAddOpen(v => !v); setProfileOpen(false); setNotifOpen(false); setSearchOpen(false); }}
-                className="h-[30px] w-[30px] rounded-[10px] flex items-center justify-center transition-all hover:brightness-110 active:scale-95 text-white"
-                style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 12px var(--accent-glow)' }}
+                className="h-[34px] w-[34px] rounded-[11px] flex items-center justify-center transition-all hover:brightness-110 active:scale-95 text-white"
+                style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 14px var(--accent-glow)' }}
                 aria-label="Quick add"
               >
                 <Plus
-                  size={16}
+                  size={17}
                   style={{ transition: 'transform 0.2s ease', transform: quickAddOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
                 />
               </button>
@@ -399,22 +409,23 @@ export default function TopNavPill() {
             </div>
 
             {/* Thin divider */}
-            <div className="h-4 w-px" style={{ background: 'var(--border-card)' }} />
+            <div className="h-5 w-px" style={{ background: 'var(--border-card)' }} />
 
             {/* Account + Settings merged */}
             <div className="relative" ref={profileRef}>
               <button
+                type="button"
                 onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setQuickAddOpen(false); setSearchOpen(false); }}
-                className="flex items-center gap-1.5 rounded-[12px] px-2 py-1 transition-all hover:brightness-110 active:scale-95"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
+                className="h-[34px] flex items-center gap-2 rounded-[13px] px-2.5 py-1 transition-all hover:brightness-110 active:scale-95 border"
+                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
               >
                 <div
-                  className="h-5 w-5 rounded-[7px] grid place-items-center text-white text-[9px] font-black shrink-0"
+                  className="h-6 w-6 rounded-[8px] grid place-items-center text-white text-[10px] font-black shrink-0"
                   style={{ background: 'var(--accent-gradient)' }}
                 >
-                  {initials || <UserIcon size={10} />}
+                  {initials || <UserIcon size={11} />}
                 </div>
-                <span className="text-[11px] font-semibold max-w-[72px] truncate" style={{ color: 'var(--text-primary)' }}>
+                <span className="text-xs font-semibold max-w-[85px] truncate" style={{ color: 'var(--text-primary)' }}>
                   {user?.name?.split(' ')[0] || 'Account'}
                 </span>
               </button>

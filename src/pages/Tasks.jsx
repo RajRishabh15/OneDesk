@@ -1,11 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Plus,
   CheckSquare,
   LayoutGrid,
   Rows3,
   Search,
-  X
+  X,
+  SlidersHorizontal,
+  Check,
+  RotateCcw,
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import TaskCard from '../components/TaskCard';
@@ -33,8 +36,13 @@ export default function Tasks() {
   const { tasks, addTask, updateTask, deleteTask, setTaskStatus } = useData();
   const [view, setView] = useState('list');
   const [filter, setFilter] = useState('All');
+  const [priorityFilter, setPriorityFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [sortBy, setSortBy] = useState('default');
   const [query, setQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [activeDrawerTab, setActiveDrawerTab] = useState('status');
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [dragId, setDragId] = useState(null);
@@ -42,12 +50,51 @@ export default function Tasks() {
   // Quick inline add state
   const [inlineTitle, setInlineTitle] = useState('');
   const [inlinePriority, setInlinePriority] = useState('Medium');
-  const [inlineDue, setInlineDue] = useState(localToday());
+
+  // Extract unique categories
+  const availableCategories = useMemo(() => {
+    const cats = new Set();
+    tasks.forEach((t) => {
+      if (t.category && t.category.trim()) cats.add(t.category.trim());
+    });
+    return Array.from(cats);
+  }, [tasks]);
+
+  // Active filter count (excluding query)
+  const activeFilterCount =
+    (filter !== 'All' ? 1 : 0) +
+    (priorityFilter !== 'All' ? 1 : 0) +
+    (categoryFilter !== 'All' ? 1 : 0) +
+    (sortBy !== 'default' ? 1 : 0);
+
+  function resetAllFilters() {
+    setFilter('All');
+    setPriorityFilter('All');
+    setCategoryFilter('All');
+    setSortBy('default');
+  }
+
+  // Lock body scroll when mobile filter drawer is open
+  useEffect(() => {
+    if (mobileFilterOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [mobileFilterOpen]);
 
   const filtered = useMemo(() => {
     let list = tasks;
     if (filter !== 'All') {
       list = list.filter((t) => t.status === filter);
+    }
+    if (priorityFilter !== 'All') {
+      list = list.filter((t) => t.priority === priorityFilter);
+    }
+    if (categoryFilter !== 'All') {
+      list = list.filter((t) => t.category === categoryFilter);
     }
     if (query.trim()) {
       const q = query.toLowerCase();
@@ -58,8 +105,18 @@ export default function Tasks() {
           t.category?.toLowerCase().includes(q)
       );
     }
+
+    if (sortBy === 'dueDate') {
+      list = [...list].sort((a, b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999'));
+    } else if (sortBy === 'priority') {
+      const pMap = { High: 3, Medium: 2, Low: 1 };
+      list = [...list].sort((a, b) => (pMap[b.priority] || 0) - (pMap[a.priority] || 0));
+    } else if (sortBy === 'title') {
+      list = [...list].sort((a, b) => a.title.localeCompare(b.title));
+    }
+
     return list;
-  }, [tasks, filter, query]);
+  }, [tasks, filter, priorityFilter, categoryFilter, query, sortBy]);
 
   const completedCount = tasks.filter((t) => t.status === 'Completed').length;
   const pct = tasks.length ? Math.round((completedCount / tasks.length) * 100) : 0;
@@ -97,7 +154,7 @@ export default function Tasks() {
     addTask({
       title: inlineTitle.trim(),
       priority: inlinePriority,
-      dueDate: inlineDue || localToday(),
+      dueDate: localToday(),
       status: filter === 'Completed' ? 'Completed' : filter === 'In Progress' ? 'In Progress' : 'Todo',
       category: 'General',
     });
@@ -112,16 +169,16 @@ export default function Tasks() {
     <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-12">
       {/* ── Page Header ────────────────────────────────────────── */}
       <div
-        className="flex flex-wrap items-center justify-between gap-4 pb-4"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4"
         style={{ borderBottom: '1px solid var(--border-subtle)' }}
       >
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
               Tasks &amp; Execution
             </h1>
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border"
+              className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border shrink-0"
               style={{
                 color: 'var(--accent-color)',
                 borderColor: 'var(--border-card)',
@@ -131,7 +188,7 @@ export default function Tasks() {
               <CheckSquare size={11} /> {completedCount}/{tasks.length} Done ({pct}%)
             </span>
           </div>
-          <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
             Track your action items, sprints, and priorities with live progress tracking.
           </p>
         </div>
@@ -139,7 +196,7 @@ export default function Tasks() {
         <button
           type="button"
           onClick={openNew}
-          className="btn-glass-primary rounded-xl px-4 py-2 text-xs"
+          className="btn-glass-primary rounded-xl px-4 py-2 text-xs w-full sm:w-auto shrink-0 shadow-sm"
         >
           <Plus size={15} /> <span>Detailed task</span>
         </button>
@@ -203,95 +260,231 @@ export default function Tasks() {
       </form>
 
       {/* ── Search & Filter Controls ───────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Search Box */}
-        <div className="relative flex-1 max-w-sm">
-          <Search
-            size={14}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--text-muted)' }}
-          />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search tasks…"
-            className="w-full rounded-xl py-2 pl-9 pr-8 text-xs outline-none border transition-all glass-card"
-            style={{
-              color: 'var(--text-primary)',
-              borderColor: 'var(--border-card)',
-            }}
-          />
-          {query && (
-            <button
-              onClick={() => setQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded"
+      <div className="space-y-2.5">
+        {/* DESKTOP & LAPTOP CONTROLS (sm:flex) - Clean, uncluttered, matching original UI */}
+        <div className="hidden sm:flex items-center justify-between gap-3">
+          {/* Search Box */}
+          <div className="relative flex-1 max-w-xs md:max-w-sm">
+            <Search
+              size={14}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
               style={{ color: 'var(--text-muted)' }}
-            >
-              <X size={12} />
-            </button>
-          )}
-        </div>
-
-        {/* Filter Pills & View Switcher */}
-        <div className="flex items-center justify-between sm:justify-end gap-2.5">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
-            {['All', ...columns].map((c) => {
-              const active = filter === c;
-              const count = c === 'All' ? tasks.length : tasks.filter((t) => t.status === c).length;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setFilter(c)}
-                  className={`chip-glass px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 ${
-                    active ? 'chip-glass-active' : ''
-                  }`}
-                >
-                  <span>{c}</span>
-                  <span className="text-[10px] font-mono opacity-70">({count})</span>
-                </button>
-              );
-            })}
+            />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search tasks…"
+              className="w-full rounded-xl py-2 pl-9 pr-8 text-xs outline-none border transition-all glass-card"
+              style={{
+                color: 'var(--text-primary)',
+                borderColor: 'var(--border-card)',
+              }}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-white/10"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
 
-          <div
-            className="flex rounded-xl p-1 gap-1 border shrink-0"
-            style={{
-              background: 'var(--bg-surface)',
-              borderColor: 'var(--border-card)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setView('list')}
-              aria-label="List view"
-              className="p-1.5 rounded-lg transition-all"
-              style={
-                view === 'list'
-                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
-                  : { color: 'var(--text-muted)' }
-              }
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Desktop Status Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+              {['All', ...columns].map((c) => {
+                const active = filter === c;
+                const count = c === 'All' ? tasks.length : tasks.filter((t) => t.status === c).length;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setFilter(c)}
+                    className={`chip-glass px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 ${
+                      active ? 'chip-glass-active' : ''
+                    }`}
+                  >
+                    <span>{c}</span>
+                    <span className="text-[10px] font-mono opacity-70">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Desktop View Switcher */}
+            <div
+              className="flex rounded-xl p-1 gap-1 border shrink-0"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+              }}
             >
-              <Rows3 size={14} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setView('kanban')}
-              aria-label="Kanban view"
-              className="p-1.5 rounded-lg transition-all"
-              style={
-                view === 'kanban'
-                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
-                  : { color: 'var(--text-muted)' }
-              }
-            >
-              <LayoutGrid size={14} />
-            </button>
+              <button
+                type="button"
+                onClick={() => setView('list')}
+                aria-label="List view"
+                className="p-1.5 rounded-lg transition-all"
+                style={
+                  view === 'list'
+                    ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
+                    : { color: 'var(--text-muted)' }
+                }
+              >
+                <Rows3 size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('kanban')}
+                aria-label="Kanban view"
+                className="p-1.5 rounded-lg transition-all"
+                style={
+                  view === 'kanban'
+                    ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
+                    : { color: 'var(--text-muted)' }
+                }
+              >
+                <LayoutGrid size={14} />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* MOBILE CONTROLS (sm:hidden) - Full Search + Amazon Filter Button + View Switcher */}
+        <div className="flex sm:hidden flex-col gap-2">
+          {/* Mobile Search */}
+          <div className="relative w-full">
+            <Search
+              size={14}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+              style={{ color: 'var(--text-muted)' }}
+            />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search tasks…"
+              className="w-full rounded-xl py-2 pl-9 pr-8 text-xs outline-none border transition-all glass-card"
+              style={{
+                color: 'var(--text-primary)',
+                borderColor: 'var(--border-card)',
+              }}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-white/10"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          {/* Mobile Filter Trigger + View Switcher Row */}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileFilterOpen(true)}
+              className={`btn-glass flex-1 px-3.5 py-2 rounded-xl text-xs font-bold relative flex items-center justify-center gap-2 ${
+                activeFilterCount > 0 ? 'border-indigo-400/60 shadow-[0_0_12px_rgba(99,102,241,0.25)] text-indigo-300' : ''
+              }`}
+              aria-label="Open filter menu"
+            >
+              <SlidersHorizontal size={14} className={activeFilterCount > 0 ? 'text-indigo-400' : 'text-stone-400'} />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="h-4 min-w-[16px] px-1 rounded-full text-[9px] font-black bg-indigo-500 text-white flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile View Switcher */}
+            <div
+              className="flex rounded-xl p-1 gap-1 border shrink-0"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setView('list')}
+                aria-label="List view"
+                className="p-1.5 rounded-lg transition-all"
+                style={
+                  view === 'list'
+                    ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
+                    : { color: 'var(--text-muted)' }
+                }
+              >
+                <Rows3 size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('kanban')}
+                aria-label="Kanban view"
+                className="p-1.5 rounded-lg transition-all"
+                style={
+                  view === 'kanban'
+                    ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
+                    : { color: 'var(--text-muted)' }
+                }
+              >
+                <LayoutGrid size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Filter Chips (MOBILE ONLY: sm:hidden) */}
+        {activeFilterCount > 0 && (
+          <div className="sm:hidden flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
+            <span className="text-[10px] uppercase font-bold tracking-wider opacity-60 mr-0.5 shrink-0" style={{ color: 'var(--text-muted)' }}>
+              Active:
+            </span>
+            {filter !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+                Status: {filter}
+                <button type="button" onClick={() => setFilter('All')} className="hover:text-white"><X size={11} /></button>
+              </span>
+            )}
+            {priorityFilter !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+                Priority: {priorityFilter}
+                <button type="button" onClick={() => setPriorityFilter('All')} className="hover:text-white"><X size={11} /></button>
+              </span>
+            )}
+            {categoryFilter !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+                Category: {categoryFilter}
+                <button type="button" onClick={() => setCategoryFilter('All')} className="hover:text-white"><X size={11} /></button>
+              </span>
+            )}
+            {sortBy !== 'default' && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+                Sort: {sortBy}
+                <button type="button" onClick={() => setSortBy('default')} className="hover:text-white"><X size={11} /></button>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              className="text-[10px] font-bold text-rose-400 hover:underline px-1 shrink-0 inline-flex items-center gap-1"
+            >
+              <RotateCcw size={10} />
+              Clear all
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Task Content (List or Kanban) ──────────────────────── */}
@@ -547,6 +740,280 @@ export default function Tasks() {
           </div>
         </form>
       </Modal>
+
+      {/* ── Amazon-Style Mobile Filter Bottom Sheet ───────────── */}
+      {mobileFilterOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop blur */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity"
+            onClick={() => setMobileFilterOpen(false)}
+          />
+
+          {/* Sheet */}
+          <div
+            className="relative w-full max-w-lg rounded-t-[28px] border-t border-[var(--border-card)] shadow-2xl animate-sheet-bounce max-h-[85vh] flex flex-col overflow-hidden z-10"
+            style={{
+              background: 'var(--bg-card)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              boxShadow: '0 -10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)',
+            }}
+          >
+            {/* Drag handle */}
+            <div className="pt-2.5 pb-1 flex justify-center shrink-0">
+              <div className="h-1.5 w-12 rounded-full bg-white/20" />
+            </div>
+
+            {/* Sheet Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-subtle)] shrink-0">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal size={16} className="text-indigo-400" />
+                <h3 className="font-display text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                  Filters
+                </h3>
+                {activeFilterCount > 0 && (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    {activeFilterCount} active
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="text-xs font-bold text-rose-400 hover:underline inline-flex items-center gap-1"
+                  >
+                    <RotateCcw size={11} />
+                    Clear all
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="h-7 w-7 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* Amazon 2-Column Split Body */}
+            <div className="flex flex-1 min-h-0 overflow-hidden">
+              {/* Left Column: Filter Categories */}
+              <div className="w-32 bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col py-2 shrink-0 overflow-y-auto">
+                {[
+                  { id: 'status', label: 'Status', active: filter !== 'All' },
+                  { id: 'priority', label: 'Priority', active: priorityFilter !== 'All' },
+                  { id: 'category', label: 'Category', active: categoryFilter !== 'All' },
+                  { id: 'sort', label: 'Sort By', active: sortBy !== 'default' },
+                ].map((tab) => {
+                  const isSelected = activeDrawerTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveDrawerTab(tab.id)}
+                      className={`relative px-3.5 py-3 text-left text-xs font-semibold flex items-center justify-between transition-colors ${
+                        isSelected
+                          ? 'bg-[var(--bg-card)] text-[var(--text-primary)] font-bold'
+                          : 'text-[var(--text-muted)] hover:bg-white/[0.02]'
+                      }`}
+                    >
+                      <span>{tab.label}</span>
+                      {tab.active && (
+                        <span className="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_6px_var(--accent-glow)] shrink-0" />
+                      )}
+                      {isSelected && (
+                        <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-indigo-500" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right Column: Category Options */}
+              <div className="flex-1 p-4 overflow-y-auto space-y-2">
+                {/* 1. Status options */}
+                {activeDrawerTab === 'status' && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                      Filter by Task Status
+                    </p>
+                    {['All', ...columns].map((c) => {
+                      const isSelected = filter === c;
+                      const count = c === 'All' ? tasks.length : tasks.filter((t) => t.status === c).length;
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setFilter(c)}
+                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                            isSelected
+                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
+                            }`}>
+                              {isSelected && <Check size={10} strokeWidth={3} />}
+                            </div>
+                            <span>{c}</span>
+                          </div>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5">
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 2. Priority options */}
+                {activeDrawerTab === 'priority' && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                      Filter by Priority Level
+                    </p>
+                    {[
+                      { id: 'All', label: 'All Priorities', color: '#94a3b8' },
+                      { id: 'High', label: 'High Priority', color: '#fb7185' },
+                      { id: 'Medium', label: 'Medium Priority', color: '#fbbf24' },
+                      { id: 'Low', label: 'Low Priority', color: '#34d399' },
+                    ].map((p) => {
+                      const isSelected = priorityFilter === p.id;
+                      const count = p.id === 'All' ? tasks.length : tasks.filter((t) => t.priority === p.id).length;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setPriorityFilter(p.id)}
+                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                            isSelected
+                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
+                            }`}>
+                              {isSelected && <Check size={10} strokeWidth={3} />}
+                            </div>
+                            <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+                            <span>{p.label}</span>
+                          </div>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5">
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 3. Category options */}
+                {activeDrawerTab === 'category' && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                      Filter by Category
+                    </p>
+                    {['All', ...availableCategories].map((cat) => {
+                      const isSelected = categoryFilter === cat;
+                      const count = cat === 'All' ? tasks.length : tasks.filter((t) => t.category === cat).length;
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setCategoryFilter(cat)}
+                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                            isSelected
+                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
+                            }`}>
+                              {isSelected && <Check size={10} strokeWidth={3} />}
+                            </div>
+                            <span>{cat}</span>
+                          </div>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5">
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 4. Sort By options */}
+                {activeDrawerTab === 'sort' && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                      Order &amp; Sequence
+                    </p>
+                    {[
+                      { id: 'default', label: 'Default Order' },
+                      { id: 'dueDate', label: 'Due Date (Soonest first)' },
+                      { id: 'priority', label: 'Priority (High to Low)' },
+                      { id: 'title', label: 'Task Name (A-Z)' },
+                    ].map((s) => {
+                      const isSelected = sortBy === s.id;
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => setSortBy(s.id)}
+                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                            isSelected
+                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
+                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
+                            }`}>
+                              {isSelected && <Check size={10} strokeWidth={3} />}
+                            </div>
+                            <span>{s.label}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sticky Bottom Actions */}
+            <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-card)] flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="btn-glass flex-1 py-2.5 text-xs font-bold rounded-xl inline-flex items-center justify-center gap-1.5"
+              >
+                <RotateCcw size={13} />
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileFilterOpen(false)}
+                className="btn-glass-primary flex-[2] py-2.5 text-xs font-bold rounded-xl shadow-lg"
+              >
+                Apply Filters ({filtered.length} {filtered.length === 1 ? 'task' : 'tasks'})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
