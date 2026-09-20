@@ -1,30 +1,17 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  TrendingUp,
-  Layers,
-  Clock,
   Plus,
-  PlusCircle,
   Check,
   ArrowUpRight,
-  Sun,
-  Sunrise,
-  Sunset,
-  Moon,
-  Flame,
-  Play,
-  Pause,
-  RotateCcw,
-  FileText,
   Calendar as CalendarIcon,
   Trash2,
-  Zap,
   CheckCircle2,
-  Save
+  Clock,
+  TrendingUp
 } from 'lucide-react';
 
-// Use local date to avoid UTC timezone shift for IST (+5:30)
+// Local date string to prevent timezone offset issues
 function localISO(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -37,26 +24,19 @@ import { LabeledInput } from './Notes';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
-const priorityPill = {
-  High: 'text-rose-400 bg-rose-500/15 border-rose-500/30',
-  Medium: 'text-amber-400 bg-amber-500/15 border-amber-500/30',
-  Low: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30',
-};
-
 export default function Dashboard() {
   const { user } = useAuth();
   const { tasks, notes, events, setTaskStatus, addTask, deleteTask, addNote, addEvent } = useData();
 
-  // Quick Task & Modal States
-  const [inlineTaskTitle, setInlineTaskTitle] = useState('');
-  const [inlinePriority, setInlinePriority] = useState('Medium');
-  const [inlineCategory, setInlineCategory] = useState('Focus');
+  // Modals & form state
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('All'); // 'All' | 'Today' | 'High' | 'Completed'
+  const [inlineTaskTitle, setInlineTaskTitle] = useState('');
+  const [inlinePriority, setInlinePriority] = useState('Medium');
+  const [activeFilter, setActiveFilter] = useState('All'); // 'All' | 'Today' | 'Completed'
 
-  // Scratchpad Tab in Right Column ('notes' | 'scratchpad')
-  const [notesTab, setNotesTab] = useState('notes');
+  // Right column tab ('scratchpad' | 'notes')
+  const [sideTab, setSideTab] = useState('scratchpad');
   const [scratchpadText, setScratchpadText] = useState(() => {
     return localStorage.getItem('lifeos_dashboard_scratchpad') || '';
   });
@@ -66,7 +46,7 @@ export default function Dashboard() {
     localStorage.setItem('lifeos_dashboard_scratchpad', scratchpadText);
   }, [scratchpadText]);
 
-  function handleSaveScratchpadAsNote() {
+  function handleSaveScratchpad() {
     if (!scratchpadText.trim()) return;
     const lines = scratchpadText.trim().split('\n');
     const title = lines[0].slice(0, 50) || 'Quick Scratchpad Note';
@@ -75,11 +55,11 @@ export default function Dashboard() {
       title,
       description,
       category: 'Personal',
-      tags: 'scratchpad,quick',
+      tags: 'scratchpad',
       color: 'violet',
     });
     setScratchpadSaved(true);
-    setTimeout(() => setScratchpadSaved(false), 2200);
+    setTimeout(() => setScratchpadSaved(false), 2000);
   }
 
   // Modals Forms
@@ -99,53 +79,7 @@ export default function Dashboard() {
     description: '',
   });
 
-  // Focus Sprint / Pomodoro Mini-Timer State
-  // Modes: 25m ('pomodoro'), 45m ('deep'), 5m ('break'), 15m ('sprint')
-  const [timerPreset, setTimerPreset] = useState('25m');
-  const [timerSeconds, setTimerSeconds] = useState(25 * 60);
-  const [timerTotalSeconds, setTimerTotalSeconds] = useState(25 * 60);
-  const [timerActive, setTimerActive] = useState(false);
-  const timerRef = useRef(null);
-
-  useEffect(() => {
-    if (timerActive) {
-      timerRef.current = setInterval(() => {
-        setTimerSeconds((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current);
-            setTimerActive(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      clearInterval(timerRef.current);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [timerActive]);
-
-  function handleToggleTimer() {
-    if (timerSeconds === 0) {
-      setTimerSeconds(timerTotalSeconds);
-    }
-    setTimerActive((prev) => !prev);
-  }
-
-  function handleSelectPreset(preset, seconds) {
-    setTimerActive(false);
-    setTimerPreset(preset);
-    setTimerTotalSeconds(seconds);
-    setTimerSeconds(seconds);
-  }
-
-  const timerPct = Math.round(((timerTotalSeconds - timerSeconds) / timerTotalSeconds) * 100);
-
-  const formattedTimer = `${String(Math.floor(timerSeconds / 60)).padStart(2, '0')}:${String(
-    timerSeconds % 60
-  ).padStart(2, '0')}`;
-
-  // Date and Tasks calculations
+  // Date and Time Calculations
   const today = useMemo(() => localISO(new Date()), []);
   const tomorrow = useMemo(() => {
     const d = new Date();
@@ -153,32 +87,92 @@ export default function Dashboard() {
     return localISO(d);
   }, []);
 
+  const todayFormatted = useMemo(() => {
+    return new Date().toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+  }, []);
+
+  // Time-of-day greeting for Typewriter
+  const hour = new Date().getHours();
+  const timeGreeting = useMemo(() => {
+    if (hour < 12) return 'Good morning.';
+    if (hour < 17) return 'Good afternoon.';
+    if (hour < 22) return 'Good evening.';
+    return 'Good night.';
+  }, [hour]);
+
+  // Phrases to loop infinitely: [Time Greeting] -> backspace -> [Welcome back.] -> backspace -> loop
+  const phrases = useMemo(() => [timeGreeting, 'Welcome back.'], [timeGreeting]);
+
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const currentPhrase = phrases[phraseIdx];
+    let timer;
+
+    if (!isDeleting) {
+      if (charIdx < currentPhrase.length) {
+        // Typing characters
+        timer = setTimeout(() => {
+          setCharIdx((prev) => prev + 1);
+        }, 70);
+      } else {
+        // Finished typing phrase: pause so user can read comfortably
+        timer = setTimeout(() => {
+          setIsDeleting(true);
+        }, 2200);
+      }
+    } else {
+      if (charIdx > 0) {
+        // Backspacing characters
+        timer = setTimeout(() => {
+          setCharIdx((prev) => prev - 1);
+        }, 38);
+      } else {
+        // Finished backspacing: brief breath before typing next phrase
+        timer = setTimeout(() => {
+          setIsDeleting(false);
+          setPhraseIdx((prev) => (prev + 1) % phrases.length);
+        }, 350);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [charIdx, isDeleting, phraseIdx, phrases]);
+
+  const typedGreeting = phrases[phraseIdx].slice(0, charIdx);
+  const displayName = user?.name || 'Rishabh';
+
+  // Task & Event metrics
   const completed = tasks.filter((t) => t.status === 'Completed');
   const pending = tasks.filter((t) => t.status !== 'Completed');
-  const inProgress = tasks.filter((t) => t.status === 'In Progress');
   const highPriorityPending = tasks.filter((t) => t.priority === 'High' && t.status !== 'Completed');
   const todaysEvents = events
     .filter((e) => e.date === today)
     .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   const recentNotes = [...notes]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 4);
+    .slice(0, 3);
 
-  // Filtered tasks for the focus checklist
+  const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 100;
+
+  // Filtered task stream
   const filteredTasks = useMemo(() => {
     if (activeFilter === 'Today') {
       return tasks.filter((t) => t.dueDate === today && t.status !== 'Completed');
-    }
-    if (activeFilter === 'High') {
-      return highPriorityPending;
     }
     if (activeFilter === 'Completed') {
       return completed.slice(0, 10);
     }
     return pending.slice(0, 9);
-  }, [tasks, activeFilter, today, highPriorityPending, completed, pending]);
+  }, [tasks, activeFilter, today, completed, pending]);
 
-  // Nearest upcoming deadline (task or event, today or future)
+  // Nearest upcoming deadline (task or event)
   const nextDeadline = useMemo(() => {
     const all = [
       ...events.filter((e) => e.date >= today).map((e) => ({ ...e, isTask: false })),
@@ -198,42 +192,6 @@ export default function Dashboard() {
     return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
-  const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 100;
-
-  // Dynamic greeting based on time of day
-  const hour = new Date().getHours();
-  let greetingTime = 'Good morning';
-  let GreetingIcon = Sun;
-  if (hour < 5) {
-    greetingTime = 'Good night';
-    GreetingIcon = Moon;
-  } else if (hour < 12) {
-    greetingTime = 'Good morning';
-    GreetingIcon = Sunrise;
-  } else if (hour < 17) {
-    greetingTime = 'Good afternoon';
-    GreetingIcon = Sun;
-  } else if (hour < 21) {
-    greetingTime = 'Good evening';
-    GreetingIcon = Sunset;
-  } else {
-    greetingTime = 'Good night';
-    GreetingIcon = Moon;
-  }
-
-  const displayName = user?.name || 'Rishabh';
-
-  // Format today's date banner string
-  const todayFormatted = new Date().toLocaleDateString(undefined, {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  });
-
-  // Calculate day of year / week number
-  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-  const weekNumber = Math.ceil(((new Date() - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
-
   function handleQuickTaskAdd(e) {
     e.preventDefault();
     if (!inlineTaskTitle.trim()) return;
@@ -242,7 +200,7 @@ export default function Dashboard() {
       priority: inlinePriority,
       dueDate: today,
       status: 'Todo',
-      category: inlineCategory,
+      category: 'Focus',
     });
     setInlineTaskTitle('');
   }
@@ -283,699 +241,365 @@ export default function Dashboard() {
     });
   }
 
-  // Active target task for focus sprint
-  const targetFocusTask = highPriorityPending[0] || pending[0];
+  // Top focus target task
+  const targetTask = highPriorityPending[0] || pending[0];
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-up max-w-7xl mx-auto pb-12">
+    <div className="space-y-8 sm:space-y-10 animate-fade-up max-w-5xl mx-auto pb-16 pt-2 sm:pt-4">
 
       {/* ══════════════════════════════════════════════════════════════
-          1. TOP ROW: FLUID SQUARE GREETING (LEFT) + 4 WIDGETS 2x2 (RIGHT)
+          1. CENTERED HERO: TYPEWRITER GREETING -> NAME -> INFO
       ══════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
+      <section className="text-center flex flex-col items-center justify-center space-y-2 py-6 sm:py-12">
         
-        {/* Left: Fluid Square "Good morning" Box (lg:col-span-5) */}
-        <div className="lg:col-span-5 flex flex-col">
-          <div className="relative rounded-[28px] sm:rounded-[32px] glass-panel-fluid p-6 sm:p-7 md:p-8 overflow-hidden flex flex-col justify-between h-full before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-indigo-400/50 before:to-transparent">
-            {/* Ambient Floating Light Orbs */}
-            <div className="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full bg-gradient-to-br from-indigo-500/20 via-purple-500/15 to-transparent blur-3xl animate-float-orb" />
-            <div className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-tr from-cyan-500/15 via-blue-500/10 to-transparent blur-3xl animate-float-orb-slow" />
-
-            {/* Top: Status Capsule & Date */}
-            <div className="relative z-10 space-y-3.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    borderColor: 'var(--border-card)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-beacon absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                  <span>Live Workspace</span>
-                  <span className="opacity-40">•</span>
-                  <span className="font-semibold text-emerald-400">
-                    {pending.length} focus active
-                  </span>
-                </div>
-
-                <div
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs border"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    borderColor: 'var(--border-card)',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  <CalendarIcon size={12} className="opacity-70" />
-                  <span>{todayFormatted}</span>
-                  <span className="opacity-40">•</span>
-                  <span>W{weekNumber}</span>
-                </div>
-              </div>
-
-              {/* Greeting Headline */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl grid place-items-center border shadow-inner transition-transform hover:rotate-6 duration-300 shrink-0"
-                    style={{
-                      background: 'var(--bg-surface)',
-                      borderColor: 'var(--border-card)',
-                    }}
-                  >
-                    <GreetingIcon size={20} className="text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-3xl xl:text-4xl font-black tracking-tight leading-tight">
-                    {greetingTime},{' '}
-                    <span
-                      className="bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent drop-shadow-sm"
-                      style={{
-                        backgroundImage: 'var(--accent-gradient, linear-gradient(135deg, #818cf8, #c084fc))',
-                      }}
-                    >
-                      {displayName}
-                    </span>
-                  </h1>
-                </div>
-
-                <p className="text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                  {highPriorityPending.length > 0 ? (
-                    <span>
-                      You have <strong className="text-rose-400 font-semibold">{highPriorityPending.length} high-priority</strong>{' '}
-                      {highPriorityPending.length === 1 ? 'item' : 'items'} queued. Focus on the essentials first.
-                    </span>
-                  ) : pending.length > 0 ? (
-                    <span>
-                      Workspace running clean with <strong className="text-cyan-400 font-semibold">{pending.length} active</strong> tasks on track.
-                    </span>
-                  ) : (
-                    <span className="text-emerald-400 font-semibold">
-                      ✨ All scheduled items completed! Peak flow achieved.
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* Bottom: Action Buttons */}
-            <div className="relative z-10 flex items-center gap-2.5 pt-5 flex-wrap">
-              <button
-                onClick={() => setTaskModalOpen(true)}
-                className="group flex items-center gap-2 rounded-full font-bold text-xs uppercase tracking-wider px-4 sm:px-5 py-2.5 text-white shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  background: 'var(--accent-gradient)',
-                  boxShadow: '0 4px 20px var(--accent-glow)',
-                }}
-              >
-                <PlusCircle size={15} className="transition-transform group-hover:rotate-90 duration-300" />
-                <span>Add Task</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  const timerEl = document.getElementById('focus-sprint-station');
-                  timerEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  if (!timerActive) handleToggleTimer();
-                }}
-                className="glass-btn-fluid flex items-center gap-2 rounded-full font-semibold text-xs px-3.5 sm:px-4 py-2.5 transition-all"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                <Zap size={14} className="text-amber-400 fill-amber-400/20" />
-                <span>{timerActive ? 'Sprint Active' : 'Focus Sprint'}</span>
-              </button>
-            </div>
-
-          </div>
+        {/* 1. Dynamic Typewriter Greeting: Large Hero */}
+        <div
+          className="inline-flex items-center justify-center text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-tight select-none text-center max-w-4xl"
+          style={{ color: 'var(--text-primary)', minHeight: '1.2em' }}
+        >
+          <span className="inline-block">{typedGreeting || '\u00A0'}</span>
+          <span className="inline-block w-[3px] sm:w-[5px] h-[0.82em] align-middle bg-indigo-400 ml-1.5 sm:ml-2.5 animate-cursor-blink shrink-0" />
         </div>
 
-        {/* Right: 4 Stat Widgets in 2x2 Grid (lg:col-span-7) */}
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 h-full">
-          
-          {/* Card 1: PENDING TASKS */}
-          <div className="relative rounded-[24px] glass-panel-fluid p-5 group flex flex-col justify-between before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-pink-500/60 before:to-transparent hover:shadow-[0_8px_30px_rgba(244,63,94,0.12)]">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest font-mono" style={{ color: 'var(--text-muted)' }}>
-                PENDING TASKS
-              </span>
-              <div className="h-8 w-8 rounded-xl bg-pink-500/15 text-pink-400 grid place-items-center transition-transform group-hover:scale-110">
-                <TrendingUp size={15} />
-              </div>
-            </div>
+        {/* 2. User Name */}
+        <h1
+          className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight pt-1"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          {displayName}
+        </h1>
 
-            <div className="my-2 flex items-baseline gap-2">
-              <p className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                {pending.length}
-              </p>
-              <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                of {tasks.length} total
-              </span>
-            </div>
+        {/* 3. Other Info */}
+        <div
+          className="flex items-center justify-center gap-2 text-xs sm:text-sm font-medium pt-0.5"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          <span>{todayFormatted}</span>
+          <span className="opacity-40">•</span>
+          <span>
+            {pending.length === 0 ? 'All tasks complete' : `${pending.length} focus ${pending.length === 1 ? 'task' : 'tasks'} remaining`}
+          </span>
+        </div>
 
-            <div className="flex items-center gap-1.5 pt-2 border-t border-white/5 text-[10px] font-mono">
-              <span className="px-1.5 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                {highPriorityPending.length} High
-              </span>
-              <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                {tasks.filter((t) => t.priority === 'Medium' && t.status !== 'Completed').length} Med
-              </span>
-              <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                {tasks.filter((t) => t.priority === 'Low' && t.status !== 'Completed').length} Low
-              </span>
-            </div>
-          </div>
-
-          {/* Card 2: ACTIVE FOCUS */}
-          <div className="relative rounded-[24px] glass-panel-fluid p-5 group flex flex-col justify-between before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-cyan-500/60 before:to-transparent hover:shadow-[0_8px_30px_rgba(6,182,212,0.12)]">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest font-mono" style={{ color: 'var(--text-muted)' }}>
-                ACTIVE FOCUS
-              </span>
-              <div className="h-8 w-8 rounded-xl bg-cyan-500/15 text-cyan-400 grid place-items-center transition-transform group-hover:scale-110">
-                <Layers size={15} />
-              </div>
-            </div>
-
-            <div className="my-2 flex items-baseline gap-2">
-              <p className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                {inProgress.length || (pending.length > 0 ? 1 : 0)}
-              </p>
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-cyan-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                In Progress
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-white/5 font-mono">
-              <span className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>
-                {highPriorityPending[0]?.title || pending[0]?.title || 'All focus items clear'}
-              </span>
-            </div>
-          </div>
-
-          {/* Card 3: NEXT DEADLINE */}
-          <Link
-            to="/calendar"
-            className="relative rounded-[24px] glass-panel-fluid p-5 group flex flex-col justify-between before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-amber-500/60 before:to-transparent hover:shadow-[0_8px_30px_rgba(245,158,11,0.12)] transition-all block"
+        {/* Action Buttons */}
+        <div className="flex items-center justify-center gap-2.5 pt-2">
+          <button
+            type="button"
+            onClick={() => setTaskModalOpen(true)}
+            className="btn-glass-primary rounded-full px-4 py-2 text-xs font-semibold"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest font-mono" style={{ color: 'var(--text-muted)' }}>
-                NEXT DEADLINE
-              </span>
-              <div className="h-8 w-8 rounded-xl bg-amber-500/15 text-amber-400 grid place-items-center transition-transform group-hover:scale-110">
-                <Clock size={15} />
-              </div>
-            </div>
+            <Plus size={14} />
+            <span>New Task</span>
+          </button>
 
-            <p className="text-base sm:text-lg font-bold tracking-tight my-2 truncate group-hover:text-amber-300 transition-colors" style={{ color: 'var(--text-primary)' }}>
-              {nextDeadline?.title || 'No upcoming tasks'}
+          <button
+            type="button"
+            onClick={() => setEventModalOpen(true)}
+            className="btn-glass rounded-full px-4 py-2 text-xs font-semibold"
+          >
+            <CalendarIcon size={13} style={{ color: 'var(--accent-color)' }} />
+            <span>Schedule</span>
+          </button>
+        </div>
+      </section>
+
+
+      {/* ══════════════════════════════════════════════════════════════
+          2. QUICK UPDATES BAR (GLANCEABLE WORKSPACE INTELLIGENCE)
+      ══════════════════════════════════════════════════════════════ */}
+      <div className="rounded-2xl glass-panel-fluid p-4 sm:p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10">
+          
+          {/* Quick Update 1: Immediate Priority Task */}
+          <div className="sm:px-4 first:pl-0 flex flex-col justify-between space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-cyan-400 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                Focus Task
+              </span>
+              {targetTask && (
+                <button
+                  type="button"
+                  onClick={() => setTaskStatus(targetTask.id, 'Completed')}
+                  className="btn-glass px-2.5 py-0.5 rounded-lg text-[10px] font-bold text-emerald-400"
+                  title="Mark as done"
+                >
+                  <Check size={11} strokeWidth={2.5} /> Done
+                </button>
+              )}
+            </div>
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+              {targetTask?.title || 'All focus tasks clear'}
             </p>
+            <span className="text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>
+              {pending.length} {pending.length === 1 ? 'task' : 'tasks'} queued
+            </span>
+          </div>
 
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-white/5 font-mono">
-              <span style={{ color: 'var(--text-muted)' }}>
-                {nextDeadline?.isTask ? 'Task due' : 'Event'}
-              </span>
-              <span className="font-extrabold text-amber-400 flex items-center gap-1">
-                {nextDeadline ? `${relativeDay(nextDeadline.date)}${nextDeadline.time ? ' · ' + nextDeadline.time : ''}` : 'All clear'}
-                <ArrowUpRight size={12} className="opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </span>
-            </div>
-          </Link>
-
-          {/* Card 4: HEALTH INDEX */}
-          <div className="relative rounded-[24px] glass-panel-fluid p-5 group flex flex-col justify-between before:absolute before:inset-x-0 before:top-0 before:h-[1.5px] before:bg-gradient-to-r before:from-transparent before:via-emerald-500/60 before:to-transparent hover:shadow-[0_8px_30px_rgba(16,185,129,0.12)]">
+          {/* Quick Update 2: Upcoming Schedule */}
+          <div className="sm:px-4 pt-3 sm:pt-0 flex flex-col justify-between space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest font-mono" style={{ color: 'var(--text-muted)' }}>
-                HEALTH INDEX
+              <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-amber-400 flex items-center gap-1.5">
+                <Clock size={11} />
+                Next Event
               </span>
-              <div className="h-8 w-8 rounded-xl bg-emerald-500/15 text-emerald-400 grid place-items-center transition-transform group-hover:scale-110">
-                <Flame size={15} />
-              </div>
+              <Link to="/calendar" className="text-[10px] text-indigo-400 hover:underline flex items-center gap-0.5">
+                Calendar <ArrowUpRight size={10} />
+              </Link>
             </div>
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+              {nextDeadline?.title || 'No upcoming events'}
+            </p>
+            <span className="text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>
+              {nextDeadline ? `${relativeDay(nextDeadline.date)}${nextDeadline.time ? ' at ' + nextDeadline.time : ''}` : 'Day is open'}
+            </span>
+          </div>
 
-            <div className="my-2 flex items-baseline gap-2">
-              <p className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                {pct}
-              </p>
-              <span className="text-sm font-normal" style={{ color: 'var(--text-muted)' }}>
-                / 100
+          {/* Quick Update 3: Velocity & Momentum */}
+          <div className="sm:px-4 last:pr-0 pt-3 sm:pt-0 flex flex-col justify-between space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-emerald-400 flex items-center gap-1.5">
+                <TrendingUp size={11} />
+                Daily Velocity
+              </span>
+              <span className="text-xs font-mono font-bold" style={{ color: 'var(--text-primary)' }}>
+                {pct}%
               </span>
             </div>
-
-            <div className="flex items-center justify-between text-xs pt-2 border-t border-white/5 font-mono">
-              <span style={{ color: 'var(--text-muted)' }}>Velocity Rating</span>
-              <span className="font-bold text-emerald-400">
-                {pct >= 80 ? 'Peak Flow 🔥' : pct >= 50 ? 'Steady ⚡' : 'Building Up 🌱'}
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                +{completed.length} completed
               </span>
+              <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                • {pending.length} remaining
+              </span>
+            </div>
+            {/* Minimal thin progress bar */}
+            <div className="w-full h-1 rounded-full overflow-hidden mt-1" style={{ background: 'rgba(255,255,255,0.08)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-500 ease-out"
+                style={{
+                  width: `${pct}%`,
+                  background: 'var(--accent-gradient)',
+                }}
+              />
             </div>
           </div>
 
         </div>
-
       </div>
 
 
       {/* ══════════════════════════════════════════════════════════════
-          3. MAIN TWO-COLUMN DECK: FOCUS CHECKLIST & REALIGNED WIDGETS
+          3. MAIN WORKSPACE: FOCUS CHECKLIST & QUIET SIDE PANEL
       ══════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
         
-        {/* ───────────────────────────────────────────────────────────
-            LEFT COLUMN (7 COLS): FOCUS CHECKLIST & PRIORITY STREAM
-        ─────────────────────────────────────────────────────────── */}
-        <div className="lg:col-span-7 flex flex-col">
-          <div className="rounded-[28px] glass-panel-fluid p-6 sm:p-7 relative overflow-hidden flex flex-col h-full">
-            
-            {/* Header: Title + Filter Pills + View All */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-white/10">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base sm:text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                    Focus Checklist & Priorities
-                  </h2>
-                  <span
-                    className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold"
-                    style={{
-                      background: 'var(--bg-surface)',
-                      color: 'var(--text-muted)',
-                      border: '1px solid var(--border-subtle)',
-                    }}
-                  >
-                    {filteredTasks.length}
-                  </span>
-                </div>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  Interactive priority stream for your active workspace
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/tasks"
-                  className="text-xs font-semibold flex items-center gap-1 hover:opacity-80 transition-opacity"
-                  style={{ color: 'var(--accent-color, #818cf8)' }}
-                >
-                  Kanban Board <ArrowUpRight size={13} />
-                </Link>
-              </div>
+        {/* Left Column (7 cols): Clean Focus Checklist */}
+        <div className="lg:col-span-7 rounded-2xl glass-panel-fluid p-6 space-y-4">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                Focus Tasks
+              </h2>
+              <span
+                className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold"
+                style={{
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                {filteredTasks.length}
+              </span>
             </div>
 
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 text-xs">
-              {[
-                { id: 'All', label: 'All Pending' },
-                { id: 'Today', label: 'Due Today' },
-                { id: 'High', label: 'High Priority' },
-                { id: 'Completed', label: 'Completed' },
-              ].map((pill) => (
+            {/* Clean minimal text filter */}
+            <div className="flex items-center gap-3 text-xs font-semibold">
+              {['All', 'Today', 'Completed'].map((tab) => (
                 <button
-                  key={pill.id}
-                  onClick={() => setActiveFilter(pill.id)}
-                  className={`px-3.5 py-1.5 rounded-xl font-semibold transition-all shrink-0 ${
-                    activeFilter === pill.id
-                      ? 'shadow-sm text-white'
-                      : 'hover:bg-white/5 opacity-70 hover:opacity-100'
+                  key={tab}
+                  onClick={() => setActiveFilter(tab)}
+                  className={`transition-colors ${
+                    activeFilter === tab
+                      ? 'text-white border-b-2 border-indigo-400 pb-0.5'
+                      : 'hover:text-stone-300'
                   }`}
-                  style={
-                    activeFilter === pill.id
-                      ? {
-                          background: 'var(--accent-gradient)',
-                          boxShadow: '0 2px 10px var(--accent-glow)',
-                        }
-                      : {
-                          background: 'var(--bg-surface)',
-                          border: '1px solid var(--border-subtle)',
-                          color: 'var(--text-primary)',
-                        }
-                  }
+                  style={{
+                    color: activeFilter === tab ? 'var(--text-primary)' : 'var(--text-muted)',
+                  }}
                 >
-                  {pill.label}
+                  {tab}
                 </button>
               ))}
             </div>
+          </div>
 
-            {/* Fast Inline Task Add Bar */}
-            <form
-              onSubmit={handleQuickTaskAdd}
-              className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border transition-all mb-4 focus-within:ring-1"
+          {/* Clean Quick-Add Input */}
+          <form
+            onSubmit={handleQuickTaskAdd}
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all focus-within:border-indigo-400/50"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <input
+              type="text"
+              value={inlineTaskTitle}
+              onChange={(e) => setInlineTaskTitle(e.target.value)}
+              placeholder="Add a task for today... (Press Enter ↵)"
+              className="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-stone-400"
+              style={{ color: 'var(--text-primary)' }}
+            />
+
+            <select
+              value={inlinePriority}
+              onChange={(e) => setInlinePriority(e.target.value)}
+              className="text-[11px] font-bold rounded-lg px-2 py-1 outline-none border cursor-pointer shrink-0"
               style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-card)',
-                boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.1)',
+                background: 'var(--bg-card)',
+                borderColor: 'var(--border-subtle)',
+                color: inlinePriority === 'High' ? '#f43f5e' : inlinePriority === 'Medium' ? '#f59e0b' : '#10b981',
               }}
             >
-              <div className="h-5 w-5 rounded-full border border-dashed border-stone-400 flex items-center justify-center shrink-0">
-                <Plus size={12} style={{ color: 'var(--text-muted)' }} />
-              </div>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </form>
 
-              <input
-                id="dashboard-inline-task"
-                type="text"
-                value={inlineTaskTitle}
-                onChange={(e) => setInlineTaskTitle(e.target.value)}
-                placeholder="Quick-add a focus task... (Press Enter ↵)"
-                className="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-stone-400"
-                style={{ color: 'var(--text-primary)' }}
-              />
-
-              {/* Priority toggle inside input */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                <select
-                  value={inlinePriority}
-                  onChange={(e) => setInlinePriority(e.target.value)}
-                  className="text-[11px] font-bold rounded-lg px-2 py-1 outline-none border cursor-pointer"
-                  style={{
-                    background: 'var(--bg-card)',
-                    borderColor: 'var(--border-subtle)',
-                    color: inlinePriority === 'High' ? '#f43f5e' : inlinePriority === 'Medium' ? '#f59e0b' : '#10b981',
-                  }}
-                >
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
-                </select>
-
-                <select
-                  value={inlineCategory}
-                  onChange={(e) => setInlineCategory(e.target.value)}
-                  className="text-[11px] font-bold rounded-lg px-2 py-1 outline-none border cursor-pointer hidden sm:block"
-                  style={{
-                    background: 'var(--bg-card)',
-                    borderColor: 'var(--border-subtle)',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  <option value="Focus">Focus</option>
-                  <option value="Work">Work</option>
-                  <option value="Personal">Personal</option>
-                </select>
-
-                {inlineTaskTitle.trim() && (
-                  <button
-                    type="submit"
-                    className="text-xs font-bold text-white px-3.5 py-1 rounded-lg shadow-sm hover:brightness-110 active:scale-95 transition-all"
-                    style={{ background: 'var(--accent-gradient)' }}
-                  >
-                    Save
-                  </button>
-                )}
-              </div>
-            </form>
-
-            {/* Checklist Items Stream (Expanded & Fluid) */}
-            <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[560px] pr-1">
-              {filteredTasks.length === 0 ? (
-                <div
-                  className="h-full min-h-[260px] flex flex-col items-center justify-center py-12 px-4 rounded-2xl text-center border"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    borderColor: 'var(--border-subtle)',
-                  }}
-                >
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 mb-3 shadow-inner">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {activeFilter === 'Completed'
-                      ? 'No tasks completed yet'
-                      : activeFilter === 'High'
-                      ? 'No high-priority tasks pending'
-                      : 'All focus tasks clear'}
-                  </p>
-                  <p className="text-xs mt-1 max-w-sm" style={{ color: 'var(--text-muted)' }}>
-                    {activeFilter === 'Completed'
-                      ? 'Mark tasks done to see your accomplishment stream.'
-                      : 'Capture a new task above or launch a Focus Sprint to stay in peak flow.'}
-                  </p>
-                </div>
-              ) : (
-                filteredTasks.map((task) => {
-                  const isDone = task.status === 'Completed';
-                  return (
-                    <div
-                      key={task.id}
-                      className="flex items-center justify-between gap-3 p-3.5 rounded-2xl border transition-all duration-200 group hover:scale-[1.005]"
-                      style={{
-                        background: isDone ? 'rgba(255,255,255,0.02)' : 'var(--bg-surface)',
-                        borderColor: 'var(--border-subtle)',
-                      }}
-                    >
-                      {/* Left: Checkbox + Title & Details */}
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <button
-                          onClick={() => setTaskStatus(task.id, isDone ? 'Todo' : 'Completed')}
-                          className={`h-5 w-5 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 ${
-                            isDone
-                              ? 'bg-emerald-500 text-white shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                              : 'border border-stone-400 hover:border-emerald-400 hover:bg-emerald-500/20 text-transparent hover:text-emerald-400'
-                          }`}
-                          title={isDone ? 'Mark as incomplete' : 'Mark as completed'}
-                        >
-                          <Check size={12} strokeWidth={3} />
-                        </button>
-
-                        <div className="min-w-0">
-                          <p
-                            className={`text-xs sm:text-sm font-medium truncate transition-all ${
-                              isDone ? 'line-through opacity-45' : ''
-                            }`}
-                            style={{ color: isDone ? 'var(--text-muted)' : 'var(--text-primary)' }}
-                          >
-                            {task.title}
-                          </p>
-
-                          <div className="flex items-center gap-2 mt-0.5 text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
-                            {task.dueDate && (
-                              <span
-                                className={
-                                  task.dueDate < today && !isDone
-                                    ? 'text-rose-400 font-bold'
-                                    : task.dueDate === today
-                                    ? 'text-amber-400 font-semibold'
-                                    : ''
-                                }
-                              >
-                                Due {relativeDay(task.dueDate)}
-                              </span>
-                            )}
-                            <span>•</span>
-                            <span>{task.category || 'Focus'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right: Priority Pill + Delete on hover */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                            priorityPill[task.priority] || priorityPill.Medium
-                          }`}
-                        >
-                          {task.priority}
-                        </span>
-
-                        <button
-                          onClick={() => deleteTask(task.id)}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-rose-500/20 text-rose-400 transition-all"
-                          title="Delete task"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ───────────────────────────────────────────────────────────
-            RIGHT COLUMN (5 COLS): REALIGNED THREE MODERN BOXES
-        ─────────────────────────────────────────────────────────── */}
-        <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
-          
-          {/* ══════════════════════════════════════════════════════════
-              Box 1: Focus Sprint Station (Redesigned & Interactive)
-          ══════════════════════════════════════════════════════════ */}
-          <div id="focus-sprint-station" className="rounded-[28px] glass-panel-fluid p-6 relative overflow-hidden">
-            
-            {/* Header: Title + Presets */}
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-xl bg-amber-500/15 text-amber-400 grid place-items-center shadow-xs">
-                  <Zap size={16} className="fill-amber-400/20" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                    Focus Sprint Station
-                  </h3>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                    Cadenced intervals for uninterrupted flow
-                  </p>
-                </div>
-              </div>
-
-              {/* Interval Preset Switcher */}
-              <div
-                className="flex items-center p-0.5 rounded-xl border text-[11px] font-bold"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-subtle)',
-                }}
-              >
-                {[
-                  { label: '15m', sec: 15 * 60 },
-                  { label: '25m', sec: 25 * 60 },
-                  { label: '45m', sec: 45 * 60 },
-                  { label: '5m', sec: 5 * 60 },
-                ].map((p) => (
-                  <button
-                    key={p.label}
-                    onClick={() => handleSelectPreset(p.label, p.sec)}
-                    className={`px-2 py-0.5 rounded-lg transition-all ${
-                      timerPreset === p.label ? 'bg-indigo-500 text-white shadow-xs' : 'opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Timer Center Stage */}
-            <div
-              className="flex items-center justify-between gap-4 p-4 rounded-2xl border"
-              style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
-            >
-              <div>
-                <span className="text-3xl sm:text-4xl font-black tracking-tight font-mono" style={{ color: 'var(--text-primary)' }}>
-                  {formattedTimer}
-                </span>
-                <p className="text-[11px] mt-0.5 truncate max-w-[190px]" style={{ color: 'var(--text-muted)' }}>
-                  {timerActive ? (
-                    <span className="text-emerald-400 font-semibold">⚡ Sprint underway — stay focused</span>
-                  ) : targetFocusTask ? (
-                    <span>Target: <strong style={{ color: 'var(--text-primary)' }}>{targetFocusTask.title}</strong></span>
-                  ) : (
-                    <span>Deep Work Cadence</span>
-                  )}
+          {/* Task List */}
+          <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
+            {filteredTasks.length === 0 ? (
+              <div className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>
+                <CheckCircle2 size={24} className="mx-auto mb-2 opacity-40 text-emerald-400" />
+                <p className="text-xs font-semibold">
+                  {activeFilter === 'Completed' ? 'No completed tasks yet' : 'All focus tasks clear'}
                 </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleToggleTimer}
-                  className={`h-11 w-11 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform hover:scale-105 active:scale-95 ${
-                    timerActive
-                      ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/25'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-600 shadow-indigo-500/25'
-                  }`}
-                  title={timerActive ? 'Pause sprint' : 'Start sprint'}
-                >
-                  {timerActive ? <Pause size={18} /> : <Play size={18} className="ml-0.5 fill-white" />}
-                </button>
-
-                <button
-                  onClick={() => handleSelectPreset(timerPreset, timerTotalSeconds)}
-                  className="h-11 w-11 rounded-2xl glass-btn-fluid flex items-center justify-center transition-transform hover:rotate-45"
-                  title="Reset sprint"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  <RotateCcw size={15} />
-                </button>
-              </div>
-            </div>
-
-            {/* Glowing Micro Progress Bar */}
-            <div className="mt-3 w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-              <div
-                className="h-full rounded-full transition-all duration-500 ease-out"
-                style={{
-                  width: `${timerPct}%`,
-                  background: timerPreset === '5m' ? '#10b981' : 'var(--accent-gradient)',
-                }}
-              />
-            </div>
-          </div>
-
-
-          {/* ══════════════════════════════════════════════════════════
-              Box 2: Today's Agenda & Schedule Timeline
-          ══════════════════════════════════════════════════════════ */}
-          <div className="rounded-[28px] glass-panel-fluid p-6 relative overflow-hidden">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-xl bg-indigo-500/15 text-indigo-400 grid place-items-center">
-                  <CalendarIcon size={16} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                    Today's Agenda & Schedule
-                  </h3>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                    {todaysEvents.length} {todaysEvents.length === 1 ? 'event' : 'events'} queued for today
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setEventModalOpen(true)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-semibold glass-btn-fluid flex items-center gap-1"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  <Plus size={12} />
-                  <span>Event</span>
-                </button>
-                <Link
-                  to="/calendar"
-                  className="text-xs font-semibold flex items-center gap-0.5 hover:opacity-80 transition-opacity"
-                  style={{ color: 'var(--accent-color, #818cf8)' }}
-                >
-                  Calendar <ArrowUpRight size={12} />
-                </Link>
-              </div>
-            </div>
-
-            {todaysEvents.length === 0 ? (
-              <div
-                className="py-6 px-4 rounded-2xl text-center border"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
-              >
-                <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  No calendar events scheduled today
-                </p>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  Your schedule is wide open for uninterrupted focus.
+                <p className="text-[11px] mt-0.5 opacity-70">
+                  {activeFilter === 'Completed' ? 'Check off items above to see them here.' : 'Add a task or take a breather.'}
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {todaysEvents.slice(0, 3).map((evt) => (
+              filteredTasks.map((task) => {
+                const isDone = task.status === 'Completed';
+                return (
                   <div
-                    key={evt.id}
-                    className="flex items-center justify-between p-3 rounded-2xl border transition-all hover:bg-white/[0.04]"
-                    style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+                    key={task.id}
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl border transition-all hover:bg-white/[0.02] group"
+                    style={{
+                      background: isDone ? 'rgba(255,255,255,0.01)' : 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
+                    }}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-2 w-2 rounded-full bg-indigo-400 shrink-0 shadow-[0_0_6px_#818cf8]" />
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <button
+                        onClick={() => setTaskStatus(task.id, isDone ? 'Todo' : 'Completed')}
+                        className={`h-4.5 w-4.5 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                          isDone
+                            ? 'bg-emerald-500 text-white'
+                            : 'border border-stone-400 hover:border-emerald-400 hover:bg-emerald-500/20 text-transparent hover:text-emerald-400'
+                        }`}
+                      >
+                        <Check size={11} strokeWidth={3} />
+                      </button>
+
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                          {evt.title}
+                        <p
+                          className={`text-xs sm:text-sm font-medium truncate ${
+                            isDone ? 'line-through opacity-40' : ''
+                          }`}
+                          style={{ color: isDone ? 'var(--text-muted)' : 'var(--text-primary)' }}
+                        >
+                          {task.title}
                         </p>
-                        <p className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                          {evt.time || 'All Day'} • {evt.category || 'General'}
-                        </p>
+
+                        <div className="flex items-center gap-2 mt-0.5 text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                          {task.dueDate && <span>Due {relativeDay(task.dueDate)}</span>}
+                          <span>•</span>
+                          <span>{task.category || 'General'}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono font-medium shrink-0">
-                      Confirmed
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor:
+                            task.priority === 'High'
+                              ? '#f43f5e'
+                              : task.priority === 'Medium'
+                              ? '#f59e0b'
+                              : '#10b981',
+                        }}
+                        title={`Priority: ${task.priority}`}
+                      />
+
+                      <button
+                        onClick={() => deleteTask(task.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-stone-400 hover:text-rose-400 transition-opacity"
+                        title="Delete"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="pt-2 text-right">
+            <Link
+              to="/tasks"
+              className="text-xs font-semibold inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--accent-color, #818cf8)' }}
+            >
+              Open Tasks Board <ArrowUpRight size={12} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Column (5 cols): Today's Schedule & Scratchpad */}
+        <div className="lg:col-span-5 space-y-6">
+          
+          {/* Card 1: Today's Schedule */}
+          <div className="rounded-2xl glass-panel-fluid p-6 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h3 className="text-sm font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                Today's Schedule
+              </h3>
+              <Link to="/calendar" className="text-xs font-semibold flex items-center gap-0.5" style={{ color: 'var(--accent-color, #818cf8)' }}>
+                Calendar <ArrowUpRight size={11} />
+              </Link>
+            </div>
+
+            {todaysEvents.length === 0 ? (
+              <p className="text-xs py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+                No events scheduled for today.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {todaysEvents.slice(0, 3).map((evt) => (
+                  <div
+                    key={evt.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl border"
+                    style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                        {evt.title}
+                      </p>
+                      <p className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                        {evt.time || 'All Day'}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5" style={{ color: 'var(--text-muted)' }}>
+                      {evt.category || 'Event'}
                     </span>
                   </div>
                 ))}
@@ -983,152 +607,109 @@ export default function Dashboard() {
             )}
           </div>
 
-
-          {/* ══════════════════════════════════════════════════════════
-              Box 3: Quick Notes & Live Scratchpad (Realigned & Functional)
-          ══════════════════════════════════════════════════════════ */}
-          <div className="rounded-[28px] glass-panel-fluid p-6 relative overflow-hidden flex-1 flex flex-col">
-            
-            {/* Header with Switcher Tabs */}
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-xl bg-pink-500/15 text-pink-400 grid place-items-center">
-                  <FileText size={16} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                    {notesTab === 'notes' ? 'Recent Notes' : 'Live Scratchpad'}
-                  </h3>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                    {notesTab === 'notes' ? 'Your latest thoughts & docs' : 'Auto-saving instant notepad'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Tab Switcher */}
-              <div
-                className="flex items-center p-0.5 rounded-xl border text-[11px] font-bold"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-subtle)',
-                }}
-              >
+          {/* Card 2: Scratchpad & Quick Notes */}
+          <div className="rounded-2xl glass-panel-fluid p-6 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <div className="flex items-center gap-3 text-xs font-bold">
                 <button
-                  onClick={() => setNotesTab('notes')}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    notesTab === 'notes' ? 'bg-pink-500 text-white shadow-xs' : 'opacity-60 hover:opacity-100'
+                  onClick={() => setSideTab('scratchpad')}
+                  className={`transition-colors ${
+                    sideTab === 'scratchpad'
+                      ? 'text-white border-b-2 border-indigo-400 pb-0.5'
+                      : 'hover:text-stone-300'
                   }`}
-                >
-                  Notes
-                </button>
-                <button
-                  onClick={() => setNotesTab('scratchpad')}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    notesTab === 'scratchpad' ? 'bg-indigo-500 text-white shadow-xs' : 'opacity-60 hover:opacity-100'
-                  }`}
+                  style={{
+                    color: sideTab === 'scratchpad' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  }}
                 >
                   Scratchpad
                 </button>
+                <button
+                  onClick={() => setSideTab('notes')}
+                  className={`transition-colors ${
+                    sideTab === 'notes'
+                      ? 'text-white border-b-2 border-indigo-400 pb-0.5'
+                      : 'hover:text-stone-300'
+                  }`}
+                  style={{
+                    color: sideTab === 'notes' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  }}
+                >
+                  Recent Notes
+                </button>
               </div>
+
+              {sideTab === 'notes' && (
+                <Link to="/notes" className="text-xs font-semibold flex items-center gap-0.5" style={{ color: 'var(--accent-color, #818cf8)' }}>
+                  All <ArrowUpRight size={11} />
+                </Link>
+              )}
             </div>
 
-            {/* Tab 1: Recent Notes Cards */}
-            {notesTab === 'notes' ? (
-              <div className="space-y-2 flex-1">
-                {recentNotes.length === 0 ? (
-                  <div
-                    className="py-8 px-4 rounded-2xl text-center border"
-                    style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
-                  >
-                    <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      No notes authored yet
-                    </p>
-                    <Link
-                      to="/notes"
-                      className="text-xs font-semibold text-pink-400 hover:underline mt-1 inline-block"
-                    >
-                      + Create your first note
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {recentNotes.map((note) => (
-                      <Link
-                        key={note.id}
-                        to="/notes"
-                        className="p-3 rounded-2xl border hover:border-white/20 transition-all group block"
-                        style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
-                      >
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <p className="text-xs font-semibold truncate group-hover:text-pink-300 transition-colors" style={{ color: 'var(--text-primary)' }}>
-                            {note.title || 'Untitled Note'}
-                          </p>
-                          <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-white/5 border border-white/5 font-mono" style={{ color: 'var(--text-muted)' }}>
-                            {note.category || 'Note'}
-                          </span>
-                        </div>
-                        <p className="text-[11px] line-clamp-2 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                          {note.description || note.content || 'No content...'}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-
-                <div className="pt-2 text-right">
-                  <Link
-                    to="/notes"
-                    className="text-xs font-semibold inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
-                    style={{ color: 'var(--accent-color, #818cf8)' }}
-                  >
-                    All Notes <ArrowUpRight size={12} />
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              /* Tab 2: Live Scratchpad Area */
-              <div className="flex flex-col flex-1 space-y-2">
+            {sideTab === 'scratchpad' ? (
+              <div className="space-y-2">
                 <textarea
                   value={scratchpadText}
                   onChange={(e) => setScratchpadText(e.target.value)}
-                  placeholder="Jot down quick ideas, phone numbers, or fleeting thoughts here... (Auto-saved)"
+                  placeholder="Jot down quick thoughts... (auto-saved)"
                   rows={4}
-                  className="w-full rounded-2xl p-3 text-xs sm:text-sm bg-transparent outline-none border resize-none focus:border-indigo-400/50 transition-all leading-relaxed"
+                  className="w-full rounded-xl p-3 text-xs bg-transparent outline-none border resize-none focus:border-indigo-400/50 transition-all leading-relaxed"
                   style={{
                     background: 'var(--bg-surface)',
                     borderColor: 'var(--border-subtle)',
                     color: 'var(--text-primary)',
                   }}
                 />
-
-                <div className="flex items-center justify-between text-[11px] pt-1 font-mono">
+                <div className="flex items-center justify-between text-[11px] font-mono">
                   <span style={{ color: 'var(--text-muted)' }}>
                     {scratchpadSaved ? (
                       <span className="text-emerald-400 font-bold">✓ Saved to notes!</span>
                     ) : (
-                      <span>{scratchpadText.length} characters • Auto-saved</span>
+                      <span>Auto-saved</span>
                     )}
                   </span>
-
                   {scratchpadText.trim() && (
                     <button
-                      onClick={handleSaveScratchpadAsNote}
-                      className="px-3 py-1 rounded-xl text-xs font-bold text-white shadow-xs hover:brightness-110 active:scale-95 transition-all flex items-center gap-1"
-                      style={{ background: 'var(--accent-gradient)' }}
+                      type="button"
+                      onClick={handleSaveScratchpad}
+                      className="btn-glass-primary rounded-xl px-3 py-1.5 text-xs font-semibold"
                     >
-                      <Save size={12} />
-                      <span>Save as Note</span>
+                      Save as Note
                     </button>
                   )}
                 </div>
               </div>
+            ) : (
+              <div className="space-y-2">
+                {recentNotes.length === 0 ? (
+                  <p className="text-xs py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+                    No notes authored yet.
+                  </p>
+                ) : (
+                  recentNotes.map((note) => (
+                    <Link
+                      key={note.id}
+                      to="/notes"
+                      className="block p-2.5 rounded-xl border hover:border-white/20 transition-all"
+                      style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+                    >
+                      <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                        {note.title || 'Untitled'}
+                      </p>
+                      <p className="text-[11px] line-clamp-1 mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                        {note.description || note.content || 'Empty note...'}
+                      </p>
+                    </Link>
+                  ))
+                )}
+              </div>
             )}
-
           </div>
 
         </div>
 
       </div>
+
 
       {/* ══════════════════════════════════════════════════════════════
           4. CREATE NEW TASK MODAL
@@ -1190,22 +771,13 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setTaskModalOpen(false)}
-              className="rounded-xl px-4 py-2 text-xs font-semibold transition-all"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-card)',
-                color: 'var(--text-muted)',
-              }}
+              className="btn-glass rounded-xl px-4 py-2 text-xs"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-xl px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-95"
-              style={{
-                background: 'var(--accent-gradient)',
-                boxShadow: '0 4px 16px var(--accent-glow)',
-              }}
+              className="btn-glass-primary rounded-xl px-5 py-2 text-xs font-bold"
             >
               Save Task
             </button>
@@ -1220,7 +792,7 @@ export default function Dashboard() {
         <form onSubmit={handleModalEventSubmit} className="space-y-4">
           <LabeledInput
             label="Event Title"
-            placeholder="e.g. Design review meeting"
+            placeholder="e.g. Weekly planning sync"
             value={eventForm.title}
             onChange={(v) => setEventForm((f) => ({ ...f, title: v }))}
             required
@@ -1285,22 +857,13 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setEventModalOpen(false)}
-              className="rounded-xl px-4 py-2 text-xs font-semibold transition-all"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-card)',
-                color: 'var(--text-muted)',
-              }}
+              className="btn-glass rounded-xl px-4 py-2 text-xs"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-xl px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-95"
-              style={{
-                background: 'var(--accent-gradient)',
-                boxShadow: '0 4px 16px var(--accent-glow)',
-              }}
+              className="btn-glass-primary rounded-xl px-5 py-2 text-xs font-bold"
             >
               Save Event
             </button>

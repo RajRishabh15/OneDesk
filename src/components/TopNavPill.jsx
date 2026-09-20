@@ -49,11 +49,14 @@ export default function TopNavPill() {
   const [notifOpen, setNotifOpen]   = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
 
-  const searchBoxRef  = useRef(null);
-  const searchInputRef= useRef(null);
-  const profileRef    = useRef(null);
-  const notifRef      = useRef(null);
-  const quickAddRef   = useRef(null);
+  const desktopSearchBoxRef   = useRef(null);
+  const desktopSearchInputRef = useRef(null);
+  const mobileSearchBoxRef    = useRef(null);
+  const mobileSearchInputRef  = useRef(null);
+  const profileRef            = useRef(null);
+  const desktopNotifRef       = useRef(null);
+  const mobileNotifRef        = useRef(null);
+  const quickAddRef           = useRef(null);
 
   function handleLogout() {
     setProfileOpen(false);
@@ -64,9 +67,15 @@ export default function TopNavPill() {
   /* ── close on outside click ── */
   useEffect(() => {
     function onDown(e) {
-      if (searchBoxRef.current  && !searchBoxRef.current.contains(e.target))  setSearchOpen(false);
+      const inDesktopSearch = desktopSearchBoxRef.current && desktopSearchBoxRef.current.contains(e.target);
+      const inMobileSearch  = mobileSearchBoxRef.current && mobileSearchBoxRef.current.contains(e.target);
+      if (!inDesktopSearch && !inMobileSearch) setSearchOpen(false);
+
+      const inDesktopNotif  = desktopNotifRef.current && desktopNotifRef.current.contains(e.target);
+      const inMobileNotif   = mobileNotifRef.current && mobileNotifRef.current.contains(e.target);
+      if (!inDesktopNotif && !inMobileNotif) setNotifOpen(false);
+
       if (profileRef.current    && !profileRef.current.contains(e.target))    setProfileOpen(false);
-      if (notifRef.current      && !notifRef.current.contains(e.target))      setNotifOpen(false);
       if (quickAddRef.current   && !quickAddRef.current.contains(e.target))   setQuickAddOpen(false);
     }
     document.addEventListener('mousedown', onDown);
@@ -79,7 +88,13 @@ export default function TopNavPill() {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setSearchOpen(true);
-        setTimeout(() => searchInputRef.current?.focus(), 50);
+        setTimeout(() => {
+          if (window.innerWidth >= 768) {
+            desktopSearchInputRef.current?.focus();
+          } else {
+            mobileSearchInputRef.current?.focus();
+          }
+        }, 60);
       }
       if (e.key === 'Escape') {
         setSearchOpen(false);
@@ -152,7 +167,7 @@ export default function TopNavPill() {
             <div className="h-4 w-px mx-1" style={{ background: 'var(--border-card)' }} />
 
             {/* Notification Bell */}
-            <div className="relative" ref={notifRef}>
+            <div className="relative" ref={desktopNotifRef}>
               <button
                 onClick={() => { setNotifOpen(v => !v); setProfileOpen(false); setQuickAddOpen(false); setSearchOpen(false); }}
                 className="relative h-[30px] w-[30px] rounded-[10px] flex items-center justify-center transition-all hover:brightness-125 active:scale-95"
@@ -243,13 +258,13 @@ export default function TopNavPill() {
           <div className="flex items-center gap-1.5 shrink-0">
 
             {/* Search — single morphing pill, spring-width transition */}
-            <div className="relative" ref={searchBoxRef}>
+            <div className="relative" ref={desktopSearchBoxRef}>
               {/* The pill itself — width springs open/closed */}
               <div
                 className="flex items-center overflow-hidden rounded-[10px] border"
                 style={{
                   height: '30px',
-                  width: searchOpen ? '178px' : '30px',
+                  width: searchOpen ? '192px' : '30px',
                   /* Spring easing: fast out, slight overshoot, then settle */
                   transition: 'width 0.42s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.25s ease, background 0.25s ease',
                   background: searchOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
@@ -259,9 +274,13 @@ export default function TopNavPill() {
               >
                 {/* Search icon — always the leftmost element, acts as trigger */}
                 <button
+                  type="button"
                   onClick={() => {
-                    setSearchOpen(v => !v);
-                    if (!searchOpen) setTimeout(() => searchInputRef.current?.focus(), 220);
+                    setSearchOpen(v => {
+                      const next = !v;
+                      if (next) setTimeout(() => desktopSearchInputRef.current?.focus(), 220);
+                      return next;
+                    });
                   }}
                   title="Search (Ctrl+K)"
                   className="h-full w-[30px] shrink-0 flex items-center justify-center transition-colors duration-200"
@@ -272,7 +291,7 @@ export default function TopNavPill() {
 
                 {/* Input — fades in after pill opens */}
                 <input
-                  ref={searchInputRef}
+                  ref={desktopSearchInputRef}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   placeholder="Search…"
@@ -288,7 +307,16 @@ export default function TopNavPill() {
 
                 {/* Clear or close — fades in when open */}
                 <button
-                  onClick={() => query ? setQuery('') : setSearchOpen(false)}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (query) {
+                      setQuery('');
+                      desktopSearchInputRef.current?.focus();
+                    } else {
+                      setSearchOpen(false);
+                    }
+                  }}
                   className="h-7 w-7 shrink-0 flex items-center justify-center"
                   style={{
                     color: 'var(--text-muted)',
@@ -483,8 +511,68 @@ export default function TopNavPill() {
             </span>
           </Link>
 
-          {/* Right: Search morphing pill */}
-          <div className="relative flex items-center" ref={searchBoxRef}>
+          {/* Right: Notifications + Search morphing pill */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Mobile Notification Bell */}
+            <div className="relative" ref={mobileNotifRef}>
+              <button
+                type="button"
+                onClick={() => { setNotifOpen(v => !v); setSearchOpen(false); }}
+                className="relative h-8 w-8 rounded-[10px] flex items-center justify-center transition-all active:scale-95 border"
+                style={{
+                  background: notifOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
+                  borderColor: notifOpen ? 'var(--border-card)' : 'var(--border-subtle)',
+                  color: notifOpen ? 'var(--accent-color)' : 'var(--text-muted)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                }}
+                aria-label="Notifications"
+              >
+                <Bell size={14} />
+                {dueSoon.length > 0 && (
+                  <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
+                )}
+              </button>
+
+              {/* Mobile Notification Dropdown */}
+              {notifOpen && (
+                <div
+                  className="absolute right-0 mt-2.5 w-72 rounded-2xl border shadow-2xl p-3 animate-menu-pop z-50"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)' }}
+                >
+                  <div className="flex items-center justify-between mb-2.5">
+                    <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
+                    {dueSoon.length > 0 && (
+                      <span className="text-[10px] font-semibold bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full border border-rose-500/30">
+                        {dueSoon.length} due
+                      </span>
+                    )}
+                  </div>
+                  {dueSoon.length === 0 ? (
+                    <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>All caught up ✓</p>
+                  ) : (
+                    <ul className="space-y-1.5 max-h-56 overflow-y-auto">
+                      {dueSoon.slice(0, 5).map(t => (
+                        <li
+                          key={t.id}
+                          className="text-xs p-2 rounded-xl cursor-pointer transition-colors"
+                          style={{ color: 'var(--text-primary)' }}
+                          onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span className="font-semibold block truncate">{t.title}</span>
+                          <span className="block text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>Due {t.dueDate}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Search morphing pill */}
+            <div className="relative flex items-center" ref={mobileSearchBoxRef}>
             <div
               className="flex items-center overflow-hidden rounded-[10px] border"
               style={{
@@ -497,9 +585,13 @@ export default function TopNavPill() {
               }}
             >
               <button
+                type="button"
                 onClick={() => {
-                  setSearchOpen(v => !v);
-                  if (!searchOpen) setTimeout(() => searchInputRef.current?.focus(), 220);
+                  setSearchOpen(v => {
+                    const next = !v;
+                    if (next) setTimeout(() => mobileSearchInputRef.current?.focus(), 220);
+                    return next;
+                  });
                 }}
                 className="h-full w-8 shrink-0 flex items-center justify-center transition-colors duration-200"
                 style={{ color: searchOpen ? 'var(--accent-color)' : 'var(--text-muted)' }}
@@ -508,7 +600,7 @@ export default function TopNavPill() {
               </button>
 
               <input
-                ref={searchInputRef}
+                ref={mobileSearchInputRef}
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search…"
@@ -523,7 +615,16 @@ export default function TopNavPill() {
               />
 
               <button
-                onClick={() => query ? setQuery('') : setSearchOpen(false)}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (query) {
+                    setQuery('');
+                    mobileSearchInputRef.current?.focus();
+                  } else {
+                    setSearchOpen(false);
+                  }
+                }}
                 className="h-full w-8 shrink-0 flex items-center justify-center"
                 style={{
                   color: 'var(--text-muted)',
@@ -553,7 +654,8 @@ export default function TopNavPill() {
             )}
           </div>
         </div>
-      </header>
+      </div>
+    </header>
 
       {/* ════════════════════════════════════════════
           MOBILE BOTTOM TAB BAR  (< md)

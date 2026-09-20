@@ -5,12 +5,7 @@ import {
   LayoutGrid,
   Rows3,
   Search,
-  X,
-  Calendar,
-  Sparkles,
-  Layers,
-  Clock,
-  ArrowRight
+  X
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import TaskCard from '../components/TaskCard';
@@ -142,14 +137,11 @@ export default function Tasks() {
         </div>
 
         <button
+          type="button"
           onClick={openNew}
-          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all shadow-lg hover:brightness-110 active:scale-95"
-          style={{
-            background: 'var(--accent-gradient)',
-            boxShadow: '0 4px 18px var(--accent-glow)',
-          }}
+          className="btn-glass-primary rounded-xl px-4 py-2 text-xs"
         >
-          <Plus size={15} /> Detailed task
+          <Plus size={15} /> <span>Detailed task</span>
         </button>
       </div>
 
@@ -176,7 +168,7 @@ export default function Tasks() {
         />
 
         {/* Priority quick selector */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {['Low', 'Medium', 'High'].map((p) => {
             const active = inlinePriority === p;
             const color = p === 'High' ? '#fb7185' : p === 'Medium' ? '#fbbf24' : '#34d399';
@@ -185,11 +177,14 @@ export default function Tasks() {
                 key={p}
                 type="button"
                 onClick={() => setInlinePriority(p)}
-                className="px-2 py-1 rounded-lg text-[10px] font-bold border transition-all"
+                className={`chip-glass px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
+                  active ? 'shadow-sm' : 'opacity-70 hover:opacity-100'
+                }`}
                 style={{
-                  background: active ? `${color}25` : 'transparent',
-                  borderColor: active ? color : 'transparent',
+                  background: active ? `${color}25` : 'var(--bg-surface)',
+                  borderColor: active ? color : 'var(--border-subtle)',
                   color: active ? color : 'var(--text-muted)',
+                  boxShadow: active ? `0 2px 8px ${color}30, inset 0 1px 0 rgba(255,255,255,0.15)` : 'none',
                 }}
               >
                 {p}
@@ -201,11 +196,7 @@ export default function Tasks() {
         <button
           type="submit"
           disabled={!inlineTitle.trim()}
-          className="px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40"
-          style={{
-            background: 'var(--accent-gradient)',
-            boxShadow: inlineTitle.trim() ? '0 2px 10px var(--accent-glow)' : 'none',
-          }}
+          className="btn-glass-primary rounded-xl px-4 py-1.5 text-xs disabled:opacity-30 disabled:pointer-events-none"
         >
           Add
         </button>
@@ -243,20 +234,18 @@ export default function Tasks() {
 
         {/* Filter Pills & View Switcher */}
         <div className="flex items-center justify-between sm:justify-end gap-2.5">
-          <div className="flex items-center gap-1 overflow-x-auto">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
             {['All', ...columns].map((c) => {
               const active = filter === c;
               const count = c === 'All' ? tasks.length : tasks.filter((t) => t.status === c).length;
               return (
                 <button
                   key={c}
+                  type="button"
                   onClick={() => setFilter(c)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0"
-                  style={{
-                    background: active ? 'var(--accent-gradient)' : 'var(--bg-surface)',
-                    borderColor: active ? 'transparent' : 'var(--border-subtle)',
-                    color: active ? '#ffffff' : 'var(--text-muted)',
-                  }}
+                  className={`chip-glass px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 ${
+                    active ? 'chip-glass-active' : ''
+                  }`}
                 >
                   <span>{c}</span>
                   <span className="text-[10px] font-mono opacity-70">({count})</span>
@@ -266,28 +255,36 @@ export default function Tasks() {
           </div>
 
           <div
-            className="flex rounded-xl p-1 gap-1 border"
-            style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)' }}
+            className="flex rounded-xl p-1 gap-1 border shrink-0"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-card)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+            }}
           >
             <button
+              type="button"
               onClick={() => setView('list')}
               aria-label="List view"
               className="p-1.5 rounded-lg transition-all"
               style={
                 view === 'list'
-                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)' }
+                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
                   : { color: 'var(--text-muted)' }
               }
             >
               <Rows3 size={14} />
             </button>
             <button
+              type="button"
               onClick={() => setView('kanban')}
               aria-label="Kanban view"
               className="p-1.5 rounded-lg transition-all"
               style={
                 view === 'kanban'
-                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)' }
+                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
                   : { color: 'var(--text-muted)' }
               }
             >
@@ -537,22 +534,13 @@ export default function Tasks() {
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="rounded-xl px-4 py-2 text-xs font-semibold transition-all"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-card)',
-                color: 'var(--text-muted)',
-              }}
+              className="btn-glass rounded-xl px-4 py-2 text-xs"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-xl px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-95"
-              style={{
-                background: 'var(--accent-gradient)',
-                boxShadow: '0 4px 16px var(--accent-glow)',
-              }}
+              className="btn-glass-primary rounded-xl px-5 py-2 text-xs font-bold"
             >
               {editing ? 'Save changes' : 'Add task'}
             </button>
