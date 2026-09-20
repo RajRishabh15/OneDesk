@@ -15,6 +15,7 @@ import TaskCard from '../components/TaskCard';
 import EmptyState from '../components/EmptyState';
 import Card from '../components/Card';
 import { useData } from '../context/DataContext';
+import { useSettings } from '../context/SettingsContext';
 
 const columns = ['Todo', 'In Progress', 'Completed'];
 
@@ -34,6 +35,7 @@ function localToday() {
 
 export default function Tasks() {
   const { tasks, addTask, updateTask, deleteTask, setTaskStatus } = useData();
+  const { playChime } = useSettings();
   const [view, setView] = useState('list');
   const [filter, setFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');
@@ -162,7 +164,11 @@ export default function Tasks() {
   }
 
   function toggleComplete(task) {
-    setTaskStatus(task.id, task.status === 'Completed' ? 'Todo' : 'Completed');
+    const nextStatus = task.status === 'Completed' ? 'Todo' : 'Completed';
+    if (nextStatus === 'Completed') {
+      playChime('success');
+    }
+    setTaskStatus(task.id, nextStatus);
   }
 
   return (
@@ -196,7 +202,7 @@ export default function Tasks() {
         <button
           type="button"
           onClick={openNew}
-          className="btn-glass-primary rounded-xl px-4 py-2 text-xs w-full sm:w-auto shrink-0 shadow-sm"
+          className="btn-glass-primary rounded-full px-5 py-2.5 text-xs w-full sm:w-auto shrink-0 shadow-md"
         >
           <Plus size={15} /> <span>Detailed task</span>
         </button>
@@ -205,7 +211,7 @@ export default function Tasks() {
       {/* ── Enhanced Inline Quick-Add Bar ─────────────────────── */}
       <form
         onSubmit={handleInlineAdd}
-        className="p-3 sm:p-3.5 rounded-2xl border transition-all glass-card flex flex-wrap items-center gap-2.5 sm:gap-3"
+        className="p-3 sm:p-3.5 rounded-[28px] border transition-all glass-card flex flex-wrap items-center gap-2.5 sm:gap-3"
         style={{ borderColor: 'var(--border-card)' }}
       >
         <div
@@ -225,7 +231,13 @@ export default function Tasks() {
         />
 
         {/* Priority quick selector */}
-        <div className="flex items-center gap-1.5">
+        <div
+          className="flex items-center p-0.5 gap-1 rounded-full border shrink-0"
+          style={{
+            background: 'var(--bg-surface)',
+            borderColor: 'var(--border-card)',
+          }}
+        >
           {['Low', 'Medium', 'High'].map((p) => {
             const active = inlinePriority === p;
             const color = p === 'High' ? '#fb7185' : p === 'Medium' ? '#fbbf24' : '#34d399';
@@ -234,14 +246,14 @@ export default function Tasks() {
                 key={p}
                 type="button"
                 onClick={() => setInlinePriority(p)}
-                className={`chip-glass px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all ${
-                  active ? 'shadow-sm' : 'opacity-70 hover:opacity-100'
+                className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all shrink-0 select-none ${
+                  active ? 'shadow-sm' : 'opacity-60 hover:opacity-100 hover:bg-white/[0.04]'
                 }`}
                 style={{
-                  background: active ? `${color}25` : 'var(--bg-surface)',
-                  borderColor: active ? color : 'var(--border-subtle)',
+                  background: active ? `${color}20` : 'transparent',
+                  border: active ? `1px solid ${color}50` : '1px solid transparent',
                   color: active ? color : 'var(--text-muted)',
-                  boxShadow: active ? `0 2px 8px ${color}30, inset 0 1px 0 rgba(255,255,255,0.15)` : 'none',
+                  boxShadow: active ? `0 2px 8px ${color}20` : 'none',
                 }}
               >
                 {p}
@@ -253,7 +265,7 @@ export default function Tasks() {
         <button
           type="submit"
           disabled={!inlineTitle.trim()}
-          className="btn-glass-primary rounded-xl px-4 py-1.5 text-xs disabled:opacity-30 disabled:pointer-events-none"
+          className="btn-glass-primary rounded-full px-4 py-1.5 text-xs font-bold disabled:opacity-30 disabled:pointer-events-none"
         >
           Add
         </button>
@@ -292,9 +304,18 @@ export default function Tasks() {
             )}
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {/* Desktop Status Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Desktop Status Pills Segmented Track */}
+            <div
+              className="flex items-center p-1 gap-1 rounded-full border overflow-x-auto scrollbar-none shrink-0"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
+            >
               {['All', ...columns].map((c) => {
                 const active = filter === c;
                 const count = c === 'All' ? tasks.length : tasks.filter((t) => t.status === c).length;
@@ -303,12 +324,33 @@ export default function Tasks() {
                     key={c}
                     type="button"
                     onClick={() => setFilter(c)}
-                    className={`chip-glass px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 ${
-                      active ? 'chip-glass-active' : ''
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 shrink-0 select-none ${
+                      active ? 'shadow-sm font-bold' : 'hover:bg-white/[0.04]'
                     }`}
+                    style={
+                      active
+                        ? {
+                            background: 'var(--bg-card)',
+                            color: 'var(--text-primary)',
+                            border: '1px solid var(--border-card)',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                          }
+                        : {
+                            color: 'var(--text-muted)',
+                            border: '1px solid transparent',
+                          }
+                    }
                   >
                     <span>{c}</span>
-                    <span className="text-[10px] font-mono opacity-70">({count})</span>
+                    <span
+                      className="text-[10px] font-mono px-1.5 py-0.2 rounded-full"
+                      style={{
+                        background: active ? 'var(--bg-surface)' : 'transparent',
+                        color: active ? 'var(--accent-color)' : 'var(--text-muted)',
+                      }}
+                    >
+                      {count}
+                    </span>
                   </button>
                 );
               })}
@@ -316,7 +358,7 @@ export default function Tasks() {
 
             {/* Desktop View Switcher */}
             <div
-              className="flex rounded-xl p-1 gap-1 border shrink-0"
+              className="flex rounded-full p-1 gap-1 border shrink-0"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-card)',
@@ -329,7 +371,7 @@ export default function Tasks() {
                 type="button"
                 onClick={() => setView('list')}
                 aria-label="List view"
-                className="p-1.5 rounded-lg transition-all"
+                className="p-1.5 rounded-full transition-all"
                 style={
                   view === 'list'
                     ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
@@ -342,7 +384,7 @@ export default function Tasks() {
                 type="button"
                 onClick={() => setView('kanban')}
                 aria-label="Kanban view"
-                className="p-1.5 rounded-lg transition-all"
+                className="p-1.5 rounded-full transition-all"
                 style={
                   view === 'kanban'
                     ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
@@ -391,7 +433,7 @@ export default function Tasks() {
             <button
               type="button"
               onClick={() => setMobileFilterOpen(true)}
-              className={`btn-glass flex-1 px-3.5 py-2 rounded-xl text-xs font-bold relative flex items-center justify-center gap-2 ${
+              className={`btn-glass flex-1 px-4 py-2 rounded-full text-xs font-bold relative flex items-center justify-center gap-2 ${
                 activeFilterCount > 0 ? 'border-indigo-400/60 shadow-[0_0_12px_rgba(99,102,241,0.25)] text-indigo-300' : ''
               }`}
               aria-label="Open filter menu"
@@ -399,7 +441,7 @@ export default function Tasks() {
               <SlidersHorizontal size={14} className={activeFilterCount > 0 ? 'text-indigo-400' : 'text-stone-400'} />
               <span>Filters</span>
               {activeFilterCount > 0 && (
-                <span className="h-4 min-w-[16px] px-1 rounded-full text-[9px] font-black bg-indigo-500 text-white flex items-center justify-center">
+                <span className="h-4 min-w-[16px] px-1.5 rounded-full text-[9px] font-black bg-indigo-500 text-white flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -407,7 +449,7 @@ export default function Tasks() {
 
             {/* Mobile View Switcher */}
             <div
-              className="flex rounded-xl p-1 gap-1 border shrink-0"
+              className="flex rounded-full p-1 gap-1 border shrink-0"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-card)',
@@ -419,7 +461,7 @@ export default function Tasks() {
                 type="button"
                 onClick={() => setView('list')}
                 aria-label="List view"
-                className="p-1.5 rounded-lg transition-all"
+                className="p-1.5 rounded-full transition-all"
                 style={
                   view === 'list'
                     ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
@@ -432,7 +474,7 @@ export default function Tasks() {
                 type="button"
                 onClick={() => setView('kanban')}
                 aria-label="Kanban view"
-                className="p-1.5 rounded-lg transition-all"
+                className="p-1.5 rounded-full transition-all"
                 style={
                   view === 'kanban'
                     ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }
@@ -452,25 +494,25 @@ export default function Tasks() {
               Active:
             </span>
             {filter !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
                 Status: {filter}
                 <button type="button" onClick={() => setFilter('All')} className="hover:text-white"><X size={11} /></button>
               </span>
             )}
             {priorityFilter !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
                 Priority: {priorityFilter}
                 <button type="button" onClick={() => setPriorityFilter('All')} className="hover:text-white"><X size={11} /></button>
               </span>
             )}
             {categoryFilter !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
                 Category: {categoryFilter}
                 <button type="button" onClick={() => setCategoryFilter('All')} className="hover:text-white"><X size={11} /></button>
               </span>
             )}
             {sortBy !== 'default' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold shrink-0">
                 Sort: {sortBy}
                 <button type="button" onClick={() => setSortBy('default')} className="hover:text-white"><X size={11} /></button>
               </span>
@@ -535,7 +577,7 @@ export default function Tasks() {
                   if (dragId) setTaskStatus(dragId, col);
                   setDragId(null);
                 }}
-                className="min-h-[260px] rounded-2xl border p-3.5 flex flex-col glass-card"
+                className="min-h-[260px] rounded-[28px] border p-4 flex flex-col glass-card"
                 style={{ borderColor: 'var(--border-card)' }}
               >
                 <div className="mb-3 flex items-center justify-between pb-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
@@ -551,7 +593,7 @@ export default function Tasks() {
                     </p>
                   </div>
                   <span
-                    className="rounded-lg px-2 py-0.5 text-[10px] font-mono font-bold border"
+                    className="rounded-full px-2.5 py-0.5 text-[10px] font-mono font-bold border"
                     style={{
                       background: 'var(--bg-surface)',
                       borderColor: 'var(--border-subtle)',
@@ -576,7 +618,7 @@ export default function Tasks() {
                   ))}
                   {colTasks.length === 0 && (
                     <div
-                      className="h-28 grid place-items-center border border-dashed rounded-xl text-xs font-mono"
+                      className="h-28 grid place-items-center border border-dashed rounded-2xl text-xs font-mono"
                       style={{
                         borderColor: 'var(--border-subtle)',
                         color: 'var(--text-muted)',
@@ -609,7 +651,7 @@ export default function Tasks() {
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="What needs to be done…"
-              className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none border transition-all"
+              className="w-full rounded-2xl px-4 py-2.5 text-sm outline-none border transition-all"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-card)',
@@ -628,7 +670,7 @@ export default function Tasks() {
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
               placeholder="Add extra context, links, or checklist…"
-              className="w-full rounded-xl p-3 text-xs sm:text-sm outline-none border transition-all resize-none leading-relaxed"
+              className="w-full rounded-2xl p-3.5 text-xs sm:text-sm outline-none border transition-all resize-none leading-relaxed"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-card)',
@@ -646,7 +688,7 @@ export default function Tasks() {
               <select
                 value={form.priority}
                 onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                className="w-full rounded-2xl px-3.5 py-2.5 text-xs outline-none border transition-all"
                 style={{
                   background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
@@ -666,7 +708,7 @@ export default function Tasks() {
               <select
                 value={form.status}
                 onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                className="w-full rounded-2xl px-3.5 py-2.5 text-xs outline-none border transition-all"
                 style={{
                   background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
@@ -692,7 +734,7 @@ export default function Tasks() {
                 type="date"
                 value={form.dueDate}
                 onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                className="w-full rounded-2xl px-3.5 py-2.5 text-xs outline-none border transition-all"
                 style={{
                   background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
@@ -709,7 +751,7 @@ export default function Tasks() {
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                 placeholder="e.g. Work, College"
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
+                className="w-full rounded-2xl px-3.5 py-2.5 text-xs outline-none border transition-all"
                 style={{
                   background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
@@ -727,13 +769,13 @@ export default function Tasks() {
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="btn-glass rounded-xl px-4 py-2 text-xs"
+              className="btn-glass rounded-full px-5 py-2.5 text-xs font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn-glass-primary rounded-xl px-5 py-2 text-xs font-bold"
+              className="btn-glass-primary rounded-full px-6 py-2.5 text-xs font-bold shadow-md"
             >
               {editing ? 'Save changes' : 'Add task'}
             </button>
@@ -750,19 +792,19 @@ export default function Tasks() {
             onClick={() => setMobileFilterOpen(false)}
           />
 
-          {/* Sheet */}
+          {/* Sheet Container */}
           <div
-            className="relative w-full max-w-lg rounded-t-[28px] border-t border-[var(--border-card)] shadow-2xl animate-sheet-bounce max-h-[85vh] flex flex-col overflow-hidden z-10"
+            className="relative w-full max-w-lg rounded-t-[32px] border-t border-[var(--border-card)] shadow-2xl animate-sheet-bounce max-h-[85vh] flex flex-col overflow-hidden z-10"
             style={{
               background: 'var(--bg-card)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              boxShadow: '0 -10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(32px)',
+              WebkitBackdropFilter: 'blur(32px)',
+              boxShadow: '0 -12px 40px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.12)',
             }}
           >
-            {/* Drag handle */}
-            <div className="pt-2.5 pb-1 flex justify-center shrink-0">
-              <div className="h-1.5 w-12 rounded-full bg-white/20" />
+            {/* Tactile Pill Drag handle */}
+            <div className="pt-3 pb-1 flex justify-center shrink-0">
+              <div className="h-1.5 w-12 rounded-full bg-white/25" />
             </div>
 
             {/* Sheet Header */}
@@ -770,10 +812,10 @@ export default function Tasks() {
               <div className="flex items-center gap-2">
                 <SlidersHorizontal size={16} className="text-indigo-400" />
                 <h3 className="font-display text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Filters
+                  Filters &amp; Sort
                 </h3>
                 {activeFilterCount > 0 && (
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     {activeFilterCount} active
                   </span>
                 )}
@@ -793,17 +835,16 @@ export default function Tasks() {
                 <button
                   type="button"
                   onClick={() => setMobileFilterOpen(false)}
-                  className="h-7 w-7 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white"
+                  className="h-8 w-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-[var(--text-muted)] hover:text-white transition-colors"
                 >
-                  <X size={14} />
+                  <X size={15} />
                 </button>
               </div>
             </div>
 
-            {/* Amazon 2-Column Split Body */}
-            <div className="flex flex-1 min-h-0 overflow-hidden">
-              {/* Left Column: Filter Categories */}
-              <div className="w-32 bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] flex flex-col py-2 shrink-0 overflow-y-auto">
+            {/* Horizontal Category Bubble Switcher */}
+            <div className="px-4 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] shrink-0">
+              <div className="flex items-center gap-1.5 p-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-card)] overflow-x-auto scrollbar-none">
                 {[
                   { id: 'status', label: 'Status', active: filter !== 'All' },
                   { id: 'priority', label: 'Priority', active: priorityFilter !== 'All' },
@@ -816,32 +857,44 @@ export default function Tasks() {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveDrawerTab(tab.id)}
-                      className={`relative px-3.5 py-3 text-left text-xs font-semibold flex items-center justify-between transition-colors ${
+                      className={`relative px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 select-none ${
                         isSelected
-                          ? 'bg-[var(--bg-card)] text-[var(--text-primary)] font-bold'
-                          : 'text-[var(--text-muted)] hover:bg-white/[0.02]'
+                          ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md font-bold'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/[0.04]'
                       }`}
                     >
                       <span>{tab.label}</span>
                       {tab.active && (
-                        <span className="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_6px_var(--accent-glow)] shrink-0" />
-                      )}
-                      {isSelected && (
-                        <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-indigo-500" />
+                        <span
+                          className={`h-2 w-2 rounded-full ${isSelected ? 'bg-white' : 'bg-indigo-400'} shadow-[0_0_6px_rgba(99,102,241,0.6)]`}
+                        />
                       )}
                     </button>
                   );
                 })}
               </div>
+            </div>
 
-              {/* Right Column: Category Options */}
-              <div className="flex-1 p-4 overflow-y-auto space-y-2">
-                {/* 1. Status options */}
-                {activeDrawerTab === 'status' && (
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+            {/* Full-width Category Options Panel */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0">
+              {/* 1. Status options */}
+              {activeDrawerTab === 'status' && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                       Filter by Task Status
                     </p>
+                    {filter !== 'All' && (
+                      <button
+                        type="button"
+                        onClick={() => setFilter('All')}
+                        className="text-[11px] text-indigo-400 hover:underline font-medium"
+                      >
+                        Reset Status
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
                     {['All', ...columns].map((c) => {
                       const isSelected = filter === c;
                       const count = c === 'All' ? tasks.length : tasks.filter((t) => t.status === c).length;
@@ -850,35 +903,48 @@ export default function Tasks() {
                           key={c}
                           type="button"
                           onClick={() => setFilter(c)}
-                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                          className={`flex items-center justify-between px-3.5 py-2.5 rounded-full border text-xs transition-all active:scale-[0.98] ${
                             isSelected
-                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              ? 'bg-indigo-500/20 border-indigo-400 text-white font-bold shadow-[0_2px_12px_rgba(99,102,241,0.25)]'
                               : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
-                            }`}>
-                              {isSelected && <Check size={10} strokeWidth={3} />}
-                            </div>
-                            <span>{c}</span>
+                          <div className="flex items-center gap-2 truncate">
+                            <span className={`h-2 w-2 rounded-full shrink-0 ${
+                              c === 'Completed' ? 'bg-emerald-400' : c === 'In Progress' ? 'bg-sky-400' : c === 'Todo' ? 'bg-indigo-400' : 'bg-stone-400'
+                            }`} />
+                            <span className="truncate">{c}</span>
                           </div>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5">
+                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                            isSelected ? 'bg-indigo-500 text-white' : 'bg-white/5 text-[var(--text-muted)]'
+                          }`}>
                             {count}
                           </span>
                         </button>
                       );
                     })}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* 2. Priority options */}
-                {activeDrawerTab === 'priority' && (
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+              {/* 2. Priority options */}
+              {activeDrawerTab === 'priority' && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                       Filter by Priority Level
                     </p>
+                    {priorityFilter !== 'All' && (
+                      <button
+                        type="button"
+                        onClick={() => setPriorityFilter('All')}
+                        className="text-[11px] text-indigo-400 hover:underline font-medium"
+                      >
+                        Reset Priority
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
                     {[
                       { id: 'All', label: 'All Priorities', color: '#94a3b8' },
                       { id: 'High', label: 'High Priority', color: '#fb7185' },
@@ -892,36 +958,49 @@ export default function Tasks() {
                           key={p.id}
                           type="button"
                           onClick={() => setPriorityFilter(p.id)}
-                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                          className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full border text-xs transition-all active:scale-[0.98] ${
                             isSelected
-                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              ? 'bg-indigo-500/20 border-indigo-400 text-white font-bold shadow-[0_2px_12px_rgba(99,102,241,0.25)]'
                               : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
-                            }`}>
-                              {isSelected && <Check size={10} strokeWidth={3} />}
-                            </div>
-                            <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
+                            <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.color }} />
                             <span>{p.label}</span>
                           </div>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5">
-                            {count}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                              isSelected ? 'bg-indigo-500 text-white' : 'bg-white/5 text-[var(--text-muted)]'
+                            }`}>
+                              {count}
+                            </span>
+                            {isSelected && <Check size={13} className="text-indigo-400" strokeWidth={3} />}
+                          </div>
                         </button>
                       );
                     })}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* 3. Category options */}
-                {activeDrawerTab === 'category' && (
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+              {/* 3. Category options */}
+              {activeDrawerTab === 'category' && (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                       Filter by Category
                     </p>
+                    {categoryFilter !== 'All' && (
+                      <button
+                        type="button"
+                        onClick={() => setCategoryFilter('All')}
+                        className="text-[11px] text-indigo-400 hover:underline font-medium"
+                      >
+                        Reset Category
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
                     {['All', ...availableCategories].map((cat) => {
                       const isSelected = categoryFilter === cat;
                       const count = cat === 'All' ? tasks.length : tasks.filter((t) => t.category === cat).length;
@@ -930,40 +1009,37 @@ export default function Tasks() {
                           key={cat}
                           type="button"
                           onClick={() => setCategoryFilter(cat)}
-                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                          className={`flex items-center gap-2 px-4 py-2 rounded-full border text-xs transition-all active:scale-[0.98] ${
                             isSelected
-                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              ? 'bg-indigo-500/20 border-indigo-400 text-white font-bold shadow-[0_2px_12px_rgba(99,102,241,0.25)]'
                               : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
-                            }`}>
-                              {isSelected && <Check size={10} strokeWidth={3} />}
-                            </div>
-                            <span>{cat}</span>
-                          </div>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5">
+                          <span>{cat}</span>
+                          <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                            isSelected ? 'bg-indigo-500 text-white' : 'bg-white/5 text-[var(--text-muted)]'
+                          }`}>
                             {count}
                           </span>
                         </button>
                       );
                     })}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* 4. Sort By options */}
-                {activeDrawerTab === 'sort' && (
+              {/* 4. Sort By options */}
+              {activeDrawerTab === 'sort' && (
+                <div className="space-y-2.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                    Order &amp; Sequence
+                  </p>
                   <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                      Order &amp; Sequence
-                    </p>
                     {[
-                      { id: 'default', label: 'Default Order' },
+                      { id: 'default', label: 'Default Sequence' },
                       { id: 'dueDate', label: 'Due Date (Soonest first)' },
                       { id: 'priority', label: 'Priority (High to Low)' },
-                      { id: 'title', label: 'Task Name (A-Z)' },
+                      { id: 'title', label: 'Alphabetical (A-Z)' },
                     ].map((s) => {
                       const isSelected = sortBy === s.id;
                       return (
@@ -971,34 +1047,28 @@ export default function Tasks() {
                           key={s.id}
                           type="button"
                           onClick={() => setSortBy(s.id)}
-                          className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
+                          className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full border text-xs transition-all active:scale-[0.98] ${
                             isSelected
-                              ? 'bg-indigo-500/15 border-indigo-400/50 text-[var(--text-primary)] font-bold shadow-sm'
+                              ? 'bg-indigo-500/20 border-indigo-400 text-white font-bold shadow-[0_2px_12px_rgba(99,102,241,0.25)]'
                               : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:border-white/20'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5">
-                            <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                              isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : 'border-stone-500'
-                            }`}>
-                              {isSelected && <Check size={10} strokeWidth={3} />}
-                            </div>
-                            <span>{s.label}</span>
-                          </div>
+                          <span>{s.label}</span>
+                          {isSelected && <Check size={13} className="text-indigo-400" strokeWidth={3} />}
                         </button>
                       );
                     })}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Sticky Bottom Actions */}
+            {/* Tactile Bubble Action Bar */}
             <div className="p-4 border-t border-[var(--border-subtle)] bg-[var(--bg-card)] flex items-center gap-3 shrink-0">
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="btn-glass flex-1 py-2.5 text-xs font-bold rounded-xl inline-flex items-center justify-center gap-1.5"
+                className="btn-glass flex-1 py-3 text-xs font-bold rounded-full inline-flex items-center justify-center gap-1.5"
               >
                 <RotateCcw size={13} />
                 Reset
@@ -1006,9 +1076,9 @@ export default function Tasks() {
               <button
                 type="button"
                 onClick={() => setMobileFilterOpen(false)}
-                className="btn-glass-primary flex-[2] py-2.5 text-xs font-bold rounded-xl shadow-lg"
+                className="btn-glass-primary flex-[2] py-3 text-xs font-bold rounded-full shadow-lg"
               >
-                Apply Filters ({filtered.length} {filtered.length === 1 ? 'task' : 'tasks'})
+                Show {filtered.length} {filtered.length === 1 ? 'task' : 'tasks'}
               </button>
             </div>
           </div>

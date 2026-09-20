@@ -137,7 +137,7 @@ export default function Notes() {
         <button
           type="button"
           onClick={openNew}
-          className="btn-glass-primary rounded-xl px-4 py-2.5 text-xs font-bold shrink-0 shadow-md"
+          className="btn-glass-primary rounded-full px-5 py-2.5 text-xs font-bold shrink-0 shadow-md"
         >
           <Plus size={15} /> <span>New note</span>
         </button>
@@ -156,7 +156,7 @@ export default function Notes() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search notes, tags, or content…"
-            className="w-full rounded-xl py-2.5 pl-10 pr-9 text-xs sm:text-sm outline-none border transition-all glass-card"
+            className="w-full rounded-full py-2.5 pl-10 pr-9 text-xs sm:text-sm outline-none border transition-all glass-card"
             style={{
               color: 'var(--text-primary)',
               borderColor: 'var(--border-card)',
@@ -165,7 +165,7 @@ export default function Notes() {
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md transition-all hover:bg-[var(--bg-surface)]"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all hover:bg-[var(--bg-surface)]"
               style={{ color: 'var(--text-muted)' }}
             >
               <X size={13} />
@@ -173,8 +173,17 @@ export default function Notes() {
           )}
         </div>
 
-        {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+        {/* Category Pills Track */}
+        <div
+          className="flex items-center p-1 gap-1 rounded-full border overflow-x-auto scrollbar-none shrink-0"
+          style={{
+            background: 'var(--bg-surface)',
+            borderColor: 'var(--border-card)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          }}
+        >
           {categories.map((c) => {
             const count = c === 'All' ? notes.length : notes.filter((n) => n.category === c).length;
             const active = category === c;
@@ -183,12 +192,33 @@ export default function Notes() {
                 key={c}
                 type="button"
                 onClick={() => setCategory(c)}
-                className={`chip-glass px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 ${
-                  active ? 'chip-glass-active' : ''
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 shrink-0 select-none ${
+                  active ? 'shadow-sm font-bold' : 'hover:bg-white/[0.04]'
                 }`}
+                style={
+                  active
+                    ? {
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border-card)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                      }
+                    : {
+                        color: 'var(--text-muted)',
+                        border: '1px solid transparent',
+                      }
+                }
               >
                 <span>{c}</span>
-                <span className="text-[10px] font-mono opacity-70">({count})</span>
+                <span
+                  className="text-[10px] font-mono px-1.5 py-0.2 rounded-full"
+                  style={{
+                    background: active ? 'var(--bg-surface)' : 'transparent',
+                    color: active ? 'var(--accent-color)' : 'var(--text-muted)',
+                  }}
+                >
+                  {count}
+                </span>
               </button>
             );
           })}

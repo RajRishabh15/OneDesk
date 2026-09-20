@@ -80,7 +80,7 @@ function Field({ label, children }) {
   );
 }
 
-const inputCls = 'w-full rounded-xl px-3.5 py-2.5 text-sm outline-none border transition-all';
+const inputCls = 'w-full rounded-2xl px-4 py-2.5 text-sm outline-none border transition-all';
 const inputStyle = {
   background: 'var(--bg-surface)',
   borderColor: 'var(--border-card)',
@@ -98,6 +98,7 @@ export default function CalendarPage() {
   const [form, setForm] = useState(emptyForm);
 
   const today = localISO(new Date());
+  const tomorrow = localISO(new Date(Date.now() + 86400000));
 
   // Task deadlined items
   const taskEvents = useMemo(
@@ -141,8 +142,31 @@ export default function CalendarPage() {
     return [...allItems]
       .filter((i) => i.date >= today)
       .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))
-      .slice(0, 5);
+      .slice(0, 6);
   }, [allItems, today]);
+
+  const displayImportantItems = useMemo(() => {
+    const urgentOrNear = allItems.filter((i) => {
+      const isUrgent = i.category === 'urgent' || i.priority === 'High' || i.priority === 'Urgent';
+      const isDueSoon = i.date === today || i.date === tomorrow;
+      return isUrgent || isDueSoon;
+    });
+
+    const sorted = [...urgentOrNear].sort((a, b) => {
+      if (a.date <= today && b.date > today) return -1;
+      if (b.date <= today && a.date > today) return 1;
+      return a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || '');
+    });
+
+    const combined = [...sorted];
+    for (const item of upcomingDeadlines) {
+      if (!combined.some((c) => c.id === item.id)) {
+        combined.push(item);
+      }
+      if (combined.length >= 5) break;
+    }
+    return combined.slice(0, 5);
+  }, [allItems, today, tomorrow, upcomingDeadlines]);
 
   function openNew(dateStr, timeStr = '09:00') {
     setEditing(null);

@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Bell, Download, Upload, Trash2, User, LogOut,
-  Palette, Shield, Database, Check, Sparkles, Lock,
+  Download, Upload, Trash2, LogOut,
+  Palette, Check, Sparkles, Lock,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useSettings } from '../context/SettingsContext';
 import Toggle from '../components/Toggle';
 
 /* ─── Small reusable pieces ──────────────────────────────── */
@@ -22,7 +23,7 @@ function SectionLabel({ children }) {
 function Panel({ children, className = '' }) {
   return (
     <div
-      className={`rounded-2xl border p-5 ${className}`}
+      className={`rounded-[26px] border p-5 sm:p-6 transition-all duration-300 shadow-[0_6px_28px_rgba(0,0,0,0.18)] backdrop-blur-xl ${className}`}
       style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)' }}
     >
       {children}
@@ -64,7 +65,7 @@ function GhostBtn({ children, danger, onClick, type = 'button', disabled }) {
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
         background: danger ? 'rgba(251,113,133,0.08)' : 'var(--bg-surface)',
         borderColor: danger ? 'rgba(251,113,133,0.25)' : 'var(--border-card)',
@@ -82,7 +83,7 @@ function PrimaryBtn({ children, type = 'button', onClick, disabled }) {
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all disabled:opacity-50 shadow-md hover:brightness-110 active:scale-95"
+      className="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-xs font-bold text-white transition-all disabled:opacity-50 shadow-md hover:brightness-110 active:scale-95"
       style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 16px var(--accent-glow)' }}
     >
       {children}
@@ -130,11 +131,18 @@ export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { user, updateProfile, logout } = useAuth();
   const { notes, tasks, events, clearAll, addNote, addTask, addEvent } = useData();
+  const {
+    settings,
+    updateSetting,
+    toggleSetting,
+    playChime,
+    sendPushNotification,
+    requestNotificationPermission,
+  } = useSettings();
   const navigate = useNavigate();
 
   const [name, setName] = useState(user?.name || user?.displayName || '');
-  const [notifOn, setNotifOn] = useState(true);
-  const [remindersOn, setRemindersOn] = useState(false);
+  const [testSent, setTestSent] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileRef = useRef(null);
@@ -311,24 +319,123 @@ export default function Settings() {
       {/* ── BOTTOM ROW: Notifications + Data ─────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        {/* Notifications */}
+        {/* Preferences & System */}
         <Panel>
-          <SectionLabel>Notifications</SectionLabel>
+          <SectionLabel>Preferences &amp; System</SectionLabel>
           <div className="space-y-4">
             <Row
               label="Due Task Badges"
-              sub="Badges in nav for tasks due today."
-              onClick={() => setNotifOn((v) => !v)}
+              sub="Show red alert badge & count in navbar for tasks due today."
+              onClick={() => toggleSetting('dueTaskBadges')}
             >
-              <Toggle on={notifOn} onToggle={() => setNotifOn((v) => !v)} label="Toggle due task badges" />
+              <Toggle
+                on={settings.dueTaskBadges}
+                onToggle={() => toggleSetting('dueTaskBadges')}
+                label="Toggle due task badges"
+              />
             </Row>
+
             <Divider />
+
             <Row
               label="Reminder Alerts"
-              sub="Desktop alerts for calendar reminders."
-              onClick={() => setRemindersOn((v) => !v)}
+              sub="Desktop browser notifications for approaching deadlines."
+              onClick={async () => {
+                if (!settings.reminderAlerts) {
+                  await requestNotificationPermission();
+                } else {
+                  updateSetting('reminderAlerts', false);
+                }
+              }}
             >
-              <Toggle on={remindersOn} onToggle={() => setRemindersOn((v) => !v)} label="Toggle reminder alerts" />
+              <Toggle
+                on={settings.reminderAlerts}
+                onToggle={async () => {
+                  if (!settings.reminderAlerts) {
+                    await requestNotificationPermission();
+                  } else {
+                    updateSetting('reminderAlerts', false);
+                  }
+                }}
+                label="Toggle reminder alerts"
+              />
+            </Row>
+
+            {settings.reminderAlerts && (
+              <div className="flex items-center justify-between p-2.5 rounded-xl border bg-white/[0.02]" style={{ borderColor: 'var(--border-subtle)' }}>
+                <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live alerts active
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const ok = sendPushNotification('OneDesk: Push Alert Test', {
+                      body: 'Your browser desktop alerts are active and working smoothly!',
+                    });
+                    if (ok) {
+                      setTestSent(true);
+                      setTimeout(() => setTestSent(false), 2500);
+                    }
+                  }}
+                  className="btn-glass px-3 py-1 text-[10px] font-bold rounded-full text-indigo-300 hover:text-white"
+                >
+                  {testSent ? '✓ Alert Dispatched' : 'Send Test Alert'}
+                </button>
+              </div>
+            )}
+
+            <Divider />
+
+            <Row
+              label="Interactive Chimes"
+              sub="Synthesized audio feedback when completing tasks."
+              onClick={() => {
+                toggleSetting('soundEffects');
+                if (!settings.soundEffects) {
+                  setTimeout(() => playChime('success'), 60);
+                }
+              }}
+            >
+              <Toggle
+                on={settings.soundEffects}
+                onToggle={() => {
+                  toggleSetting('soundEffects');
+                  if (!settings.soundEffects) {
+                    setTimeout(() => playChime('success'), 60);
+                  }
+                }}
+                label="Toggle interactive chimes"
+              />
+            </Row>
+
+            <Divider />
+
+            <Row
+              label="Bouncy Physics"
+              sub="Tactile spring & bounce micro-animations on controls."
+              onClick={() => toggleSetting('bouncyAnimations')}
+            >
+              <Toggle
+                on={settings.bouncyAnimations}
+                onToggle={() => toggleSetting('bouncyAnimations')}
+                label="Toggle bouncy animations"
+              />
+            </Row>
+
+            <Divider />
+
+            <Row
+              label="Ambient Fibers"
+              sub="Glowing dynamic background wave canvas."
+              onClick={() => toggleSetting('ghostFibers')}
+            >
+              <Toggle
+                on={settings.ghostFibers}
+                onToggle={() => toggleSetting('ghostFibers')}
+                label="Toggle background fibers"
+              />
             </Row>
           </div>
         </Panel>

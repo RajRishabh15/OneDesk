@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useSettings } from '../context/SettingsContext';
+import OneDeskLogo from './OneDeskLogo';
 
 const navLinks = [
   { to: '/', label: 'Home',     icon: Home,        end: true },
@@ -40,6 +42,7 @@ const mobileLinks = [
 export default function TopNavPill() {
   const { user, logout } = useAuth();
   const { tasks, notes, events } = useData();
+  const { settings } = useSettings();
   const navigate = useNavigate();
 
   const [query, setQuery]           = useState('');
@@ -156,14 +159,8 @@ export default function TopNavPill() {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <div
-                className="h-8 w-8 rounded-[11px] p-[1.5px] grid place-items-center shadow-md transition-transform group-hover:scale-105"
-                style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 12px var(--accent-glow)' }}
-              >
-                <div
-                  className="h-full w-full rounded-[9px] grid place-items-center text-xs font-bold"
-                  style={{ background: 'var(--bg-page)', color: 'var(--accent-color)' }}
-                >✦</div>
+              <div className="transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_2px_8px_rgba(99,102,241,0.35)]">
+                <OneDeskLogo size={28} />
               </div>
               <span
                 className="font-display text-[15px] font-extrabold tracking-tight"
@@ -184,7 +181,7 @@ export default function TopNavPill() {
                 aria-label="Notifications"
               >
                 <Bell size={15} />
-                {dueSoon.length > 0 && (
+                {dueSoon.length > 0 && settings.dueTaskBadges && (
                   <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
                 )}
               </button>
@@ -508,14 +505,8 @@ export default function TopNavPill() {
         >
           {/* Left: Logo + Name */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
-            <div
-              className="h-7 w-7 rounded-[10px] p-[1.5px] grid place-items-center shadow-md"
-              style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
-            >
-              <div
-                className="h-full w-full rounded-[8px] grid place-items-center text-[11px] font-bold"
-                style={{ background: 'var(--bg-page)', color: 'var(--accent-color)' }}
-              >✦</div>
+            <div className="transition-transform active:scale-95 drop-shadow-[0_2px_6px_rgba(99,102,241,0.35)]">
+              <OneDeskLogo size={25} />
             </div>
             <span className="font-display text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
               OneDesk
@@ -540,7 +531,7 @@ export default function TopNavPill() {
                 aria-label="Notifications"
               >
                 <Bell size={14} />
-                {dueSoon.length > 0 && (
+                {dueSoon.length > 0 && settings.dueTaskBadges && (
                   <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
                 )}
               </button>

@@ -47,7 +47,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         tabIndex={-1}
         className={[
           'relative w-full outline-none',
-          'rounded-t-3xl sm:rounded-3xl',
+          'rounded-t-[32px] sm:rounded-[32px]',
           'max-h-[90vh] overflow-y-auto overscroll-contain',
           wide ? 'sm:max-w-2xl' : 'sm:max-w-md',
           'animate-modal-up shadow-2xl',
@@ -62,7 +62,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
       >
         {/* Thin accent line at the top */}
         <div
-          className="absolute inset-x-0 top-0 h-[1px] rounded-t-3xl"
+          className="absolute inset-x-0 top-0 h-[1px] rounded-t-[32px]"
           style={{
             background:
               'linear-gradient(90deg, transparent, var(--border-card) 40%, rgba(255,255,255,0.18) 50%, var(--border-card) 60%, transparent)',
@@ -83,7 +83,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="flex h-7 w-7 items-center justify-center rounded-lg transition-all"
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-white/10"
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',

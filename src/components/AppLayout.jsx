@@ -2,14 +2,19 @@ import { useEffect, useRef } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import TopNavPill from './TopNavPill';
 import GhostFibers from './GhostFibers';
+import LoadingScreen from './LoadingScreen';
 import { useTheme } from '../context/ThemeContext';
+import { useSettings } from '../context/SettingsContext';
+import { useData } from '../context/DataContext';
 
 const SHORTCUT_MAP = { d: '/', n: '/notes', t: '/tasks', c: '/calendar', a: '/analytics', s: '/settings' };
 
 export default function AppLayout() {
   const navigate = useNavigate();
   const pendingG = useRef(false);
-  const { glowLine, glowColor, fiberOpacity } = useThemeColors();
+  const { glowLine, glowColor } = useThemeColors();
+  const { settings, sendPushNotification } = useSettings();
+  const { loading: dataLoading, tasks } = useData();
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -29,51 +34,77 @@ export default function AppLayout() {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [navigate]);
 
+  // Automated Desktop Push Notification for Today's Deadlines
+  useEffect(() => {
+    if (!settings.reminderAlerts || !tasks?.length) return;
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    const alreadyNotified = sessionStorage.getItem('onedesk_notified_today');
+    if (alreadyNotified) return;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const dueToday = tasks.filter((t) => t.status !== 'Completed' && t.dueDate === todayStr);
+
+    if (dueToday.length > 0) {
+      sessionStorage.setItem('onedesk_notified_today', 'true');
+      sendPushNotification(`OneDesk: ${dueToday.length} ${dueToday.length === 1 ? 'task' : 'tasks'} due today`, {
+        body: `Items: ${dueToday.slice(0, 2).map((t) => t.title).join(', ')}${dueToday.length > 2 ? '…' : ''}`,
+      });
+    }
+  }, [settings.reminderAlerts, tasks, sendPushNotification]);
+
+  if (dataLoading) {
+    return <LoadingScreen message="Syncing workspace…" />;
+  }
+
   return (
     <div
       className="relative min-h-screen overflow-x-hidden selection:bg-indigo-500/30 selection:text-white"
       style={{ background: 'var(--bg-page)', color: 'var(--text-primary)' }}
     >
       {/* Animated background fibers — opacity controlled per theme via CSS var */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden fiber-canvas">
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-          <GhostFibers
-            lineColor={glowLine}
-            glowColor={glowColor}
-            speed={0.2}
-            scale={2}
-            rotation={0}
-            rotationSpeed={0.25}
-            layers={4}
-            waveAmplitude={0.015}
-            waveFrequency={3}
-            waveSpeed={0.15}
-            layerSpeed={0.08}
-            twist={0.1}
-            twistFrequency={5}
-            twistSpeed={1.2}
-            lineFrequency={5}
-            lineSpacing={2}
-            lineSharpness={16}
-            glowFalloff={10}
-            glowIntensity={1.6}
-            brightness={2}
-            blueBoost={1.25}
-            vignette={0.8}
-            grain={0.05}
-            dpr={1}
-            lightMode={false}
-            fps={60}
-            paused={false}
-          />
+      {settings.ghostFibers && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden fiber-canvas">
+          <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+            <GhostFibers
+              lineColor={glowLine}
+              glowColor={glowColor}
+              speed={0.2}
+              scale={2}
+              rotation={0}
+              rotationSpeed={0.25}
+              layers={4}
+              waveAmplitude={0.015}
+              waveFrequency={3}
+              waveSpeed={0.15}
+              layerSpeed={0.08}
+              twist={0.1}
+              twistFrequency={5}
+              twistSpeed={1.2}
+              lineFrequency={5}
+              lineSpacing={2}
+              lineSharpness={16}
+              glowFalloff={10}
+              glowIntensity={1.6}
+              brightness={2}
+              blueBoost={1.25}
+              vignette={0.8}
+              grain={0.05}
+              dpr={1}
+              lightMode={false}
+              fps={60}
+              paused={false}
+            />
+          </div>
+          {/* Soft blur overlay — diffuses background fibers so content stays crisp */}
+          <div className="absolute inset-0 page-blur-layer" />
         </div>
-        {/* Soft blur overlay — diffuses background fibers so content stays crisp */}
-        <div className="absolute inset-0 page-blur-layer" />
-      </div>
+      )}
 
       <TopNavPill />
 
-      <main className="relative z-10 pt-[52px] md:pt-28 pb-28 md:pb-10 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
+      <main className="relative z-10 pt-[72px] sm:pt-24 md:pt-28 pb-28 md:pb-10 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         <Outlet />
       </main>
     </div>

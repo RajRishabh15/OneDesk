@@ -321,7 +321,7 @@ export default function Dashboard() {
       {/* ══════════════════════════════════════════════════════════════
           2. QUICK UPDATES BAR (GLANCEABLE WORKSPACE INTELLIGENCE)
       ══════════════════════════════════════════════════════════════ */}
-      <div className="rounded-2xl glass-panel-fluid p-4 sm:p-5">
+      <div className="rounded-[28px] glass-panel-fluid p-5 sm:p-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10">
           
           {/* Quick Update 1: Immediate Priority Task */}
@@ -410,7 +410,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
         
         {/* Left Column (7 cols): Clean Focus Checklist */}
-        <div className="lg:col-span-7 rounded-2xl glass-panel-fluid p-6 space-y-4">
+        <div className="lg:col-span-7 rounded-[28px] glass-panel-fluid p-6 space-y-4">
           
           {/* Header */}
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
@@ -454,7 +454,7 @@ export default function Dashboard() {
           {/* Clean Quick-Add Input */}
           <form
             onSubmit={handleQuickTaskAdd}
-            className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all focus-within:border-indigo-400/50"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-full border transition-all focus-within:border-indigo-400/50"
             style={{
               background: 'var(--bg-surface)',
               borderColor: 'var(--border-subtle)',
@@ -553,7 +553,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={task.id}
-                    className="flex items-center justify-between gap-3 p-3 rounded-xl border transition-all hover:bg-white/[0.02] group"
+                    className="flex items-center justify-between gap-3 p-3.5 rounded-2xl border transition-all hover:bg-white/[0.02] group"
                     style={{
                       background: isDone ? 'rgba(255,255,255,0.01)' : 'var(--bg-surface)',
                       borderColor: 'var(--border-subtle)',
@@ -632,7 +632,7 @@ export default function Dashboard() {
         <div className="lg:col-span-5 space-y-6">
           
           {/* Card 1: Today's Schedule */}
-          <div className="rounded-2xl glass-panel-fluid p-6 space-y-3">
+          <div className="rounded-[28px] glass-panel-fluid p-6 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <h3 className="text-sm font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
                 Today's Schedule
@@ -651,7 +651,7 @@ export default function Dashboard() {
                 {todaysEvents.slice(0, 3).map((evt) => (
                   <div
                     key={evt.id}
-                    className="flex items-center justify-between p-2.5 rounded-xl border"
+                    className="flex items-center justify-between p-3 rounded-2xl border"
                     style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
                   >
                     <div className="min-w-0">
@@ -662,7 +662,7 @@ export default function Dashboard() {
                         {evt.time || 'All Day'}
                       </p>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/5" style={{ color: 'var(--text-muted)' }}>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5" style={{ color: 'var(--text-muted)' }}>
                       {evt.category || 'Event'}
                     </span>
                   </div>
@@ -672,7 +672,7 @@ export default function Dashboard() {
           </div>
 
           {/* Card 2: Scratchpad & Quick Notes */}
-          <div className="rounded-2xl glass-panel-fluid p-6 space-y-3">
+          <div className="rounded-[28px] glass-panel-fluid p-6 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-3 text-xs font-bold">
                 <button
@@ -717,7 +717,7 @@ export default function Dashboard() {
                   onChange={(e) => setScratchpadText(e.target.value)}
                   placeholder="Jot down quick thoughts... (auto-saved)"
                   rows={4}
-                  className="w-full rounded-xl p-3 text-xs bg-transparent outline-none border resize-none focus:border-indigo-400/50 transition-all leading-relaxed"
+                  className="w-full rounded-2xl p-3.5 text-xs bg-transparent outline-none border resize-none focus:border-indigo-400/50 transition-all leading-relaxed"
                   style={{
                     background: 'var(--bg-surface)',
                     borderColor: 'var(--border-subtle)',
@@ -736,7 +736,7 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={handleSaveScratchpad}
-                      className="btn-glass-primary rounded-xl px-3 py-1.5 text-xs font-semibold"
+                      className="btn-glass-primary rounded-full px-4 py-1.5 text-xs font-semibold"
                     >
                       Save as Note
                     </button>
