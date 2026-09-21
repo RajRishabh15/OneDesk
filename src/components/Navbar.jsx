@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, LogOut, User as UserIcon, Plus, CheckSquare, FileText, CalendarPlus, X } from 'lucide-react';
+import { Search, Bell, Menu, LogOut, User as UserIcon, Plus, CheckSquare, FileText, CalendarPlus, X, Sparkles, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
@@ -72,12 +72,7 @@ export default function Navbar({ onMenuClick }) {
     (t) => t.status !== 'Completed' && t.dueDate && new Date(t.dueDate) <= new Date(Date.now() + 86400000)
   );
 
-  const initials = user?.name
-    ?.split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+  const initials = (user?.name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-stone-200/80 dark:border-stone-800/80 bg-[#fafaf9]/90 dark:bg-[#121211]/90 backdrop-blur-md px-4 md:px-6 py-2.5">
@@ -140,40 +135,135 @@ export default function Navbar({ onMenuClick }) {
         {/* Quick Add Button */}
         <div className="relative" ref={quickAddRef}>
           <button
+            type="button"
             onClick={() => {
               setQuickAddOpen((v) => !v);
               setNotifOpen(false);
               setProfileOpen(false);
             }}
-            className="flex items-center gap-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-white dark:text-stone-900 text-stone-100 px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors"
+            className="h-[34px] w-[34px] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 text-white"
+            style={{
+              background: 'var(--accent-gradient)',
+              boxShadow: quickAddOpen ? '0 0 20px var(--accent-glow)' : '0 2px 14px var(--accent-glow)',
+            }}
+            aria-label="Quick Create"
+            title="Quick Create"
           >
-            <Plus size={13} />
-            <span>New</span>
+            <Plus
+              size={17}
+              strokeWidth={2.4}
+              style={{
+                transition: 'transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1)',
+                transform: quickAddOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+              }}
+            />
           </button>
 
           {quickAddOpen && (
-            <div className="absolute right-0 mt-2 w-40 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1c1c1a] shadow-xl p-1.5 animate-fade-up z-50">
-              <button
-                onClick={() => { setQuickAddOpen(false); navigate('/tasks'); }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              >
-                <CheckSquare size={14} className="text-stone-500" />
-                Task
-              </button>
-              <button
-                onClick={() => { setQuickAddOpen(false); navigate('/notes'); }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              >
-                <FileText size={14} className="text-stone-500" />
-                Note
-              </button>
-              <button
-                onClick={() => { setQuickAddOpen(false); navigate('/calendar'); }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              >
-                <CalendarPlus size={14} className="text-stone-500" />
-                Event
-              </button>
+            <div
+              className="absolute right-0 mt-3 w-80 rounded-[28px] border shadow-2xl p-3.5 space-y-2.5 animate-menu-pop z-50 overflow-hidden"
+              style={{
+                background: 'var(--bg-card)',
+                borderColor: 'var(--border-card)',
+                backdropFilter: 'blur(32px)',
+                WebkitBackdropFilter: 'blur(32px)',
+                boxShadow: '0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)',
+              }}
+            >
+              <div className="flex items-center justify-between px-1 pt-0.5">
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-indigo-400 border border-indigo-500/25 bg-indigo-500/10">
+                  <Sparkles size={11} className="animate-pulse text-indigo-400" />
+                  <span>Quick Create</span>
+                </div>
+                <span
+                  className="text-[10px] font-mono px-1.5 py-0.5 rounded-md border"
+                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                >
+                  ESC
+                </span>
+              </div>
+              <p className="text-[11px] font-medium px-1 -mt-1" style={{ color: 'var(--text-muted)' }}>
+                Capture actionable items & notes instantly
+              </p>
+              <div className="space-y-1.5">
+                {[
+                  {
+                    title: 'New Task',
+                    subtitle: 'Action item with priority & due date',
+                    to: '/tasks',
+                    icon: CheckSquare,
+                    color: 'var(--accent-color)',
+                    gradient: 'linear-gradient(135deg, rgba(99,102,241,0.22), rgba(139,92,246,0.12))',
+                    border: 'rgba(99,102,241,0.3)',
+                    glow: 'rgba(99,102,241,0.25)',
+                  },
+                  {
+                    title: 'Quick Note',
+                    subtitle: 'Capture ideas, drafts & markdown',
+                    to: '/notes',
+                    icon: FileText,
+                    color: '#34d399',
+                    gradient: 'linear-gradient(135deg, rgba(52,211,153,0.22), rgba(16,185,129,0.12))',
+                    border: 'rgba(52,211,153,0.3)',
+                    glow: 'rgba(52,211,153,0.25)',
+                  },
+                  {
+                    title: 'Schedule Event',
+                    subtitle: 'Block calendar meeting or milestone',
+                    to: '/calendar',
+                    icon: CalendarPlus,
+                    color: '#fbbf24',
+                    gradient: 'linear-gradient(135deg, rgba(251,191,36,0.22), rgba(245,158,11,0.12))',
+                    border: 'rgba(251,191,36,0.3)',
+                    glow: 'rgba(251,191,36,0.25)',
+                  },
+                ].map((action) => (
+                  <button
+                    key={action.to}
+                    onClick={() => { setQuickAddOpen(false); navigate(action.to); }}
+                    className="w-full flex items-center justify-between p-2.5 rounded-[20px] border transition-all duration-200 text-left group hover:scale-[1.015] active:scale-[0.98]"
+                    style={{
+                      background: 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = action.border;
+                      e.currentTarget.style.boxShadow = `0 4px 18px ${action.glow}`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="h-9 w-9 rounded-[13px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-110"
+                        style={{
+                          background: action.gradient,
+                          borderColor: action.border,
+                          color: action.color,
+                        }}
+                      >
+                        <action.icon size={17} strokeWidth={2.2} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                          {action.title}
+                        </div>
+                        <div className="text-[10px] truncate" style={{ color: 'var(--text-muted)' }}>
+                          {action.subtitle}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 opacity-60 group-hover:opacity-100"
+                      style={{ color: action.color }}
+                    >
+                      <ArrowRight size={13} />
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -229,12 +319,13 @@ export default function Navbar({ onMenuClick }) {
               setNotifOpen(false);
               setQuickAddOpen(false);
             }}
-            className="flex items-center gap-2 rounded-lg p-1 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            className="flex items-center justify-center rounded-full p-1 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            title={user?.name || 'Account'}
+            aria-label="Account profile"
           >
-            <div className="grid h-6 w-6 place-items-center rounded-md bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px] font-bold">
+            <div className="grid h-7 w-7 place-items-center rounded-full bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px] font-bold">
               {initials || <UserIcon size={13} />}
             </div>
-            <span className="hidden md:block text-xs font-medium text-stone-700 dark:text-stone-300">{user?.name?.split(' ')[0]}</span>
           </button>
 
           {profileOpen && (

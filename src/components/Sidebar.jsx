@@ -21,12 +21,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
     navigate('/login', { replace: true });
   }
 
-  const initials = user?.name
-    ?.split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() || 'U';
+  const initials = (user?.name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
 
   return (
     <>

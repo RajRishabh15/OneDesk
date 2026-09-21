@@ -147,8 +147,7 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
   const fileRef = useRef(null);
 
-  const initials = (name || user?.email || 'U')
-    .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const initials = (name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
 
   async function handleLogout() {
     await logout();
