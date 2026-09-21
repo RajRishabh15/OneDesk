@@ -268,7 +268,7 @@ export default function CalendarPage() {
         <div className="lg:col-span-5 flex flex-col">
           <Card className="p-4 sm:p-5 flex-1 flex flex-col justify-between" hover={false}>
             <div>
-              <div className="flex items-center justify-between mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center gap-2.5">
                   <div
                     className="flex h-8 w-8 items-center justify-center rounded-xl"
@@ -407,7 +407,7 @@ export default function CalendarPage() {
         <div className="lg:col-span-7 flex flex-col">
           <Card className="p-4 sm:p-5 flex-1 flex flex-col justify-between" hover={false}>
             <div>
-              <div className="flex items-center justify-between mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center gap-2.5">
                   <div
                     className="flex h-8 w-8 items-center justify-center rounded-xl"
@@ -527,15 +527,15 @@ export default function CalendarPage() {
 
       {/* ── Controls Bar: Schedule Navigation, Filter Views & Segmented View Switcher ── */}
       <div
-        className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-[26px] border glass-card"
+        className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:p-3.5 rounded-[26px] border glass-card"
         style={{ borderColor: 'var(--border-card)' }}
       >
         {/* Prev / Title / Next */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between sm:justify-start gap-2">
           <NavBtn onClick={() => shift(-1)}>
             <ChevronLeft size={15} />
           </NavBtn>
-          <div className="px-2 text-center min-w-[160px] sm:min-w-[220px]">
+          <div className="px-2 text-center flex-1 sm:flex-initial min-w-0 sm:min-w-[200px]">
             <p className="text-sm sm:text-base font-bold font-display truncate" style={{ color: 'var(--text-primary)' }}>
               {title}
             </p>
@@ -550,7 +550,7 @@ export default function CalendarPage() {
           </NavBtn>
           <button
             onClick={() => setCursor(new Date())}
-            className="hidden sm:inline-block ml-1 btn-glass rounded-full px-3 py-1 text-[11px] font-bold"
+            className="btn-glass rounded-full px-2.5 sm:px-3 py-1 text-[11px] font-bold shrink-0"
             style={{
               color: 'var(--accent-color, #818cf8)',
             }}
@@ -559,64 +559,68 @@ export default function CalendarPage() {
           </button>
         </div>
 
-        {/* Filter Chips: All, Events, Tasks */}
-        <div
-          className="flex items-center gap-1 p-1 rounded-full border shrink-0"
-          style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
-        >
-          {[
-            { id: 'all', label: 'All', count: allItems.length },
-            { id: 'events', label: 'Events', count: events.length },
-            { id: 'tasks', label: 'Tasks', count: taskEvents.length },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilterType(tab.id)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                filterType === tab.id
-                  ? 'btn-glass-primary shadow-sm text-white'
-                  : 'text-[var(--text-muted)] hover:text-white'
-              }`}
-            >
-              {tab.label} <span className="text-[10px] opacity-70 font-mono">({tab.count})</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Segmented View Switcher */}
-        <div
-          className="flex rounded-full p-1 gap-1"
-          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-card)' }}
-        >
-          {[
-            { id: 'planner', label: 'Planner', icon: Clock },
-            { id: 'agenda', label: 'Agenda', icon: ListTodo },
-            { id: 'week', label: 'Week', icon: Layers },
-            { id: 'month', label: 'Month', icon: CalendarDays },
-          ].map((mode) => {
-            const Icon = mode.icon;
-            const active = view === mode.id;
-            return (
+        {/* Filter Chips & View Switcher */}
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between sm:justify-end gap-2">
+          {/* Filter Chips: All, Events, Tasks */}
+          <div
+            className="flex items-center gap-1 p-1 rounded-full border shrink-0"
+            style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+          >
+            {[
+              { id: 'all', label: 'All', count: allItems.length },
+              { id: 'events', label: 'Events', count: events.length },
+              { id: 'tasks', label: 'Tasks', count: taskEvents.length },
+            ].map((tab) => (
               <button
-                key={mode.id}
-                onClick={() => setView(mode.id)}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
-                style={
-                  active
-                    ? {
-                        background: 'var(--bg-card)',
-                        color: 'var(--text-primary)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                        border: '1px solid var(--border-card)',
-                      }
-                    : { color: 'var(--text-muted)' }
-                }
+                key={tab.id}
+                onClick={() => setFilterType(tab.id)}
+                className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                  filterType === tab.id
+                    ? 'btn-glass-primary shadow-sm text-white'
+                    : 'text-[var(--text-muted)] hover:text-white'
+                }`}
               >
-                <Icon size={12} />
-                <span className="hidden sm:inline">{mode.label}</span>
+                {tab.label} <span className="text-[10px] opacity-70 font-mono">({tab.count})</span>
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Segmented View Switcher */}
+          <div
+            className="flex rounded-full p-1 gap-1 shrink-0"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-card)' }}
+          >
+            {[
+              { id: 'planner', label: 'Planner', icon: Clock },
+              { id: 'agenda', label: 'Agenda', icon: ListTodo },
+              { id: 'week', label: 'Week', icon: Layers },
+              { id: 'month', label: 'Month', icon: CalendarDays },
+            ].map((mode) => {
+              const Icon = mode.icon;
+              const active = view === mode.id;
+              return (
+                <button
+                  key={mode.id}
+                  onClick={() => setView(mode.id)}
+                  className="flex items-center gap-1 sm:gap-1.5 rounded-full px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all"
+                  style={
+                    active
+                      ? {
+                          background: 'var(--bg-card)',
+                          color: 'var(--text-primary)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                          border: '1px solid var(--border-card)',
+                        }
+                      : { color: 'var(--text-muted)' }
+                  }
+                  title={mode.label}
+                >
+                  <Icon size={13} />
+                  <span className="hidden sm:inline">{mode.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -969,7 +973,7 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
                     <button
                       type="button"
                       onClick={() => onSlotClick(hourSlot)}
-                      className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[11px] font-semibold py-1 px-2.5 rounded-lg border transition-all hover:border-indigo-400"
+                      className="opacity-40 sm:opacity-0 sm:group-hover:opacity-100 hover:opacity-100 flex items-center gap-1 text-[11px] font-semibold py-1 px-2.5 rounded-lg border transition-all hover:border-indigo-400"
                       style={{
                         color: 'var(--text-muted)',
                         background: 'var(--bg-surface)',
@@ -1136,7 +1140,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
         return (
           <div
             key={iso}
-            className="rounded-[26px] p-3.5 min-h-[220px] flex flex-col border glass-card transition-all"
+            className="rounded-[26px] p-3.5 min-h-[110px] sm:min-h-[220px] flex flex-col border glass-card transition-all"
             style={{
               borderColor: isToday ? 'rgba(99,102,241,0.5)' : 'var(--border-card)',
               boxShadow: isToday ? '0 0 16px rgba(99,102,241,0.15)' : 'none',
@@ -1172,7 +1176,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
             {/* Items Column */}
             <div className="space-y-1.5 flex-1 overflow-y-auto">
               {dayItems.length === 0 ? (
-                <p className="text-[10px] text-center py-4 font-mono opacity-40" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-[10px] text-center py-2 sm:py-4 font-mono opacity-40" style={{ color: 'var(--text-muted)' }}>
                   —
                 </p>
               ) : (
@@ -1218,18 +1222,19 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
   });
 
   return (
-    <Card className="p-4 sm:p-5 overflow-hidden" hover={false}>
+    <Card className="p-2 sm:p-4 md:p-5 overflow-hidden" hover={false}>
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center text-[10px] font-bold uppercase tracking-widest mb-2 sm:mb-3" style={{ color: 'var(--text-muted)' }}>
         {WEEKDAYS.map((d) => (
           <div key={d} className="py-1">
-            {d}
+            <span className="hidden sm:inline">{d}</span>
+            <span className="sm:hidden">{d[0]}</span>
           </div>
         ))}
       </div>
 
       {/* 42-day calendar grid */}
-      <div className="grid grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
         {days.map((d) => {
           const iso = localISO(d);
           const inMonth = d.getMonth() === month;
@@ -1240,7 +1245,7 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
             <button
               key={iso}
               onClick={() => onDayClick(iso)}
-              className="min-h-[92px] rounded-2xl p-2.5 text-left flex flex-col transition-all duration-150 relative group active:scale-[0.98]"
+              className="min-h-[52px] sm:min-h-[92px] rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 text-left flex flex-col transition-all duration-150 relative group active:scale-[0.98]"
               style={{
                 background: isToday
                   ? 'rgba(99,102,241,0.1)'
@@ -1257,9 +1262,9 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
                 opacity: inMonth ? 1 : 0.3,
               }}
             >
-              <div className="flex items-center justify-between w-full mb-1">
+              <div className="flex items-center justify-between w-full mb-0.5 sm:mb-1">
                 <span
-                  className="text-[11px] font-bold inline-flex h-5 w-5 items-center justify-center rounded-full leading-none"
+                  className="text-[10px] sm:text-[11px] font-bold inline-flex h-4.5 w-4.5 sm:h-5 sm:w-5 items-center justify-center rounded-full leading-none"
                   style={{
                     background: isToday ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'transparent',
                     color: isToday ? '#fff' : 'var(--text-primary)',
@@ -1273,7 +1278,26 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
                 </span>
               </div>
 
-              <div className="space-y-1 w-full flex-1 overflow-hidden">
+              {/* Mobile compact dot indicator */}
+              <div className="flex sm:hidden items-center gap-0.5 mt-auto flex-wrap">
+                {dayItems.slice(0, 3).map((item, idx) => (
+                  <span
+                    key={idx}
+                    className="h-1.5 w-1.5 rounded-full shrink-0"
+                    style={{
+                      background: item.isTask ? '#fbbf24' : '#818cf8',
+                    }}
+                  />
+                ))}
+                {dayItems.length > 3 && (
+                  <span className="text-[7px] font-mono leading-none" style={{ color: 'var(--text-muted)' }}>
+                    +{dayItems.length - 3}
+                  </span>
+                )}
+              </div>
+
+              {/* Desktop detailed preview */}
+              <div className="hidden sm:block space-y-1 w-full flex-1 overflow-hidden">
                 {dayItems.slice(0, 2).map((item) => (
                   <div
                     key={item.id}

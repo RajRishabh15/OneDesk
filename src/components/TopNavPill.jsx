@@ -18,6 +18,7 @@ import {
   Settings,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   Check,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -659,7 +660,7 @@ export default function TopNavPill() {
       ════════════════════════════════════════════ */}
       <header className="md:hidden fixed top-0 inset-x-0 z-40">
         <div
-          className="flex items-center justify-between px-4 py-3"
+          className="flex items-center justify-between px-3.5 py-2.5 h-14"
           style={{
             background:     'var(--bg-card-solid)',
             borderBottom:   '1px solid var(--border-subtle)',
@@ -667,398 +668,418 @@ export default function TopNavPill() {
             WebkitBackdropFilter: 'blur(32px)',
           }}
         >
-          {/* Left: Logo + Name */}
-          <Link to="/" className="flex items-center gap-2 shrink-0 group">
-            <div className="transition-transform active:scale-95 drop-shadow-[0_2px_6px_rgba(99,102,241,0.35)]">
-              <OneDeskLogo size={25} />
-            </div>
-            <span className="font-display text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              OneDesk
-            </span>
-          </Link>
-
-          {/* Right: Notifications + Search morphing pill + Account avatar */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Mobile Notification Bell */}
-            <div className="relative" ref={mobileNotifRef}>
+          {searchOpen ? (
+            /* Full-width Search Bar Mode on Mobile (No collision with logo or icons) */
+            <div className="flex items-center gap-2 w-full animate-fade-in">
               <button
                 type="button"
-                onClick={() => { setNotifOpen(v => !v); setSearchOpen(false); setProfileOpen(false); }}
-                className="relative h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
-                style={{
-                  background: notifOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
-                  borderColor: notifOpen ? 'var(--border-card)' : 'var(--border-subtle)',
-                  color: notifOpen ? 'var(--accent-color)' : 'var(--text-muted)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                }}
-                aria-label="Notifications"
+                onClick={() => { setSearchOpen(false); setQuery(''); }}
+                className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-all active:scale-95"
+                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                aria-label="Close search"
               >
-                <Bell size={14} />
-                {dueSoon.length > 0 && settings.dueTaskBadges && (
-                  <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
-                )}
+                <ArrowLeft size={16} />
               </button>
-
-              {/* Mobile Notification Dropdown */}
-              {notifOpen && (
-                <div
-                  className="absolute right-0 mt-2.5 w-72 rounded-2xl border shadow-2xl p-3 animate-menu-pop z-50"
-                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
-                >
-                  <div className="flex items-center justify-between mb-2.5">
-                    <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
-                    {dueSoon.length > 0 && (
-                      <span className="text-[10px] font-semibold bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full border border-rose-500/30">
-                        {dueSoon.length} due
-                      </span>
-                    )}
-                  </div>
-                  {dueSoon.length === 0 ? (
-                    <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>All caught up ✓</p>
-                  ) : (
-                    <ul className="space-y-1.5 max-h-56 overflow-y-auto">
-                      {dueSoon.slice(0, 5).map(t => (
-                        <li
-                          key={t.id}
-                          className="text-xs p-2 rounded-xl cursor-pointer transition-colors"
-                          style={{ color: 'var(--text-primary)' }}
-                          onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        >
-                          <span className="font-semibold block truncate">{t.title}</span>
-                          <span className="block text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>Due {t.dueDate}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Search morphing pill */}
-            <div className="relative flex items-center" ref={mobileSearchBoxRef}>
               <div
-                className="flex items-center overflow-hidden rounded-full border"
-                style={{
-                  height: '32px',
-                  width: searchOpen ? '170px' : '32px',
-                  transition: 'width 0.42s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.25s ease, background 0.25s ease',
-                  background: searchOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
-                  borderColor: searchOpen ? 'var(--border-card)' : 'var(--border-subtle)',
-                  boxShadow: searchOpen ? '0 2px 12px rgba(0,0,0,0.2)' : 'none',
-                }}
+                className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-inner"
+                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)' }}
               >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchOpen(v => {
-                      const next = !v;
-                      if (next) {
-                        setProfileOpen(false);
-                        setNotifOpen(false);
-                        setTimeout(() => mobileSearchInputRef.current?.focus(), 220);
-                      }
-                      return next;
-                    });
-                  }}
-                  className="h-full w-8 shrink-0 flex items-center justify-center transition-colors duration-200"
-                  style={{ color: searchOpen ? 'var(--accent-color)' : 'var(--text-muted)' }}
-                >
-                  <Search size={14} />
-                </button>
-
+                <Search size={14} style={{ color: 'var(--accent-color)' }} />
                 <input
                   ref={mobileSearchInputRef}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  placeholder="Search…"
-                  className="flex-1 min-w-0 bg-transparent text-[12px] outline-none"
-                  style={{
-                    color: 'var(--text-primary)',
-                    opacity: searchOpen ? 1 : 0,
-                    transition: 'opacity 0.18s ease',
-                    transitionDelay: searchOpen ? '0.18s' : '0s',
-                    pointerEvents: searchOpen ? 'auto' : 'none',
-                  }}
+                  placeholder="Search tasks, notes, schedule…"
+                  className="flex-1 min-w-0 bg-transparent text-xs outline-none"
+                  style={{ color: 'var(--text-primary)' }}
+                  autoFocus
                 />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => { setQuery(''); mobileSearchInputRef.current?.focus(); }}
+                    className="p-1 rounded-full text-stone-400 hover:text-white"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Normal Mode: Logo on Left, Action Cluster on Right */
+            <>
+              {/* Left: Logo + Name */}
+              <Link to="/" className="flex items-center gap-2 shrink-0 group">
+                <div className="transition-transform active:scale-95 drop-shadow-[0_2px_6px_rgba(99,102,241,0.35)]">
+                  <OneDeskLogo size={25} />
+                </div>
+                <span className="font-display text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                  OneDesk
+                </span>
+              </Link>
 
+              {/* Right: Notifications + Search trigger + Account avatar */}
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Mobile Notification Bell */}
+                <div className="relative" ref={mobileNotifRef}>
+                  <button
+                    type="button"
+                    onClick={() => { setNotifOpen(v => !v); setSearchOpen(false); setProfileOpen(false); }}
+                    className="relative h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
+                    style={{
+                      background: notifOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
+                      borderColor: notifOpen ? 'var(--border-card)' : 'var(--border-subtle)',
+                      color: notifOpen ? 'var(--accent-color)' : 'var(--text-muted)',
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
+                    }}
+                    aria-label="Notifications"
+                  >
+                    <Bell size={14} />
+                    {dueSoon.length > 0 && settings.dueTaskBadges && (
+                      <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Mobile Search Trigger Button */}
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (query) {
-                      setQuery('');
-                      mobileSearchInputRef.current?.focus();
-                    } else {
-                      setSearchOpen(false);
-                    }
+                  onClick={() => {
+                    setSearchOpen(true);
+                    setNotifOpen(false);
+                    setProfileOpen(false);
+                    setTimeout(() => mobileSearchInputRef.current?.focus(), 100);
                   }}
-                  className="h-full w-8 shrink-0 flex items-center justify-center"
+                  className="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
                   style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
                     color: 'var(--text-muted)',
-                    opacity: searchOpen ? 0.55 : 0,
-                    transition: 'opacity 0.15s ease',
-                    transitionDelay: searchOpen ? '0.22s' : '0s',
-                    pointerEvents: searchOpen ? 'auto' : 'none',
                   }}
+                  aria-label="Open search"
                 >
-                  <X size={12} />
+                  <Search size={14} />
                 </button>
-              </div>
 
-              {/* Mobile search results dropdown */}
-              {searchOpen && query.trim() && (
-                <div
-                  className="absolute right-0 top-full mt-2 w-72 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50"
-                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
-                >
-                  <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
-                  <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
-                  <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
-                  {results.notes.length + results.tasks.length + results.events.length === 0 && (
-                    <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Account Profile Button (Name-based single-initial logo) */}
-            <div className="relative" ref={mobileProfileRef}>
-              <button
-                type="button"
-                onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setSearchOpen(false); }}
-                className="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
-                style={{
-                  background: profileOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
-                  borderColor: profileOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
-                  boxShadow: profileOpen ? '0 0 12px var(--accent-glow)' : 'none',
-                }}
-                aria-label="Account Profile"
-              >
-                <div
-                  className="h-6 w-6 rounded-full grid place-items-center text-white text-[11px] font-black shrink-0 select-none shadow-sm"
-                  style={{ background: 'var(--accent-gradient)' }}
-                >
-                  {initials || <UserIcon size={11} />}
-                </div>
-              </button>
-
-              {/* Mobile Profile Dropdown */}
-              {profileOpen && (
-                <div
-                  className="absolute right-0 mt-2.5 w-60 rounded-[24px] border shadow-2xl animate-menu-pop z-50 overflow-hidden"
-                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
-                >
-                  <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className="h-8 w-8 rounded-full grid place-items-center text-white text-xs font-black shrink-0"
-                        style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
-                      >
-                        {initials}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
-                        <p className="text-[10px] truncate font-mono" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
-                      </div>
+                {/* Mobile Account Profile Button (Name-based single-initial logo) */}
+                <div className="relative" ref={mobileProfileRef}>
+                  <button
+                    type="button"
+                    onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setSearchOpen(false); }}
+                    className="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
+                    style={{
+                      background: profileOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
+                      borderColor: profileOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
+                      boxShadow: profileOpen ? '0 0 12px var(--accent-glow)' : 'none',
+                    }}
+                    aria-label="Account Profile"
+                  >
+                    <div
+                      className="h-6 w-6 rounded-full grid place-items-center text-white text-[11px] font-black shrink-0 select-none shadow-sm"
+                      style={{ background: 'var(--accent-gradient)' }}
+                    >
+                      {initials || <UserIcon size={11} />}
                     </div>
-                  </div>
-                  <div className="p-2 space-y-1">
-                    <button
-                      onClick={() => { setProfileOpen(false); navigate('/settings'); }}
-                      className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-xs font-semibold transition-all"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
-                      <span className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 border" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>
-                        <Sliders size={12} />
-                      </span>
-                      Settings & Preferences
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-xs font-semibold transition-all text-rose-400"
-                    >
-                      <span className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 border border-rose-500/30 bg-rose-500/10">
-                        <LogOut size={12} />
-                      </span>
-                      Log out
-                    </button>
-                  </div>
+                  </button>
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
-      </header>
 
-      {/* ════════════════════════════════════════════
-          MOBILE BOTTOM FLOATING DOCK  (< md)
-      ════════════════════════════════════════════ */}
-      <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 animate-tab-bar select-none pointer-events-none"
-        style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
-      >
-        {/* Bleed gradient above bar */}
-        <div
-          className="absolute inset-x-0 -top-10 h-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to top, var(--bg-page), transparent)' }}
-        />
-
-        <div className="px-3.5 pointer-events-auto">
+        {/* Mobile Notification Popover — FIXED and CENTERED within screen margins, NEVER clips! */}
+        {notifOpen && (
           <div
-            className="flex items-center justify-between rounded-full px-2 py-1.5 border shadow-2xl relative"
+            className="fixed inset-x-3.5 top-[60px] max-w-sm mx-auto rounded-[24px] border shadow-2xl p-4 animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
               backdropFilter: 'blur(40px)',
               WebkitBackdropFilter: 'blur(40px)',
-              boxShadow: '0 16px 48px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
             }}
           >
-            {/* 1. Home */}
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center py-1 rounded-full transition-all duration-200 ${
-                  isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
-                }`
-              }
-              style={({ isActive }) =>
-                isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <div
-                    className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
-                    style={{
-                      background: isActive ? 'var(--bg-surface)' : 'transparent',
-                      boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
-                    }}
-                  >
-                    <Home size={18} strokeWidth={isActive ? 2.5 : 1.8} />
-                  </div>
-                  <span className="text-[9px] font-bold tracking-tight mt-0.5">Home</span>
-                </>
-              )}
-            </NavLink>
-
-            {/* 2. Tasks */}
-            <NavLink
-              to="/tasks"
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center py-1 rounded-full transition-all duration-200 ${
-                  isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
-                }`
-              }
-              style={({ isActive }) =>
-                isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <div
-                    className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
-                    style={{
-                      background: isActive ? 'var(--bg-surface)' : 'transparent',
-                      boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
-                    }}
-                  >
-                    <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.8} />
-                  </div>
-                  <span className="text-[9px] font-bold tracking-tight mt-0.5">Tasks</span>
-                </>
-              )}
-            </NavLink>
-
-            {/* 3. Center Integrated Action Button (Quick Create) */}
-            <button
-              type="button"
-              onClick={() => setMobileQuickSheetOpen(v => !v)}
-              className="flex-1 flex flex-col items-center justify-center py-1 rounded-full transition-all duration-200 select-none active:scale-95 group"
-              aria-label="Quick Create"
-              title="Quick Create"
-            >
-              <div
-                className="h-7 w-7 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-md group-hover:scale-105"
-                style={{
-                  background: 'var(--accent-gradient)',
-                  boxShadow: '0 2px 10px var(--accent-glow)',
-                }}
-              >
-                <Plus
-                  size={16}
-                  strokeWidth={2.8}
-                  style={{
-                    transition: 'transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1)',
-                    transform: mobileQuickSheetOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-                  }}
-                />
+            <div className="flex items-center justify-between mb-3 pb-2 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+              <div className="flex items-center gap-2">
+                <Bell size={14} style={{ color: 'var(--accent-color)' }} />
+                <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
               </div>
-              <span className="text-[9px] font-bold tracking-tight mt-0.5" style={{ color: 'var(--accent-color)' }}>
-                Create
-              </span>
-            </button>
+              <div className="flex items-center gap-2">
+                {dueSoon.length > 0 && (
+                  <span className="text-[10px] font-semibold bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full border border-rose-500/30">
+                    {dueSoon.length} due
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setNotifOpen(false)}
+                  className="h-6 w-6 rounded-full flex items-center justify-center text-stone-400 hover:text-white"
+                  aria-label="Close"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            </div>
 
-            {/* 4. Notes */}
-            <NavLink
-              to="/notes"
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center py-1 rounded-full transition-all duration-200 ${
-                  isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
-                }`
-              }
-              style={({ isActive }) =>
-                isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <div
-                    className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+            {dueSoon.length === 0 ? (
+              <div className="py-5 text-center">
+                <Check size={22} className="mx-auto text-emerald-400 mb-1 opacity-80" />
+                <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>All caught up ✓</p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>No urgent deadlines pending</p>
+              </div>
+            ) : (
+              <ul className="space-y-1.5 max-h-60 overflow-y-auto">
+                {dueSoon.map(t => (
+                  <li
+                    key={t.id}
+                    className="text-xs p-2.5 rounded-xl cursor-pointer transition-colors border"
                     style={{
-                      background: isActive ? 'var(--bg-surface)' : 'transparent',
-                      boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
+                      color: 'var(--text-primary)',
+                      background: 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
                     }}
+                    onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
                   >
-                    <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.8} />
-                  </div>
-                  <span className="text-[9px] font-bold tracking-tight mt-0.5">Notes</span>
-                </>
-              )}
-            </NavLink>
-
-            {/* 5. Schedule */}
-            <NavLink
-              to="/calendar"
-              className={({ isActive }) =>
-                `flex-1 flex flex-col items-center justify-center py-1 rounded-full transition-all duration-200 ${
-                  isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
-                }`
-              }
-              style={({ isActive }) =>
-                isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <div
-                    className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
-                    style={{
-                      background: isActive ? 'var(--bg-surface)' : 'transparent',
-                      boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
-                    }}
-                  >
-                    <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.8} />
-                  </div>
-                  <span className="text-[9px] font-bold tracking-tight mt-0.5">Schedule</span>
-                </>
-              )}
-            </NavLink>
+                    <span className="font-semibold block truncate">{t.title}</span>
+                    <span className="block text-[10px] font-mono mt-0.5 text-rose-400">Due {t.dueDate}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+        )}
+
+        {/* Mobile Search Results Dropdown — FIXED and CENTERED within screen margins, NEVER clips! */}
+        {searchOpen && query.trim() && (
+          <div
+            className="fixed inset-x-3.5 top-[60px] max-w-sm mx-auto rounded-[24px] border shadow-2xl p-4 space-y-3 animate-menu-pop z-50 overflow-hidden"
+            style={{
+              background: 'var(--bg-card-solid)',
+              borderColor: 'var(--border-card)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
+            }}
+          >
+            <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
+            <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
+            <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
+            {results.notes.length + results.tasks.length + results.events.length === 0 && (
+              <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
+            )}
+          </div>
+        )}
+
+        {/* Mobile Profile Dropdown */}
+        {profileOpen && (
+          <div
+            className="fixed right-3.5 top-[60px] w-64 rounded-[24px] border shadow-2xl animate-menu-pop z-50 overflow-hidden"
+            style={{
+              background: 'var(--bg-card-solid)',
+              borderColor: 'var(--border-card)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
+            }}
+          >
+            <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="h-8 w-8 rounded-full grid place-items-center text-white text-xs font-black shrink-0"
+                  style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
+                >
+                  {initials}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
+                  <p className="text-[10px] truncate font-mono" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-2 space-y-1">
+              <button
+                onClick={() => { setProfileOpen(false); navigate('/settings'); }}
+                className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-xs font-semibold transition-all"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                <span className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 border" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>
+                  <Sliders size={12} />
+                </span>
+                Settings & Preferences
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-xs font-semibold transition-all text-rose-400"
+              >
+                <span className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 border border-rose-500/30 bg-rose-500/10">
+                  <LogOut size={12} />
+                </span>
+                Log out
+              </button>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* ════════════════════════════════════════════
+          MOBILE BOTTOM BAR  (< md)
+          Edge-to-Edge Native Mobile Dock — No Square Back!
+      ════════════════════════════════════════════ */}
+      <nav
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 select-none border-t"
+        style={{
+          background: 'var(--bg-card-solid)',
+          borderColor: 'var(--border-subtle)',
+          backdropFilter: 'blur(36px)',
+          WebkitBackdropFilter: 'blur(36px)',
+          boxShadow: '0 -8px 28px rgba(0,0,0,0.4)',
+          paddingBottom: 'max(0.55rem, env(safe-area-inset-bottom))',
+          paddingTop: '0.45rem',
+        }}
+      >
+        <div className="flex items-center justify-around px-2 max-w-lg mx-auto relative">
+          {/* 1. Home */}
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
+                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  style={{
+                    background: isActive ? 'var(--bg-surface)' : 'transparent',
+                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
+                  }}
+                >
+                  <Home size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                </div>
+                <span className="text-[9px] font-bold tracking-tight mt-0.5">Home</span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 2. Tasks */}
+          <NavLink
+            to="/tasks"
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
+                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  style={{
+                    background: isActive ? 'var(--bg-surface)' : 'transparent',
+                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
+                  }}
+                >
+                  <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                </div>
+                <span className="text-[9px] font-bold tracking-tight mt-0.5">Tasks</span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 3. Center Integrated Action Button (Quick Create) */}
+          <button
+            type="button"
+            onClick={() => setMobileQuickSheetOpen(v => !v)}
+            className="flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 select-none active:scale-95 group"
+            aria-label="Quick Create"
+            title="Quick Create"
+          >
+            <div
+              className="h-7 w-7 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-md group-hover:scale-105"
+              style={{
+                background: 'var(--accent-gradient)',
+                boxShadow: '0 2px 10px var(--accent-glow)',
+              }}
+            >
+              <Plus
+                size={16}
+                strokeWidth={2.8}
+                style={{
+                  transition: 'transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1)',
+                  transform: mobileQuickSheetOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                }}
+              />
+            </div>
+            <span className="text-[9px] font-bold tracking-tight mt-0.5" style={{ color: 'var(--accent-color)' }}>
+              Create
+            </span>
+          </button>
+
+          {/* 4. Notes */}
+          <NavLink
+            to="/notes"
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
+                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  style={{
+                    background: isActive ? 'var(--bg-surface)' : 'transparent',
+                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
+                  }}
+                >
+                  <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                </div>
+                <span className="text-[9px] font-bold tracking-tight mt-0.5">Notes</span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 5. Schedule */}
+          <NavLink
+            to="/calendar"
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
+                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  style={{
+                    background: isActive ? 'var(--bg-surface)' : 'transparent',
+                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
+                  }}
+                >
+                  <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                </div>
+                <span className="text-[9px] font-bold tracking-tight mt-0.5">Schedule</span>
+              </>
+            )}
+          </NavLink>
         </div>
       </nav>
 
