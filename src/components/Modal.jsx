@@ -53,11 +53,11 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           'animate-modal-up shadow-2xl',
         ].join(' ')}
         style={{
-          background: 'var(--bg-card)',
+          background: 'var(--bg-card-solid)',
           border: '1px solid var(--border-card)',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
-          backdropFilter: 'blur(28px)',
-          WebkitBackdropFilter: 'blur(28px)',
+          boxShadow: '0 32px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)',
+          backdropFilter: 'blur(40px)',
+          WebkitBackdropFilter: 'blur(40px)',
         }}
       >
         {/* Thin accent line at the top */}

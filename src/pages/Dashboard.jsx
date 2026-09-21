@@ -495,11 +495,11 @@ export default function Dashboard() {
                 <div
                   className="absolute right-0 mt-1.5 w-32 rounded-xl border p-1 shadow-2xl animate-menu-pop z-30 overflow-hidden"
                   style={{
-                    background: 'var(--bg-card)',
+                    background: 'var(--bg-card-solid)',
                     borderColor: 'var(--border-card)',
-                    backdropFilter: 'blur(28px)',
-                    WebkitBackdropFilter: 'blur(28px)',
-                    boxShadow: '0 12px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)',
+                    backdropFilter: 'blur(40px)',
+                    WebkitBackdropFilter: 'blur(40px)',
+                    boxShadow: '0 16px 36px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
                   }}
                 >
                   {[

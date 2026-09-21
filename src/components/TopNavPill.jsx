@@ -216,12 +216,12 @@ export default function TopNavPill() {
         <div
           className="pointer-events-auto relative flex items-center gap-3 px-4 sm:px-5 py-2.5 transition-all duration-300"
           style={{
-            background:     'var(--bg-card)',
+            background:     'var(--bg-card-solid)',
             borderRadius:   '24px',
             border:         '1px solid var(--border-card)',
-            backdropFilter: 'blur(28px)',
-            WebkitBackdropFilter: 'blur(28px)',
-            boxShadow:      '0 10px 45px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.08) inset',
+            backdropFilter: 'blur(32px)',
+            WebkitBackdropFilter: 'blur(32px)',
+            boxShadow:      '0 12px 45px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset',
             width:          'fit-content',
             maxWidth:       'min(1100px, calc(100vw - 48px))',
           }}
@@ -261,7 +261,7 @@ export default function TopNavPill() {
               {notifOpen && (
                 <div
                   className="absolute left-0 mt-2.5 w-72 rounded-2xl border shadow-2xl p-3 animate-menu-pop z-50"
-                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
                   <div className="flex items-center justify-between mb-2.5">
                     <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
@@ -414,7 +414,7 @@ export default function TopNavPill() {
               {searchOpen && query.trim() && (
                 <div
                   className="absolute right-0 top-full mt-2.5 w-80 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50"
-                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
                   <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
                   <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
@@ -453,11 +453,11 @@ export default function TopNavPill() {
                 <div
                   className="absolute right-0 mt-3 w-80 rounded-[28px] border shadow-2xl p-3.5 space-y-2.5 animate-menu-pop z-50 overflow-hidden"
                   style={{
-                    background: 'var(--bg-card)',
+                    background: 'var(--bg-card-solid)',
                     borderColor: 'var(--border-card)',
-                    backdropFilter: 'blur(32px)',
-                    WebkitBackdropFilter: 'blur(32px)',
-                    boxShadow: '0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)',
+                    backdropFilter: 'blur(40px)',
+                    WebkitBackdropFilter: 'blur(40px)',
+                    boxShadow: '0 24px 70px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
                   }}
                 >
                   {/* Header */}
@@ -594,7 +594,7 @@ export default function TopNavPill() {
               {profileOpen && (
                 <div
                   className="absolute right-0 mt-2.5 w-52 rounded-2xl border shadow-2xl animate-menu-pop z-50 overflow-hidden"
-                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
                   {/* User info */}
                   <div
@@ -661,10 +661,10 @@ export default function TopNavPill() {
         <div
           className="flex items-center justify-between px-4 py-3"
           style={{
-            background:     'var(--bg-card)',
+            background:     'var(--bg-card-solid)',
             borderBottom:   '1px solid var(--border-subtle)',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
+            backdropFilter: 'blur(32px)',
+            WebkitBackdropFilter: 'blur(32px)',
           }}
         >
           {/* Left: Logo + Name */}
@@ -686,7 +686,7 @@ export default function TopNavPill() {
                 onClick={() => { setNotifOpen(v => !v); setSearchOpen(false); setProfileOpen(false); }}
                 className="relative h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
                 style={{
-                  background: notifOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
+                  background: notifOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
                   borderColor: notifOpen ? 'var(--border-card)' : 'var(--border-subtle)',
                   color: notifOpen ? 'var(--accent-color)' : 'var(--text-muted)',
                   backdropFilter: 'blur(16px)',
@@ -704,7 +704,7 @@ export default function TopNavPill() {
               {notifOpen && (
                 <div
                   className="absolute right-0 mt-2.5 w-72 rounded-2xl border shadow-2xl p-3 animate-menu-pop z-50"
-                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)' }}
+                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
                   <div className="flex items-center justify-between mb-2.5">
                     <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
@@ -812,7 +812,7 @@ export default function TopNavPill() {
               {searchOpen && query.trim() && (
                 <div
                   className="absolute right-0 top-full mt-2 w-72 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50"
-                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)' }}
+                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
                   <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
                   <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
@@ -831,7 +831,7 @@ export default function TopNavPill() {
                 onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setSearchOpen(false); }}
                 className="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
                 style={{
-                  background: profileOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
+                  background: profileOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
                   borderColor: profileOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
                   boxShadow: profileOpen ? '0 0 12px var(--accent-glow)' : 'none',
                 }}
@@ -849,7 +849,7 @@ export default function TopNavPill() {
               {profileOpen && (
                 <div
                   className="absolute right-0 mt-2.5 w-60 rounded-[24px] border shadow-2xl animate-menu-pop z-50 overflow-hidden"
-                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)' }}
+                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
                   <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
                     <div className="flex items-center gap-2.5">
@@ -910,11 +910,11 @@ export default function TopNavPill() {
           <div
             className="flex items-center justify-between rounded-full px-2 py-1.5 border shadow-2xl relative"
             style={{
-              background: 'var(--bg-card)',
+              background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              boxShadow: '0 14px 44px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              boxShadow: '0 16px 48px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
             }}
           >
             {/* 1. Home */}
@@ -974,30 +974,34 @@ export default function TopNavPill() {
               )}
             </NavLink>
 
-            {/* 3. Center Elevated Action Button (Quick Create Hero) */}
-            <div className="flex-1 flex justify-center -translate-y-3.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setMobileQuickSheetOpen(v => !v)}
-                className="h-12 w-12 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 shadow-2xl"
+            {/* 3. Center Integrated Action Button (Quick Create) */}
+            <button
+              type="button"
+              onClick={() => setMobileQuickSheetOpen(v => !v)}
+              className="flex-1 flex flex-col items-center justify-center py-1 rounded-full transition-all duration-200 select-none active:scale-95 group"
+              aria-label="Quick Create"
+              title="Quick Create"
+            >
+              <div
+                className="h-7 w-7 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-md group-hover:scale-105"
                 style={{
                   background: 'var(--accent-gradient)',
-                  boxShadow: '0 8px 24px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.4)',
-                  border: '3.5px solid var(--bg-card)',
+                  boxShadow: '0 2px 10px var(--accent-glow)',
                 }}
-                aria-label="Quick Create"
-                title="Quick Create"
               >
                 <Plus
-                  size={22}
+                  size={16}
                   strokeWidth={2.8}
                   style={{
                     transition: 'transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1)',
                     transform: mobileQuickSheetOpen ? 'rotate(45deg)' : 'rotate(0deg)',
                   }}
                 />
-              </button>
-            </div>
+              </div>
+              <span className="text-[9px] font-bold tracking-tight mt-0.5" style={{ color: 'var(--accent-color)' }}>
+                Create
+              </span>
+            </button>
 
             {/* 4. Notes */}
             <NavLink
@@ -1074,11 +1078,11 @@ export default function TopNavPill() {
           <div
             className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto"
             style={{
-              background: 'var(--bg-card)',
+              background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              boxShadow: '0 -16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              boxShadow: '0 -20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.15)',
               paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
             }}
           >

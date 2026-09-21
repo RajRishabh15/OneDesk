@@ -796,10 +796,10 @@ export default function Tasks() {
           <div
             className="relative w-full max-w-lg rounded-t-[32px] border-t border-[var(--border-card)] shadow-2xl animate-sheet-bounce max-h-[85vh] flex flex-col overflow-hidden z-10"
             style={{
-              background: 'var(--bg-card)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              boxShadow: '0 -12px 40px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.12)',
+              background: 'var(--bg-card-solid)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              boxShadow: '0 -16px 50px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.15)',
             }}
           >
             {/* Tactile Pill Drag handle */}
