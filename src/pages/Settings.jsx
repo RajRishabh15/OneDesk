@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Download, Upload, Trash2, LogOut,
@@ -148,6 +148,54 @@ export default function Settings() {
   const fileRef = useRef(null);
 
   const initials = (name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
+
+  const [mobileToast, setMobileToast] = useState(null);
+  const mobileToastTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
+    };
+  }, []);
+
+  function handleThemeSelect(t) {
+    setTheme(t.id);
+    if (playChime) playChime('pop');
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      const isWhite = t.id === 'light';
+      const circleColor = isWhite ? '#ffffff' : (t.color || t.preview?.[2] || '#818cf8');
+      setMobileToast({
+        id: Date.now(),
+        type: 'theme',
+        text: `${t.name} theme applied`,
+        color: circleColor,
+        isWhite,
+      });
+      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
+      mobileToastTimeoutRef.current = setTimeout(() => {
+        setMobileToast(null);
+      }, 2200);
+    }
+  }
+
+  function handleToggleFibers() {
+    const isCurrentlyOn = settings?.ghostFibers !== false;
+    const willBeEnabled = !isCurrentlyOn;
+    toggleSetting('ghostFibers');
+    if (playChime) playChime('pop');
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setMobileToast({
+        id: Date.now(),
+        type: 'bg',
+        text: `Background animation ${willBeEnabled ? 'enabled' : 'disabled'}`,
+        enabled: willBeEnabled,
+      });
+      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
+      mobileToastTimeoutRef.current = setTimeout(() => {
+        setMobileToast(null);
+      }, 2200);
+    }
+  }
 
   async function handleLogout() {
     await logout();
@@ -310,7 +358,7 @@ export default function Settings() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
           {THEMES.map((t) => (
-            <ThemeSwatch key={t.id} t={t} active={theme === t.id} onClick={() => setTheme(t.id)} />
+            <ThemeSwatch key={t.id} t={t} active={theme === t.id} onClick={() => handleThemeSelect(t)} />
           ))}
         </div>
       </Panel>
@@ -428,11 +476,11 @@ export default function Settings() {
             <Row
               label="Ambient Fibers"
               sub="Glowing dynamic background wave canvas."
-              onClick={() => toggleSetting('ghostFibers')}
+              onClick={handleToggleFibers}
             >
               <Toggle
                 on={settings.ghostFibers}
-                onToggle={() => toggleSetting('ghostFibers')}
+                onToggle={handleToggleFibers}
                 label="Toggle background fibers"
               />
             </Row>
@@ -470,6 +518,66 @@ export default function Settings() {
       <p className="text-center text-[10px] pb-2 tracking-widest uppercase" style={{ color: 'var(--text-muted)', opacity: 0.4 }}>
         OneDesk · Your personal workspace
       </p>
+
+      {/* Mobile Pop-up Notification (Only for Mobile) */}
+      {mobileToast && (
+        <div
+          key={mobileToast.id}
+          className="sm:hidden fixed bottom-20 inset-x-0 mx-auto w-fit z-50 pointer-events-none animate-fade-in"
+        >
+          <div
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-2xl backdrop-blur-xl text-xs font-semibold whitespace-nowrap"
+            style={{
+              background: 'var(--bg-card-solid)',
+              borderColor:
+                mobileToast.type === 'theme'
+                  ? (mobileToast.isWhite ? 'var(--border-card)' : mobileToast.color)
+                  : mobileToast.enabled
+                  ? 'var(--accent-color)'
+                  : 'var(--border-card)',
+              color: 'var(--text-primary)',
+              boxShadow:
+                mobileToast.type === 'theme'
+                  ? (mobileToast.isWhite
+                      ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
+                      : `0 8px 24px -4px ${mobileToast.color}66`)
+                  : mobileToast.enabled
+                  ? '0 8px 24px -4px var(--accent-glow)'
+                  : '0 8px 24px -4px rgba(0,0,0,0.6)',
+            }}
+          >
+            {mobileToast.type === 'theme' ? (
+              <Palette
+                size={13}
+                style={{ color: mobileToast.isWhite ? 'var(--accent-color)' : mobileToast.color }}
+              />
+            ) : (
+              <Sparkles
+                size={13}
+                style={{ color: mobileToast.enabled ? 'var(--accent-color)' : 'var(--text-muted)' }}
+              />
+            )}
+            <span>{mobileToast.text}</span>
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{
+                background:
+                  mobileToast.type === 'theme'
+                    ? (mobileToast.isWhite ? 'var(--accent-color)' : mobileToast.color)
+                    : mobileToast.enabled
+                    ? '#34d399'
+                    : '#f43f5e',
+                boxShadow:
+                  mobileToast.type === 'theme'
+                    ? (mobileToast.isWhite ? '0 0 8px var(--accent-glow)' : `0 0 8px ${mobileToast.color}bb`)
+                    : mobileToast.enabled
+                    ? '0 0 6px #34d399'
+                    : 'none',
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
