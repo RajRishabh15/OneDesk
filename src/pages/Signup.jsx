@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AuthShell, Field } from './Login';
 
@@ -19,55 +19,67 @@ export default function Signup() {
   }
 
   return (
-    <AuthShell>
-      <h1 className="font-serif text-2xl font-normal text-white">Create workspace</h1>
-      <p className="mt-1 text-xs text-stone-400">Set up your personal OneDesk workspace.</p>
-
-      <form onSubmit={handleSubmit} className="mt-5 space-y-3.5">
+    <AuthShell activeTab="signup">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <Field
+          label="Your Name"
           icon={User}
           type="text"
-          placeholder="Full name"
+          placeholder="e.g., Rishabh"
           required
+          autoComplete="name"
           value={form.name}
           onChange={(v) => setForm((f) => ({ ...f, name: v }))}
         />
         <Field
+          label="Email Address"
           icon={Mail}
           type="email"
-          placeholder="Email address"
+          placeholder="name@example.com"
           required
+          autoComplete="email"
           value={form.email}
           onChange={(v) => setForm((f) => ({ ...f, email: v }))}
         />
         <Field
+          label="Choose Password"
           icon={Lock}
           type="password"
-          placeholder="Choose password (min 6 chars)"
+          placeholder="Minimum 6 characters"
           required
           minLength={6}
+          autoComplete="new-password"
           value={form.password}
           onChange={(v) => setForm((f) => ({ ...f, password: v }))}
         />
 
-        {authError && <p className="text-xs font-medium text-rose-400">{authError}</p>}
+        {authError && (
+          <div
+            className="p-3 rounded-2xl border text-xs font-medium animate-fade-in flex items-start gap-2"
+            style={{
+              background: 'rgba(244,63,94,0.1)',
+              borderColor: 'rgba(244,63,94,0.25)',
+              color: '#fb7185',
+            }}
+          >
+            <span>{authError}</span>
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-2.5 text-xs font-semibold transition-all shadow-md shadow-indigo-500/25"
+          className="w-full flex items-center justify-center gap-2 rounded-2xl text-white py-3 text-xs sm:text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          style={{
+            background: 'var(--accent-gradient)',
+            boxShadow: '0 6px 20px var(--accent-glow)',
+          }}
         >
-          {isLoading ? <Loader2 size={14} className="animate-spin" /> : null}
-          {isLoading ? 'Creating account…' : 'Create account'}
+          {isLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+          <span>{isLoading ? 'Creating your workspace…' : 'Create workspace'}</span>
+          {!isLoading && <ArrowRight size={14} />}
         </button>
       </form>
-
-      <p className="mt-6 text-center text-xs text-stone-400">
-        Already have an account?{' '}
-        <Link to="/login" className="font-semibold text-indigo-400 hover:underline">
-          Sign in
-        </Link>
-      </p>
     </AuthShell>
   );
 }
