@@ -313,19 +313,21 @@ export function AuthShell({ children, activeTab = 'login' }) {
           className="sm:hidden fixed bottom-16 inset-x-0 mx-auto w-fit z-40 pointer-events-none animate-fade-in"
         >
           <div
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-2xl backdrop-blur-xl text-xs font-semibold"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-2xl backdrop-blur-xl text-xs font-semibold whitespace-nowrap"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor:
                 toast.type === 'theme'
-                  ? (toast.isWhite ? 'rgba(255,255,255,0.4)' : toast.color)
+                  ? (toast.isWhite ? 'var(--border-card)' : toast.color)
                   : toast.enabled
                   ? 'var(--accent-color)'
                   : 'var(--border-card)',
               color: 'var(--text-primary)',
               boxShadow:
                 toast.type === 'theme'
-                  ? (toast.isWhite ? '0 8px 24px -4px rgba(255,255,255,0.2)' : `0 8px 24px -4px ${toast.color}66`)
+                  ? (toast.isWhite
+                      ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
+                      : `0 8px 24px -4px ${toast.color}66`)
                   : toast.enabled
                   ? '0 8px 24px -4px var(--accent-glow)'
                   : '0 8px 24px -4px rgba(0,0,0,0.6)',
@@ -334,7 +336,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
             {toast.type === 'theme' ? (
               <Palette
                 size={13}
-                style={{ color: toast.isWhite ? '#ffffff' : toast.color }}
+                style={{ color: toast.isWhite ? 'var(--accent-color)' : toast.color }}
               />
             ) : (
               <Sparkles
@@ -348,14 +350,13 @@ export function AuthShell({ children, activeTab = 'login' }) {
               style={{
                 background:
                   toast.type === 'theme'
-                    ? toast.color
+                    ? (toast.isWhite ? 'var(--accent-color)' : toast.color)
                     : toast.enabled
                     ? '#34d399'
                     : '#f43f5e',
-                border: toast.type === 'theme' && toast.isWhite ? '1px solid rgba(0,0,0,0.25)' : 'none',
                 boxShadow:
                   toast.type === 'theme'
-                    ? (toast.isWhite ? '0 0 6px rgba(255,255,255,0.8)' : `0 0 8px ${toast.color}bb`)
+                    ? (toast.isWhite ? '0 0 8px var(--accent-glow)' : `0 0 8px ${toast.color}bb`)
                     : toast.enabled
                     ? '0 0 6px #34d399'
                     : 'none',

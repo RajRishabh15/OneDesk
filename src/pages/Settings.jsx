@@ -526,19 +526,21 @@ export default function Settings() {
           className="sm:hidden fixed bottom-20 inset-x-0 mx-auto w-fit z-50 pointer-events-none animate-fade-in"
         >
           <div
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-2xl backdrop-blur-xl text-xs font-semibold"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-2xl backdrop-blur-xl text-xs font-semibold whitespace-nowrap"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor:
                 mobileToast.type === 'theme'
-                  ? (mobileToast.isWhite ? 'rgba(255,255,255,0.4)' : mobileToast.color)
+                  ? (mobileToast.isWhite ? 'var(--border-card)' : mobileToast.color)
                   : mobileToast.enabled
                   ? 'var(--accent-color)'
                   : 'var(--border-card)',
               color: 'var(--text-primary)',
               boxShadow:
                 mobileToast.type === 'theme'
-                  ? (mobileToast.isWhite ? '0 8px 24px -4px rgba(255,255,255,0.2)' : `0 8px 24px -4px ${mobileToast.color}66`)
+                  ? (mobileToast.isWhite
+                      ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
+                      : `0 8px 24px -4px ${mobileToast.color}66`)
                   : mobileToast.enabled
                   ? '0 8px 24px -4px var(--accent-glow)'
                   : '0 8px 24px -4px rgba(0,0,0,0.6)',
@@ -547,7 +549,7 @@ export default function Settings() {
             {mobileToast.type === 'theme' ? (
               <Palette
                 size={13}
-                style={{ color: mobileToast.isWhite ? '#ffffff' : mobileToast.color }}
+                style={{ color: mobileToast.isWhite ? 'var(--accent-color)' : mobileToast.color }}
               />
             ) : (
               <Sparkles
@@ -561,14 +563,13 @@ export default function Settings() {
               style={{
                 background:
                   mobileToast.type === 'theme'
-                    ? mobileToast.color
+                    ? (mobileToast.isWhite ? 'var(--accent-color)' : mobileToast.color)
                     : mobileToast.enabled
                     ? '#34d399'
                     : '#f43f5e',
-                border: mobileToast.type === 'theme' && mobileToast.isWhite ? '1px solid rgba(0,0,0,0.25)' : 'none',
                 boxShadow:
                   mobileToast.type === 'theme'
-                    ? (mobileToast.isWhite ? '0 0 6px rgba(255,255,255,0.8)' : `0 0 8px ${mobileToast.color}bb`)
+                    ? (mobileToast.isWhite ? '0 0 8px var(--accent-glow)' : `0 0 8px ${mobileToast.color}bb`)
                     : mobileToast.enabled
                     ? '0 0 6px #34d399'
                     : 'none',
