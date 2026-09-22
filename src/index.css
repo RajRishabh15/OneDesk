@@ -479,6 +479,21 @@ select option {
   animation: cursorBlink 0.85s infinite;
 }
 
+/* ─── Smooth Fade & Slide In ─────────────────────────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* ─── Bouncy physics toggle & bubble styling ─────────────── */
 .reduce-bounciness .btn-glass,
 .reduce-bounciness .btn-glass-primary,
