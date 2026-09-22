@@ -20,6 +20,17 @@ export function AuthProvider({ children }) {
   // session management — no localStorage needed.
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
+      // Force global logout on cloud system for all existing sessions
+      const LOGOUT_EPOCH = 'onedesk_cloud_logout_epoch_v1';
+      if (localStorage.getItem(LOGOUT_EPOCH) !== 'done') {
+        signOut(auth).finally(() => {
+          localStorage.setItem(LOGOUT_EPOCH, 'done');
+          setUser(null);
+          setLoading(false);
+        });
+        return;
+      }
+
       if (firebaseUser) {
         setUser({
           id: firebaseUser.uid,

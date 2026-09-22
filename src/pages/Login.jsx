@@ -40,10 +40,6 @@ export default function Login() {
     if (ok) navigate('/');
   }
 
-  function handleDemoFill() {
-    setForm({ email: 'demo@onedesk.io', password: 'password123' });
-  }
-
   return (
     <AuthShell activeTab="login">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -68,21 +64,6 @@ export default function Login() {
           onChange={(v) => setForm((f) => ({ ...f, password: v }))}
         />
 
-        {/* Demo Quick Fill & Status */}
-        <div className="flex items-center justify-between pt-0.5 text-[11px]">
-          <button
-            type="button"
-            onClick={handleDemoFill}
-            className="inline-flex items-center gap-1 font-semibold transition-all hover:underline cursor-pointer"
-            style={{ color: 'var(--accent-color)' }}
-          >
-            <Sparkles size={11} /> Auto-fill demo
-          </button>
-          <span style={{ color: 'var(--text-muted)' }}>
-            OneDesk Secured
-          </span>
-        </div>
-
         {authError && (
           <div
             className="p-3 rounded-2xl border text-xs font-medium animate-fade-in flex items-start gap-2"
@@ -99,7 +80,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-2xl text-white py-3 text-xs sm:text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 rounded-2xl text-white py-3 text-xs sm:text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
           style={{
             background: 'var(--accent-gradient)',
             boxShadow: '0 6px 20px var(--accent-glow)',
@@ -198,7 +179,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
           </span>
         </div>
 
-        {/* Floating Theme Customizer Pill */}
+        {/* Floating Theme Customizer Pill (Right Side) */}
         <div
           className="pointer-events-auto flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-full border shadow-lg backdrop-blur-xl transition-all"
           style={{
@@ -206,9 +187,9 @@ export function AuthShell({ children, activeTab = 'login' }) {
             borderColor: 'var(--border-card)',
           }}
         >
-          <div className="hidden md:flex items-center gap-1.5 pr-2 border-r border-[var(--border-subtle)]">
+          <div className="flex items-center gap-1.5 pr-1.5 sm:pr-2 border-r border-[var(--border-subtle)]">
             <Palette size={13} style={{ color: 'var(--accent-color)' }} />
-            <span className="text-[11px] font-bold capitalize" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-[11px] font-bold capitalize hidden sm:inline" style={{ color: 'var(--text-primary)' }}>
               {THEMES.find((t) => t.id === theme)?.name || theme}
             </span>
           </div>
@@ -217,6 +198,8 @@ export function AuthShell({ children, activeTab = 'login' }) {
           <div className="flex items-center gap-1">
             {THEMES.map((t) => {
               const active = theme === t.id;
+              const isWhite = t.id === 'light';
+              const circleColor = isWhite ? '#ffffff' : (t.color || t.preview[2] || t.preview[0]);
               return (
                 <button
                   key={t.id}
@@ -232,12 +215,22 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   <span
                     className="w-5 h-5 rounded-full flex items-center justify-center transition-all border shadow-sm"
                     style={{
-                      background: t.preview[2] || t.preview[0],
-                      borderColor: active ? '#ffffff' : 'transparent',
-                      boxShadow: active ? `0 0 10px ${t.preview[2]}aa` : 'none',
+                      background: circleColor,
+                      borderColor: active
+                        ? (isWhite ? 'var(--accent-color)' : '#ffffff')
+                        : (isWhite ? 'rgba(0,0,0,0.3)' : 'transparent'),
+                      boxShadow: active
+                        ? (isWhite ? '0 0 10px rgba(255,255,255,0.9)' : `0 0 10px ${circleColor}aa`)
+                        : 'none',
                     }}
                   >
-                    {active && <Check size={10} className="text-white drop-shadow" strokeWidth={3} />}
+                    {active && (
+                      <Check
+                        size={10}
+                        className={isWhite ? 'text-stone-900' : 'text-white drop-shadow'}
+                        strokeWidth={3}
+                      />
+                    )}
                   </span>
                 </button>
               );
@@ -252,7 +245,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
               if (playChime) playChime('pop');
             }}
             title={settings?.ghostFibers !== false ? 'Disable animated background' : 'Enable animated background'}
-            className="p-1.5 rounded-full border transition-all ml-1 cursor-pointer"
+            className="p-1.5 rounded-full border transition-all ml-0.5 cursor-pointer"
             style={{
               background: settings?.ghostFibers !== false ? 'var(--bg-surface)' : 'transparent',
               borderColor: 'var(--border-subtle)',
@@ -268,7 +261,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
       <div className="relative z-10 w-full max-w-[430px] my-auto pt-16 pb-8">
         {/* Auth Glass Card */}
         <div
-          className="rounded-[32px] border p-6 sm:p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden transition-all duration-300"
+          className="rounded-[32px] border p-6 sm:p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden transition-all duration-300 w-full"
           style={{
             background: 'var(--bg-card-solid)',
             borderColor: 'var(--border-card)',
@@ -284,7 +277,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
           />
 
           {/* Header Branding */}
-          <div className="flex flex-col items-center text-center mb-6">
+          <div className="flex flex-col items-center text-center mb-5">
             <div
               className="p-2.5 rounded-2xl border shadow-md mb-3 transition-transform hover:scale-105 duration-200"
               style={{
@@ -334,54 +327,6 @@ export function AuthShell({ children, activeTab = 'login' }) {
             >
               Create account
             </Link>
-          </div>
-
-          {/* In-Card Theme Selection Row */}
-          <div
-            className="rounded-2xl border p-3 mb-6 transition-all"
-            style={{
-              background: 'var(--bg-surface)',
-              borderColor: 'var(--border-subtle)',
-            }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-                <Palette size={11} style={{ color: 'var(--accent-color)' }} /> Workspace Theme
-              </span>
-              <span className="text-[10px] font-bold capitalize" style={{ color: 'var(--accent-color)' }}>
-                {THEMES.find((t) => t.id === theme)?.name || theme}
-              </span>
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-              {THEMES.map((t) => {
-                const active = theme === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => handleThemeChange(t.id)}
-                    title={t.name}
-                    className="flex flex-col items-center gap-1 py-1.5 px-0.5 rounded-xl border transition-all duration-200 cursor-pointer"
-                    style={{
-                      background: active ? 'var(--bg-card-solid)' : 'transparent',
-                      borderColor: active ? 'var(--accent-color)' : 'transparent',
-                      boxShadow: active ? '0 0 10px var(--accent-glow)' : 'none',
-                    }}
-                  >
-                    <div className="flex items-center -space-x-1">
-                      <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ background: t.preview[0] }} />
-                      <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ background: t.preview[2] }} />
-                    </div>
-                    <span
-                      className="text-[9px] font-semibold truncate max-w-full"
-                      style={{ color: active ? 'var(--text-primary)' : 'var(--text-muted)' }}
-                    >
-                      {t.name}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {/* Page-Specific Form Children */}
