@@ -97,8 +97,11 @@ export default function TopNavPill() {
   const mobileSearchInputRef  = useRef(null);
   const profileRef            = useRef(null);
   const mobileProfileRef      = useRef(null);
+  const mobileProfileDropdownRef = useRef(null);
   const desktopNotifRef       = useRef(null);
   const mobileNotifRef        = useRef(null);
+  const mobileNotifDropdownRef   = useRef(null);
+  const mobileSearchDropdownRef  = useRef(null);
   const quickAddRef           = useRef(null);
 
   async function handleQuickInlineTask(e) {
@@ -127,31 +130,41 @@ export default function TopNavPill() {
     }
   }
 
-  function handleLogout() {
+  async function handleLogout() {
     setProfileOpen(false);
-    logout();
-    navigate('/login', { replace: true });
+    try {
+      await logout();
+    } finally {
+      navigate('/login', { replace: true });
+    }
   }
 
   /* ── close on outside click ── */
   useEffect(() => {
     function onDown(e) {
       const inDesktopSearch = desktopSearchBoxRef.current && desktopSearchBoxRef.current.contains(e.target);
-      const inMobileSearch  = mobileSearchBoxRef.current && mobileSearchBoxRef.current.contains(e.target);
+      const inMobileSearch  = (mobileSearchBoxRef.current && mobileSearchBoxRef.current.contains(e.target)) ||
+                              (mobileSearchDropdownRef.current && mobileSearchDropdownRef.current.contains(e.target));
       if (!inDesktopSearch && !inMobileSearch) setSearchOpen(false);
 
       const inDesktopNotif  = desktopNotifRef.current && desktopNotifRef.current.contains(e.target);
-      const inMobileNotif   = mobileNotifRef.current && mobileNotifRef.current.contains(e.target);
+      const inMobileNotif   = (mobileNotifRef.current && mobileNotifRef.current.contains(e.target)) ||
+                              (mobileNotifDropdownRef.current && mobileNotifDropdownRef.current.contains(e.target));
       if (!inDesktopNotif && !inMobileNotif) setNotifOpen(false);
 
       const inDesktopProfile = profileRef.current && profileRef.current.contains(e.target);
-      const inMobileProfile  = mobileProfileRef.current && mobileProfileRef.current.contains(e.target);
+      const inMobileProfile  = (mobileProfileRef.current && mobileProfileRef.current.contains(e.target)) ||
+                               (mobileProfileDropdownRef.current && mobileProfileDropdownRef.current.contains(e.target));
       if (!inDesktopProfile && !inMobileProfile) setProfileOpen(false);
 
       if (quickAddRef.current && !quickAddRef.current.contains(e.target)) setQuickAddOpen(false);
     }
     document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
+    document.addEventListener('touchstart', onDown, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('touchstart', onDown);
+    };
   }, []);
 
   /* ── Ctrl+K ── */
@@ -791,6 +804,7 @@ export default function TopNavPill() {
         {/* Mobile Notification Popover — FIXED and CENTERED within screen margins, NEVER clips! */}
         {notifOpen && (
           <div
+            ref={mobileNotifDropdownRef}
             className="fixed inset-x-3.5 top-[60px] max-w-sm mx-auto rounded-[24px] border shadow-2xl p-4 animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
@@ -853,6 +867,7 @@ export default function TopNavPill() {
         {/* Mobile Search Results Dropdown — FIXED and CENTERED within screen margins, NEVER clips! */}
         {searchOpen && query.trim() && (
           <div
+            ref={mobileSearchDropdownRef}
             className="fixed inset-x-3.5 top-[60px] max-w-sm mx-auto rounded-[24px] border shadow-2xl p-4 space-y-3 animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
@@ -874,6 +889,7 @@ export default function TopNavPill() {
         {/* Mobile Profile Dropdown */}
         {profileOpen && (
           <div
+            ref={mobileProfileDropdownRef}
             className="fixed right-3.5 top-[60px] w-64 rounded-[24px] border shadow-2xl animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
@@ -899,20 +915,26 @@ export default function TopNavPill() {
             </div>
             <div className="p-2 space-y-1">
               <button
+                type="button"
                 onClick={() => { setProfileOpen(false); navigate('/settings'); }}
-                className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-xs font-semibold transition-all"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer active:scale-95"
                 style={{ color: 'var(--text-primary)' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
-                <span className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 border" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>
+                <span className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0 border" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>
                   <Sliders size={12} />
                 </span>
                 Settings & Preferences
               </button>
               <button
+                type="button"
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-xs font-semibold transition-all text-rose-400"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all text-rose-400 cursor-pointer active:scale-95"
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(251,113,133,0.08)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
-                <span className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 border border-rose-500/30 bg-rose-500/10">
+                <span className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0 border border-rose-500/30 bg-rose-500/10">
                   <LogOut size={12} />
                 </span>
                 Log out
