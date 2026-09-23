@@ -671,31 +671,51 @@ export default function TopNavPill() {
       {/* ════════════════════════════════════════════
           MOBILE TOP BAR  (< md)
       ════════════════════════════════════════════ */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-40">
+      <header className="md:hidden fixed top-0 inset-x-0 z-40 select-none">
         <div
-          className="flex items-center justify-between px-3.5 py-2.5 h-14"
+          className="relative flex items-center justify-between px-3.5 h-14"
           style={{
-            background:     'var(--bg-card-solid)',
-            borderBottom:   '1px solid var(--border-subtle)',
+            background: 'var(--bg-card-solid)',
+            borderBottom: '1px solid var(--border-subtle)',
             backdropFilter: 'blur(32px)',
             WebkitBackdropFilter: 'blur(32px)',
+            boxShadow: '0 4px 20px -2px rgba(0,0,0,0.3)',
           }}
         >
+          {/* Hairline Specular Reflection Line on Bottom Edge */}
+          <div
+            className="absolute bottom-0 inset-x-0 h-px pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)',
+            }}
+          />
+
           {searchOpen ? (
-            /* Full-width Search Bar Mode on Mobile (No collision with logo or icons) */
+            /* Full-width Search Bar Mode on Mobile — Square bar inline morph */
             <div className="flex items-center gap-2 w-full animate-fade-in">
               <button
                 type="button"
-                onClick={() => { setSearchOpen(false); setQuery(''); }}
-                className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-all active:scale-95"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setSearchOpen(false);
+                  setQuery('');
+                }}
+                className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-200 active:scale-90 cursor-pointer"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                }}
                 aria-label="Close search"
               >
                 <ArrowLeft size={16} />
               </button>
               <div
-                className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-inner"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)' }}
+                className="flex-1 flex items-center gap-2 px-3 h-9 rounded-xl border shadow-inner transition-all"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                }}
               >
                 <Search size={14} style={{ color: 'var(--accent-color)' }} />
                 <input
@@ -703,15 +723,20 @@ export default function TopNavPill() {
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                   placeholder="Search tasks, notes, schedule…"
-                  className="flex-1 min-w-0 bg-transparent text-xs outline-none"
+                  className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm outline-none font-medium"
                   style={{ color: 'var(--text-primary)' }}
                   autoFocus
                 />
                 {query && (
                   <button
                     type="button"
-                    onClick={() => { setQuery(''); mobileSearchInputRef.current?.focus(); }}
-                    className="p-1 rounded-full text-stone-400 hover:text-white"
+                    onClick={() => {
+                      if (playChime) playChime('pop');
+                      setQuery('');
+                      mobileSearchInputRef.current?.focus();
+                    }}
+                    className="p-1 rounded-lg text-stone-400 hover:text-white transition-colors active:scale-90"
+                    aria-label="Clear query"
                   >
                     <X size={12} />
                   </button>
@@ -719,38 +744,65 @@ export default function TopNavPill() {
               </div>
             </div>
           ) : (
-            /* Normal Mode: Logo on Left, Action Cluster on Right */
+            /* Normal Mode: Brand on Left, Squircle Action Cluster on Right */
             <>
-              {/* Left: Logo + Name */}
-              <Link to="/" className="flex items-center gap-2 shrink-0 group">
-                <div className="transition-transform active:scale-95 drop-shadow-[0_2px_6px_rgba(99,102,241,0.35)]">
-                  <OneDeskLogo size={25} />
+              {/* Left: Brand Logo + Typography + Live Accent Indicator */}
+              <Link
+                to="/"
+                onClick={() => playChime && playChime('pop')}
+                className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform"
+              >
+                <div
+                  className="h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-200"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  <OneDeskLogo size={22} />
                 </div>
-                <span className="font-display text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                  OneDesk
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="font-display text-[15px] font-extrabold tracking-tight leading-none"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    OneDesk
+                  </span>
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: 'var(--accent-color)',
+                      boxShadow: '0 0 6px var(--accent-color)',
+                    }}
+                  />
+                </div>
               </Link>
 
-              {/* Right: Notifications + Search trigger + Account avatar */}
+              {/* Right: Notifications + Search Trigger + Account Profile */}
               <div className="flex items-center gap-2 shrink-0">
                 {/* Mobile Notification Bell */}
                 <div className="relative" ref={mobileNotifRef}>
                   <button
                     type="button"
-                    onClick={() => { setNotifOpen(v => !v); setSearchOpen(false); setProfileOpen(false); }}
-                    className="relative h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
+                    onClick={() => {
+                      if (playChime) playChime('pop');
+                      setNotifOpen(v => !v);
+                      setSearchOpen(false);
+                      setProfileOpen(false);
+                    }}
+                    className="relative h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer"
                     style={{
                       background: notifOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
-                      borderColor: notifOpen ? 'var(--border-card)' : 'var(--border-subtle)',
+                      borderColor: notifOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
                       color: notifOpen ? 'var(--accent-color)' : 'var(--text-muted)',
-                      backdropFilter: 'blur(16px)',
-                      WebkitBackdropFilter: 'blur(16px)',
+                      boxShadow: notifOpen ? '0 0 14px var(--accent-glow)' : 'none',
                     }}
                     aria-label="Notifications"
                   >
-                    <Bell size={14} />
+                    <Bell size={15} strokeWidth={notifOpen ? 2.3 : 1.8} />
                     {dueSoon.length > 0 && settings.dueTaskBadges && (
-                      <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
+                      <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-[var(--bg-card)] shadow-[0_0_8px_rgba(244,63,94,0.7)] animate-pulse" />
                     )}
                   </button>
                 </div>
@@ -759,12 +811,13 @@ export default function TopNavPill() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (playChime) playChime('pop');
                     setSearchOpen(true);
                     setNotifOpen(false);
                     setProfileOpen(false);
                     setTimeout(() => mobileSearchInputRef.current?.focus(), 100);
                   }}
-                  className="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
+                  className="h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer"
                   style={{
                     background: 'var(--bg-surface)',
                     borderColor: 'var(--border-subtle)',
@@ -772,27 +825,32 @@ export default function TopNavPill() {
                   }}
                   aria-label="Open search"
                 >
-                  <Search size={14} />
+                  <Search size={15} strokeWidth={1.8} />
                 </button>
 
-                {/* Mobile Account Profile Button (Name-based single-initial logo) */}
+                {/* Mobile Account Profile Button */}
                 <div className="relative" ref={mobileProfileRef}>
                   <button
                     type="button"
-                    onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setSearchOpen(false); }}
-                    className="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-95 border"
+                    onClick={() => {
+                      if (playChime) playChime('pop');
+                      setProfileOpen(v => !v);
+                      setNotifOpen(false);
+                      setSearchOpen(false);
+                    }}
+                    className="h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer p-0.5"
                     style={{
                       background: profileOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
                       borderColor: profileOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
-                      boxShadow: profileOpen ? '0 0 12px var(--accent-glow)' : 'none',
+                      boxShadow: profileOpen ? '0 0 14px var(--accent-glow)' : 'none',
                     }}
                     aria-label="Account Profile"
                   >
                     <div
-                      className="h-6 w-6 rounded-full grid place-items-center text-white text-[11px] font-black shrink-0 select-none shadow-sm"
+                      className="h-full w-full rounded-[9px] grid place-items-center text-white text-[11px] font-black shrink-0 select-none shadow-sm"
                       style={{ background: 'var(--accent-gradient)' }}
                     >
-                      {initials || <UserIcon size={11} />}
+                      {initials || <UserIcon size={12} />}
                     </div>
                   </button>
                 </div>
@@ -805,7 +863,7 @@ export default function TopNavPill() {
         {notifOpen && (
           <div
             ref={mobileNotifDropdownRef}
-            className="fixed inset-x-3.5 top-[60px] max-w-sm mx-auto rounded-[24px] border shadow-2xl p-4 animate-menu-pop z-50 overflow-hidden"
+            className="fixed inset-x-3.5 top-[62px] max-w-sm mx-auto rounded-2xl border shadow-2xl p-4 animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
@@ -814,21 +872,35 @@ export default function TopNavPill() {
               boxShadow: '0 24px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
             }}
           >
-            <div className="flex items-center justify-between mb-3 pb-2 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+            <div
+              className="absolute top-0 inset-x-4 h-px pointer-events-none"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+              }}
+            />
+            <div className="flex items-center justify-between mb-3 pb-2.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
               <div className="flex items-center gap-2">
-                <Bell size={14} style={{ color: 'var(--accent-color)' }} />
+                <div
+                  className="h-6 w-6 rounded-lg flex items-center justify-center border"
+                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+                >
+                  <Bell size={13} style={{ color: 'var(--accent-color)' }} />
+                </div>
                 <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
               </div>
               <div className="flex items-center gap-2">
                 {dueSoon.length > 0 && (
-                  <span className="text-[10px] font-semibold bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full border border-rose-500/30">
+                  <span className="text-[10px] font-bold bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full border border-rose-500/30">
                     {dueSoon.length} due
                   </span>
                 )}
                 <button
                   type="button"
-                  onClick={() => setNotifOpen(false)}
-                  className="h-6 w-6 rounded-full flex items-center justify-center text-stone-400 hover:text-white"
+                  onClick={() => {
+                    if (playChime) playChime('pop');
+                    setNotifOpen(false);
+                  }}
+                  className="h-6 w-6 rounded-lg flex items-center justify-center text-stone-400 hover:text-white active:scale-90 transition-all"
                   aria-label="Close"
                 >
                   <X size={13} />
@@ -847,16 +919,20 @@ export default function TopNavPill() {
                 {dueSoon.map(t => (
                   <li
                     key={t.id}
-                    className="text-xs p-2.5 rounded-xl cursor-pointer transition-colors border"
+                    className="text-xs p-2.5 rounded-xl cursor-pointer transition-all border active:scale-[0.98]"
                     style={{
                       color: 'var(--text-primary)',
                       background: 'var(--bg-surface)',
                       borderColor: 'var(--border-subtle)',
                     }}
-                    onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
+                    onClick={() => {
+                      if (playChime) playChime('pop');
+                      setNotifOpen(false);
+                      navigate('/tasks');
+                    }}
                   >
                     <span className="font-semibold block truncate">{t.title}</span>
-                    <span className="block text-[10px] font-mono mt-0.5 text-rose-400">Due {t.dueDate}</span>
+                    <span className="block text-[10px] font-mono mt-0.5 text-rose-400 font-medium">Due {t.dueDate}</span>
                   </li>
                 ))}
               </ul>
@@ -868,7 +944,7 @@ export default function TopNavPill() {
         {searchOpen && query.trim() && (
           <div
             ref={mobileSearchDropdownRef}
-            className="fixed inset-x-3.5 top-[60px] max-w-sm mx-auto rounded-[24px] border shadow-2xl p-4 space-y-3 animate-menu-pop z-50 overflow-hidden"
+            className="fixed inset-x-3.5 top-[62px] max-w-sm mx-auto rounded-2xl border shadow-2xl p-4 space-y-3 animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
@@ -877,9 +953,15 @@ export default function TopNavPill() {
               boxShadow: '0 24px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
             }}
           >
-            <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
-            <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
-            <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
+            <div
+              className="absolute top-0 inset-x-4 h-px pointer-events-none"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+              }}
+            />
+            <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/tasks'); }} />
+            <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/notes'); }} />
+            <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/calendar'); }} />
             {results.notes.length + results.tasks.length + results.events.length === 0 && (
               <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
             )}
@@ -890,7 +972,7 @@ export default function TopNavPill() {
         {profileOpen && (
           <div
             ref={mobileProfileDropdownRef}
-            className="fixed right-3.5 top-[60px] w-64 rounded-[24px] border shadow-2xl animate-menu-pop z-50 overflow-hidden"
+            className="fixed right-3.5 top-[62px] w-64 rounded-2xl border shadow-2xl animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
@@ -899,30 +981,43 @@ export default function TopNavPill() {
               boxShadow: '0 24px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
             }}
           >
-            <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+            <div
+              className="absolute top-0 inset-x-4 h-px pointer-events-none"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+              }}
+            />
+            <div className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
               <div className="flex items-center gap-2.5">
                 <div
-                  className="h-8 w-8 rounded-full grid place-items-center text-white text-xs font-black shrink-0"
+                  className="h-9 w-9 rounded-xl grid place-items-center text-white text-xs font-black shrink-0 select-none shadow-sm"
                   style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
                 >
                   {initials}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
-                  <p className="text-[10px] truncate font-mono" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+                  <p className="text-[10px] truncate font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
                 </div>
               </div>
             </div>
             <div className="p-2 space-y-1">
               <button
                 type="button"
-                onClick={() => { setProfileOpen(false); navigate('/settings'); }}
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setProfileOpen(false);
+                  navigate('/settings');
+                }}
                 className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer active:scale-95"
                 style={{ color: 'var(--text-primary)' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
-                <span className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0 border" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>
+                <span
+                  className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0 border"
+                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+                >
                   <Sliders size={12} />
                 </span>
                 Settings & Preferences
