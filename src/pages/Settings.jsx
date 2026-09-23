@@ -2,13 +2,14 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Download, Upload, Trash2, LogOut,
-  Palette, Check, Sparkles, Lock,
+  Palette, Check, Sparkles, Lock, AlertTriangle, Eye, EyeOff, Loader2,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
 import Toggle from '../components/Toggle';
+import Modal from '../components/Modal';
 
 /* ─── Small reusable pieces ──────────────────────────────── */
 
@@ -129,7 +130,7 @@ function ThemeSwatch({ t, active, onClick }) {
 /* ─── Main Settings page ─────────────────────────────────── */
 export default function Settings() {
   const { theme, setTheme } = useTheme();
-  const { user, updateProfile, logout } = useAuth();
+  const { user, updateProfile, logout, deleteAccount } = useAuth();
   const { notes, tasks, events, clearAll, addNote, addTask, addEvent } = useData();
   const {
     settings,
@@ -146,6 +147,51 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileRef = useRef(null);
+
+  // Delete Account States
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [requirePassword, setRequirePassword] = useState(false);
+
+  async function handleDeleteAccount(e) {
+    if (e) e.preventDefault();
+    setDeleting(true);
+    setDeleteError('');
+
+    try {
+      // 1. Wipe all user data from collections & user document
+      try {
+        await clearAll();
+      } catch (clearErr) {
+        console.warn('Workspace cleanup note:', clearErr);
+      }
+
+      // 2. Delete Firebase Auth account
+      const res = await deleteAccount(deletePassword);
+      if (!res.success) {
+        if (res.requiresPassword) {
+          setRequirePassword(true);
+        }
+        setDeleteError(res.error || 'Failed to delete account. Please try again.');
+        setDeleting(false);
+        return;
+      }
+
+      // 3. Clear local storage traces
+      localStorage.removeItem('lifeos_dashboard_scratchpad');
+      localStorage.removeItem('onedesk_settings');
+
+      if (playChime) playChime('pop');
+      setDeleteModalOpen(false);
+      navigate('/login');
+    } catch (err) {
+      setDeleteError(err.message || 'An unexpected error occurred while deleting account.');
+      setDeleting(false);
+    }
+  }
 
   const initials = (name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
 
@@ -309,11 +355,31 @@ export default function Settings() {
         <Panel className="flex flex-col gap-4">
           <div>
             <SectionLabel>Account</SectionLabel>
-            <Row label="Sign out" sub="End your current session on this device.">
-              <GhostBtn danger onClick={handleLogout}>
-                <LogOut size={13} /> Log out
-              </GhostBtn>
-            </Row>
+            <div className="space-y-3">
+              <Row label="Sign out" sub="End your current session on this device.">
+                <GhostBtn danger onClick={handleLogout}>
+                  <LogOut size={13} /> Log out
+                </GhostBtn>
+              </Row>
+              <Divider />
+              <Row
+                label="Delete Account"
+                sub="Permanently delete your account and wipe all workspace data."
+                danger
+              >
+                <GhostBtn
+                  danger
+                  onClick={() => {
+                    setDeleteError('');
+                    setDeletePassword('');
+                    setRequirePassword(false);
+                    setDeleteModalOpen(true);
+                  }}
+                >
+                  <Trash2 size={13} /> Delete Account
+                </GhostBtn>
+              </Row>
+            </div>
           </div>
 
           <Divider />
@@ -518,6 +584,103 @@ export default function Settings() {
       <p className="text-center text-[10px] pb-2 tracking-widest uppercase" style={{ color: 'var(--text-muted)', opacity: 0.4 }}>
         OneDesk · Your personal workspace
       </p>
+
+      {/* ── Delete Account Confirmation Modal ─────────────────── */}
+      <Modal
+        open={deleteModalOpen}
+        onClose={() => !deleting && setDeleteModalOpen(false)}
+        title="Delete Account"
+      >
+        <div className="p-5 sm:p-6 space-y-5">
+          <div className="flex items-start gap-3.5 p-3.5 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-rose-300">
+            <AlertTriangle size={20} className="shrink-0 text-rose-400 mt-0.5" />
+            <div className="text-xs space-y-1">
+              <p className="font-bold text-rose-200">Warning: This action is permanent and irreversible</p>
+              <p className="text-rose-300/80 leading-relaxed">
+                Deleting your account will permanently wipe your credentials, tasks, notes, calendar events, and custom preferences. You will be logged out completely.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleDeleteAccount} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                Confirm with your password {requirePassword && <span className="text-rose-400 font-bold">*</span>}
+              </label>
+              <div className="relative">
+                <input
+                  type={showDeletePassword ? 'text' : 'password'}
+                  value={deletePassword}
+                  onChange={(e) => {
+                    setDeletePassword(e.target.value);
+                    setDeleteError('');
+                  }}
+                  placeholder="Enter your account password"
+                  required={requirePassword}
+                  className="w-full rounded-xl px-3.5 py-2.5 pr-10 text-sm outline-none border transition-all"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: deleteError ? '#f43f5e' : 'var(--border-card)',
+                    color: 'var(--text-primary)',
+                  }}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowDeletePassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white p-1"
+                  tabIndex={-1}
+                  aria-label="Toggle password visibility"
+                >
+                  {showDeletePassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+              <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                Deleting account for <strong style={{ color: 'var(--text-primary)' }}>{user?.email}</strong>
+              </p>
+            </div>
+
+            {deleteError && (
+              <div className="p-3 rounded-xl border bg-rose-500/10 border-rose-500/25 text-xs text-rose-400 font-medium animate-fade-in">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => setDeleteModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={deleting}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all bg-rose-600 hover:bg-rose-500 active:scale-95 disabled:opacity-50 shadow-lg shadow-rose-900/30 cursor-pointer"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Deleting account…</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    <span>Permanently Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
 
       {/* Mobile Pop-up Notification (Only for Mobile) */}
       {mobileToast && (

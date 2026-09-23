@@ -187,13 +187,19 @@ export function DataProvider({ children }) {
 
   // ---- Bulk ----
   async function clearAll() {
+    if (!uid) return;
     const deleteCollection = async (colName) => {
       const batch = writeBatch(db);
       const snap = await getDocs(col(colName));
       snap.docs.forEach((d) => batch.delete(d.ref));
       await batch.commit();
     };
-    await Promise.all([deleteCollection('notes'), deleteCollection('tasks'), deleteCollection('events')]);
+    await Promise.all([
+      deleteCollection('notes'),
+      deleteCollection('tasks'),
+      deleteCollection('events'),
+      deleteDoc(doc(db, 'users', uid)).catch(() => {}),
+    ]);
   }
 
   const value = {

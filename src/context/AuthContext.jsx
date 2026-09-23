@@ -5,6 +5,9 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile as fbUpdateProfile,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -103,8 +106,45 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function deleteAccount(password = '') {
+    setAuthError('');
+    if (!auth.currentUser) return { success: false, error: 'No user signed in' };
+
+    const currentUser = auth.currentUser;
+    const uid = currentUser.uid;
+
+    try {
+      if (password) {
+        try {
+          const credential = EmailAuthProvider.credential(currentUser.email, password);
+          await reauthenticateWithCredential(currentUser, credential);
+        } catch (reauthErr) {
+          return {
+            success: false,
+            requiresPassword: true,
+            error: friendlyError(reauthErr.code),
+          };
+        }
+      }
+
+      await deleteUser(currentUser);
+      localStorage.removeItem(`onedesk_user_name_${uid}`);
+      setUser(null);
+      return { success: true };
+    } catch (err) {
+      if (err.code === 'auth/requires-recent-login') {
+        return {
+          success: false,
+          requiresPassword: true,
+          error: 'For security, please enter your password to confirm account deletion.',
+        };
+      }
+      return { success: false, error: friendlyError(err.code) };
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );
@@ -129,6 +169,8 @@ function friendlyError(code) {
     case 'auth/wrong-password':
     case 'auth/invalid-credential':
       return 'Email or password is incorrect.';
+    case 'auth/requires-recent-login':
+      return 'For security, please confirm your password to proceed.';
     case 'auth/too-many-requests':
       return 'Too many attempts. Please try again later.';
     case 'auth/network-request-failed':
