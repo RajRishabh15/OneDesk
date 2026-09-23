@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Wrench,
   ShieldCheck,
@@ -8,19 +8,33 @@ import {
   Database,
   CheckCircle2,
   Clock,
-  ArrowRight,
+  X,
+  Radio,
 } from 'lucide-react';
 import OneDeskLogo from '../components/OneDeskLogo';
 import GhostFibers from '../components/GhostFibers';
 
 export default function Maintenance() {
   const [checking, setChecking] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+
+  // Close dialog on Escape key
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') setShowDialog(false);
+    }
+    if (showDialog) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showDialog]);
 
   function handleCheckStatus() {
     setChecking(true);
     setTimeout(() => {
-      window.location.reload();
-    }, 600);
+      setChecking(false);
+      setShowDialog(true);
+    }, 450);
   }
 
   return (
@@ -109,7 +123,8 @@ export default function Maintenance() {
           </div>
 
           {/* Status Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] font-semibold mb-3"
+          <div
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-semibold mb-3"
             style={{
               background: 'rgba(245,158,11,0.08)',
               borderColor: 'rgba(245,158,11,0.25)',
@@ -139,8 +154,14 @@ export default function Maintenance() {
               borderColor: 'var(--border-subtle, rgba(255,255,255,0.08))',
             }}
           >
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-1" style={{ color: 'var(--text-muted)' }}>
-              System Upgrade Status
+            <div
+              className="text-[10px] font-bold uppercase tracking-wider px-1 flex items-center justify-between"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <span>System Upgrade Status</span>
+              <span className="text-amber-400 flex items-center gap-1">
+                <Radio size={11} className="animate-pulse" /> Live
+              </span>
             </div>
 
             <div className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg">
@@ -192,10 +213,15 @@ export default function Maintenance() {
             <span>{checking ? 'Checking system status…' : 'Check if site is back'}</span>
           </button>
 
-          {/* Security Guarantee Note */}
-          <div className="flex items-center justify-center gap-1.5 mt-4 text-[11px]" style={{ color: 'var(--text-muted)' }}>
-            <Clock size={12} />
-            <span>Expected downtime: ~15 to 30 minutes</span>
+          {/* Maintenance Downtime Timer */}
+          <div
+            className="flex items-center justify-center gap-1.5 mt-4 text-xs font-medium"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            <Clock size={13} className="text-amber-400 shrink-0" />
+            <span>
+              Expected back: <strong className="text-white font-semibold">10:00 AM tomorrow</strong>
+            </span>
           </div>
         </div>
 
@@ -207,6 +233,71 @@ export default function Maintenance() {
           OneDesk Cloud OS · Maintenance Protocol
         </p>
       </div>
+
+      {/* Pop-up Dialog Box: "Not yet stay tuned" */}
+      {showDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md animate-fade-in">
+          <div
+            className="relative w-full max-w-sm rounded-[24px] sm:rounded-[30px] border p-6 shadow-2xl text-center transform transition-all"
+            style={{
+              background: 'var(--bg-card-solid, #0d0a1b)',
+              borderColor: 'var(--border-card, rgba(255,255,255,0.14))',
+              boxShadow: '0 25px 60px -10px var(--accent-glow, rgba(99,102,241,0.35))',
+            }}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowDialog(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full border transition-all text-neutral-400 hover:text-white cursor-pointer"
+              style={{
+                borderColor: 'var(--border-subtle, rgba(255,255,255,0.08))',
+                background: 'rgba(255,255,255,0.04)',
+              }}
+            >
+              <X size={15} />
+            </button>
+
+            {/* Glowing Icon */}
+            <div
+              className="w-13 h-13 mx-auto mb-3.5 rounded-2xl border flex items-center justify-center shadow-lg"
+              style={{
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(99,102,241,0.18))',
+                borderColor: 'rgba(245,158,11,0.3)',
+                color: '#fbbf24',
+                boxShadow: '0 8px 24px -4px rgba(245,158,11,0.25)',
+              }}
+            >
+              <Sparkles size={22} className="animate-pulse" />
+            </div>
+
+            {/* Dialog Message */}
+            <h3 className="text-lg sm:text-xl font-bold tracking-tight mb-2 text-white">
+              Not yet, stay tuned!
+            </h3>
+            <p
+              className="text-xs sm:text-sm leading-relaxed mb-5"
+              style={{ color: 'var(--text-muted, rgba(245,243,255,0.7))' }}
+            >
+              Our engineers are actively rolling out improvements and database optimizations. We're on schedule to be back online by{' '}
+              <strong className="text-white font-semibold">10:00 AM tomorrow</strong>.
+            </p>
+
+            {/* Confirmation Button */}
+            <button
+              type="button"
+              onClick={() => setShowDialog(false)}
+              className="w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md hover:brightness-110 active:scale-[0.98] cursor-pointer"
+              style={{
+                background: 'var(--accent-gradient, linear-gradient(135deg, #6366f1, #8b5cf6))',
+                boxShadow: '0 4px 16px var(--accent-glow, rgba(99,102,241,0.4))',
+              }}
+            >
+              Got it, thanks!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
