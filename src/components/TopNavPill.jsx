@@ -746,37 +746,28 @@ export default function TopNavPill() {
           ) : (
             /* Normal Mode: Brand on Left, Squircle Action Cluster on Right */
             <>
-              {/* Left: Brand Logo + Typography + Live Accent Indicator */}
+              {/* Left: Brand Logo (White Themed Badge) + Typography */}
               <Link
                 to="/"
                 onClick={() => playChime && playChime('pop')}
                 className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform"
               >
                 <div
-                  className="h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-200"
+                  className="h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-200 shrink-0 select-none shadow-md"
                   style={{
-                    background: 'var(--bg-surface)',
-                    borderColor: 'var(--border-subtle)',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                    background: '#FFFFFF',
+                    borderColor: '#E2E8F0',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1)',
                   }}
                 >
-                  <OneDeskLogo size={22} />
+                  <OneDeskLogo size={24} />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className="font-display text-[15px] font-extrabold tracking-tight leading-none"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    OneDesk
-                  </span>
-                  <span
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 6px var(--accent-color)',
-                    }}
-                  />
-                </div>
+                <span
+                  className="font-display text-[15px] font-extrabold tracking-tight leading-none"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  OneDesk
+                </span>
               </Link>
 
               {/* Right: Notifications + Search Trigger + Account Profile */}
