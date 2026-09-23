@@ -948,63 +948,78 @@ export default function TopNavPill() {
           MOBILE BOTTOM BAR  (< md)
           Edge-to-Edge Native Mobile Dock — No Square Back!
       ════════════════════════════════════════════ */}
-      <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 select-none border-t"
+      {/* ════════════════════════════════════════════
+          MOBILE BOTTOM BAR  (< md)
+          Brand New Next-Gen Floating Island Capsule Dock
+      ════════════════════════════════════════════ */}
+      {/* Bottom Vignette Gradient Shield — smoothly dissolves content before it slides under the dock */}
+      <div
+        className="md:hidden fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30"
         style={{
-          background: 'var(--bg-card-solid)',
-          borderColor: 'var(--border-subtle)',
-          backdropFilter: 'blur(36px)',
-          WebkitBackdropFilter: 'blur(36px)',
-          boxShadow: '0 -8px 30px rgba(0,0,0,0.45)',
-          paddingBottom: 'max(0.6rem, env(safe-area-inset-bottom))',
-          paddingTop: '0.45rem',
+          background: 'linear-gradient(to top, var(--bg-page) 20%, rgba(9,7,21,0.85) 60%, transparent 100%)',
+        }}
+      />
+
+      {/* Floating Island Dock */}
+      <nav
+        className="md:hidden fixed bottom-3.5 inset-x-3 max-w-[400px] mx-auto z-40 select-none"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        {/* Top Hairline Specular Highlight */}
         <div
-          className="absolute top-0 inset-x-0 h-px pointer-events-none"
+          className="h-[58px] px-2.5 rounded-full border shadow-2xl backdrop-blur-3xl flex items-center justify-between relative overflow-hidden transition-all duration-300"
           style={{
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)',
+            background: 'var(--bg-card-solid)',
+            borderColor: 'var(--border-card)',
+            boxShadow: '0 16px 45px -8px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.14)',
           }}
-        />
+        >
+          {/* Top Hairline Specular Highlight */}
+          <div
+            className="absolute top-0 inset-x-6 h-px pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)',
+            }}
+          />
 
-        <div className="flex items-center justify-between px-3 max-w-md mx-auto relative">
           {/* 1. Home */}
           <NavLink
             to="/"
             end
             onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
-                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
+              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
+                isActive
+                  ? 'px-3.5 py-1.5 font-bold'
+                  : 'p-2.5 opacity-50 hover:opacity-85'
               }`
             }
             style={({ isActive }) => ({
+              background: isActive ? 'var(--bg-surface)' : 'transparent',
+              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
               color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
             })}
           >
             {({ isActive }) => (
-              <>
-                <div
-                  className="relative p-1.5 rounded-xl transition-all duration-200"
-                  style={{
-                    background: isActive ? 'var(--bg-surface)' : 'transparent',
-                  }}
-                >
-                  <Home size={19} strokeWidth={isActive ? 2.4 : 1.7} />
-                </div>
-                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
-                  Home
-                </span>
-                <span
-                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
-                  style={{
-                    background: isActive ? 'var(--accent-color)' : 'transparent',
-                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
-                    opacity: isActive ? 1 : 0,
-                  }}
-                />
-              </>
+              <div className="flex items-center gap-1.5">
+                <Home size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                {isActive && (
+                  <span className="text-xs font-bold tracking-tight animate-fade-in">
+                    Home
+                  </span>
+                )}
+                {isActive && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: 'var(--accent-color)',
+                      boxShadow: '0 0 6px var(--accent-color)',
+                    }}
+                  />
+                )}
+              </div>
             )}
           </NavLink>
 
@@ -1013,61 +1028,62 @@ export default function TopNavPill() {
             to="/tasks"
             onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
-                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
+              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
+                isActive
+                  ? 'px-3.5 py-1.5 font-bold'
+                  : 'p-2.5 opacity-50 hover:opacity-85'
               }`
             }
             style={({ isActive }) => ({
+              background: isActive ? 'var(--bg-surface)' : 'transparent',
+              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
               color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
             })}
           >
             {({ isActive }) => (
-              <>
-                <div
-                  className="relative p-1.5 rounded-xl transition-all duration-200"
-                  style={{
-                    background: isActive ? 'var(--bg-surface)' : 'transparent',
-                  }}
-                >
-                  <CheckSquare size={19} strokeWidth={isActive ? 2.4 : 1.7} />
-                </div>
-                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
-                  Tasks
-                </span>
-                <span
-                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
-                  style={{
-                    background: isActive ? 'var(--accent-color)' : 'transparent',
-                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
-                    opacity: isActive ? 1 : 0,
-                  }}
-                />
-              </>
+              <div className="flex items-center gap-1.5">
+                <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                {isActive && (
+                  <span className="text-xs font-bold tracking-tight animate-fade-in">
+                    Tasks
+                  </span>
+                )}
+                {isActive && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: 'var(--accent-color)',
+                      boxShadow: '0 0 6px var(--accent-color)',
+                    }}
+                  />
+                )}
+              </div>
             )}
           </NavLink>
 
-          {/* 3. Center Hero Action Button (Quick Create) */}
-          <div className="flex-shrink-0 px-1 -mt-2">
+          {/* 3. Center Hero Action Button (Quick Create FAB) */}
+          <div className="flex items-center justify-center shrink-0 px-0.5">
             <button
               type="button"
               onClick={() => {
                 if (playChime) playChime('pop');
                 setMobileQuickSheetOpen(v => !v);
               }}
-              className="w-11 h-11 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer border shadow-lg group relative"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer border shadow-lg group relative"
               style={{
                 background: 'var(--accent-gradient)',
-                borderColor: 'rgba(255,255,255,0.2)',
+                borderColor: 'rgba(255,255,255,0.25)',
                 boxShadow: mobileQuickSheetOpen
-                  ? '0 0 20px var(--accent-glow)'
+                  ? '0 0 24px var(--accent-glow)'
                   : '0 4px 16px var(--accent-glow)',
               }}
               aria-label="Quick Create"
               title="Quick Create"
             >
               <Plus
-                size={20}
-                strokeWidth={2.6}
+                size={19}
+                strokeWidth={2.8}
                 style={{
                   transition: 'transform 0.3s cubic-bezier(0.34, 1.45, 0.64, 1)',
                   transform: mobileQuickSheetOpen ? 'rotate(45deg)' : 'rotate(0deg)',
@@ -1081,36 +1097,37 @@ export default function TopNavPill() {
             to="/notes"
             onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
-                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
+              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
+                isActive
+                  ? 'px-3.5 py-1.5 font-bold'
+                  : 'p-2.5 opacity-50 hover:opacity-85'
               }`
             }
             style={({ isActive }) => ({
+              background: isActive ? 'var(--bg-surface)' : 'transparent',
+              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
               color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
             })}
           >
             {({ isActive }) => (
-              <>
-                <div
-                  className="relative p-1.5 rounded-xl transition-all duration-200"
-                  style={{
-                    background: isActive ? 'var(--bg-surface)' : 'transparent',
-                  }}
-                >
-                  <StickyNote size={19} strokeWidth={isActive ? 2.4 : 1.7} />
-                </div>
-                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
-                  Notes
-                </span>
-                <span
-                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
-                  style={{
-                    background: isActive ? 'var(--accent-color)' : 'transparent',
-                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
-                    opacity: isActive ? 1 : 0,
-                  }}
-                />
-              </>
+              <div className="flex items-center gap-1.5">
+                <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                {isActive && (
+                  <span className="text-xs font-bold tracking-tight animate-fade-in">
+                    Notes
+                  </span>
+                )}
+                {isActive && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: 'var(--accent-color)',
+                      boxShadow: '0 0 6px var(--accent-color)',
+                    }}
+                  />
+                )}
+              </div>
             )}
           </NavLink>
 
@@ -1119,36 +1136,37 @@ export default function TopNavPill() {
             to="/calendar"
             onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
-                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
+              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
+                isActive
+                  ? 'px-3.5 py-1.5 font-bold'
+                  : 'p-2.5 opacity-50 hover:opacity-85'
               }`
             }
             style={({ isActive }) => ({
+              background: isActive ? 'var(--bg-surface)' : 'transparent',
+              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
               color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
             })}
           >
             {({ isActive }) => (
-              <>
-                <div
-                  className="relative p-1.5 rounded-xl transition-all duration-200"
-                  style={{
-                    background: isActive ? 'var(--bg-surface)' : 'transparent',
-                  }}
-                >
-                  <Calendar size={19} strokeWidth={isActive ? 2.4 : 1.7} />
-                </div>
-                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
-                  Schedule
-                </span>
-                <span
-                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
-                  style={{
-                    background: isActive ? 'var(--accent-color)' : 'transparent',
-                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
-                    opacity: isActive ? 1 : 0,
-                  }}
-                />
-              </>
+              <div className="flex items-center gap-1.5">
+                <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                {isActive && (
+                  <span className="text-xs font-bold tracking-tight animate-fade-in">
+                    Schedule
+                  </span>
+                )}
+                {isActive && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: 'var(--accent-color)',
+                      boxShadow: '0 0 6px var(--accent-color)',
+                    }}
+                  />
+                )}
+              </div>
             )}
           </NavLink>
         </div>
