@@ -32,9 +32,10 @@ export function AuthProvider({ children }) {
       }
 
       if (firebaseUser) {
+        const cachedName = localStorage.getItem(`onedesk_user_name_${firebaseUser.uid}`);
         setUser({
           id: firebaseUser.uid,
-          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          name: firebaseUser.displayName || cachedName || firebaseUser.email.split('@')[0],
           email: firebaseUser.email,
         });
       } else {
@@ -48,10 +49,23 @@ export function AuthProvider({ children }) {
   async function signup({ name, email, password }) {
     setAuthError('');
     try {
+      const trimmedName = (name || '').trim();
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       // Store the display name in Firebase Auth profile
-      await fbUpdateProfile(cred.user, { displayName: name });
-      // onAuthStateChanged will fire and update state automatically
+      await fbUpdateProfile(cred.user, { displayName: trimmedName });
+
+      // Cache locally so any subsequent reloads or listeners immediately resolve the real name
+      if (trimmedName) {
+        localStorage.setItem(`onedesk_user_name_${cred.user.uid}`, trimmedName);
+      }
+
+      // Immediately set the React user state with their real name so dashboard gets it directly!
+      setUser({
+        id: cred.user.uid,
+        name: trimmedName || cred.user.email.split('@')[0],
+        email: cred.user.email,
+      });
+
       return true;
     } catch (err) {
       setAuthError(friendlyError(err.code));
@@ -72,13 +86,18 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     await signOut(auth);
+    setUser(null);
   }
 
   async function updateProfile({ name }) {
     if (!auth.currentUser) return;
     try {
-      await fbUpdateProfile(auth.currentUser, { displayName: name });
-      setUser((prev) => prev ? { ...prev, name } : prev);
+      const trimmedName = (name || '').trim();
+      await fbUpdateProfile(auth.currentUser, { displayName: trimmedName });
+      if (trimmedName) {
+        localStorage.setItem(`onedesk_user_name_${auth.currentUser.uid}`, trimmedName);
+      }
+      setUser((prev) => prev ? { ...prev, name: trimmedName } : prev);
     } catch {
       // silently fail on profile update
     }

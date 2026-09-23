@@ -13,7 +13,10 @@ export default function Signup() {
   async function handleSubmit(e) {
     e.preventDefault();
     setIsLoading(true);
-    const ok = await signup(form);
+    const ok = await signup({
+      ...form,
+      name: form.name.trim(),
+    });
     setIsLoading(false);
     if (ok) navigate('/');
   }
