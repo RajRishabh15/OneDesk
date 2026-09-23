@@ -77,7 +77,7 @@ const quickActions = [
 export default function TopNavPill() {
   const { user, logout } = useAuth();
   const { tasks, notes, events, addTask } = useData();
-  const { settings } = useSettings();
+  const { settings, playChime } = useSettings();
   const navigate = useNavigate();
 
   const [query, setQuery]                       = useState('');
@@ -955,37 +955,55 @@ export default function TopNavPill() {
           borderColor: 'var(--border-subtle)',
           backdropFilter: 'blur(36px)',
           WebkitBackdropFilter: 'blur(36px)',
-          boxShadow: '0 -8px 28px rgba(0,0,0,0.4)',
-          paddingBottom: 'max(0.55rem, env(safe-area-inset-bottom))',
+          boxShadow: '0 -8px 30px rgba(0,0,0,0.45)',
+          paddingBottom: 'max(0.6rem, env(safe-area-inset-bottom))',
           paddingTop: '0.45rem',
         }}
       >
-        <div className="flex items-center justify-around px-2 max-w-lg mx-auto relative">
+        {/* Top Hairline Specular Highlight */}
+        <div
+          className="absolute top-0 inset-x-0 h-px pointer-events-none"
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)',
+          }}
+        />
+
+        <div className="flex items-center justify-between px-3 max-w-md mx-auto relative">
           {/* 1. Home */}
           <NavLink
             to="/"
             end
+            onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
-                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
+                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
               }`
             }
-            style={({ isActive }) =>
-              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-            }
+            style={({ isActive }) => ({
+              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+            })}
           >
             {({ isActive }) => (
               <>
                 <div
-                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  className="relative p-1.5 rounded-xl transition-all duration-200"
                   style={{
                     background: isActive ? 'var(--bg-surface)' : 'transparent',
-                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
                   }}
                 >
-                  <Home size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                  <Home size={19} strokeWidth={isActive ? 2.4 : 1.7} />
                 </div>
-                <span className="text-[9px] font-bold tracking-tight mt-0.5">Home</span>
+                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
+                  Home
+                </span>
+                <span
+                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
+                  style={{
+                    background: isActive ? 'var(--accent-color)' : 'transparent',
+                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
+                    opacity: isActive ? 1 : 0,
+                  }}
+                />
               </>
             )}
           </NavLink>
@@ -993,84 +1011,105 @@ export default function TopNavPill() {
           {/* 2. Tasks */}
           <NavLink
             to="/tasks"
+            onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
-                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
+                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
               }`
             }
-            style={({ isActive }) =>
-              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-            }
+            style={({ isActive }) => ({
+              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+            })}
           >
             {({ isActive }) => (
               <>
                 <div
-                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  className="relative p-1.5 rounded-xl transition-all duration-200"
                   style={{
                     background: isActive ? 'var(--bg-surface)' : 'transparent',
-                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
                   }}
                 >
-                  <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                  <CheckSquare size={19} strokeWidth={isActive ? 2.4 : 1.7} />
                 </div>
-                <span className="text-[9px] font-bold tracking-tight mt-0.5">Tasks</span>
+                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
+                  Tasks
+                </span>
+                <span
+                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
+                  style={{
+                    background: isActive ? 'var(--accent-color)' : 'transparent',
+                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
+                    opacity: isActive ? 1 : 0,
+                  }}
+                />
               </>
             )}
           </NavLink>
 
-          {/* 3. Center Integrated Action Button (Quick Create) */}
-          <button
-            type="button"
-            onClick={() => setMobileQuickSheetOpen(v => !v)}
-            className="flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 select-none active:scale-95 group"
-            aria-label="Quick Create"
-            title="Quick Create"
-          >
-            <div
-              className="h-7 w-7 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-md group-hover:scale-105"
+          {/* 3. Center Hero Action Button (Quick Create) */}
+          <div className="flex-shrink-0 px-1 -mt-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (playChime) playChime('pop');
+                setMobileQuickSheetOpen(v => !v);
+              }}
+              className="w-11 h-11 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer border shadow-lg group relative"
               style={{
                 background: 'var(--accent-gradient)',
-                boxShadow: '0 2px 10px var(--accent-glow)',
+                borderColor: 'rgba(255,255,255,0.2)',
+                boxShadow: mobileQuickSheetOpen
+                  ? '0 0 20px var(--accent-glow)'
+                  : '0 4px 16px var(--accent-glow)',
               }}
+              aria-label="Quick Create"
+              title="Quick Create"
             >
               <Plus
-                size={16}
-                strokeWidth={2.8}
+                size={20}
+                strokeWidth={2.6}
                 style={{
-                  transition: 'transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1)',
+                  transition: 'transform 0.3s cubic-bezier(0.34, 1.45, 0.64, 1)',
                   transform: mobileQuickSheetOpen ? 'rotate(45deg)' : 'rotate(0deg)',
                 }}
               />
-            </div>
-            <span className="text-[9px] font-bold tracking-tight mt-0.5" style={{ color: 'var(--accent-color)' }}>
-              Create
-            </span>
-          </button>
+            </button>
+          </div>
 
           {/* 4. Notes */}
           <NavLink
             to="/notes"
+            onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
-                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
+                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
               }`
             }
-            style={({ isActive }) =>
-              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-            }
+            style={({ isActive }) => ({
+              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+            })}
           >
             {({ isActive }) => (
               <>
                 <div
-                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  className="relative p-1.5 rounded-xl transition-all duration-200"
                   style={{
                     background: isActive ? 'var(--bg-surface)' : 'transparent',
-                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
                   }}
                 >
-                  <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                  <StickyNote size={19} strokeWidth={isActive ? 2.4 : 1.7} />
                 </div>
-                <span className="text-[9px] font-bold tracking-tight mt-0.5">Notes</span>
+                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
+                  Notes
+                </span>
+                <span
+                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
+                  style={{
+                    background: isActive ? 'var(--accent-color)' : 'transparent',
+                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
+                    opacity: isActive ? 1 : 0,
+                  }}
+                />
               </>
             )}
           </NavLink>
@@ -1078,27 +1117,37 @@ export default function TopNavPill() {
           {/* 5. Schedule */}
           <NavLink
             to="/calendar"
+            onClick={() => playChime && playChime('pop')}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center py-0.5 rounded-xl transition-all duration-200 ${
-                isActive ? 'scale-105' : 'opacity-60 hover:opacity-100'
+              `flex-1 flex flex-col items-center justify-center py-1 transition-all duration-200 active:scale-90 cursor-pointer ${
+                isActive ? 'opacity-100' : 'opacity-55 hover:opacity-90'
               }`
             }
-            style={({ isActive }) =>
-              isActive ? { color: 'var(--accent-color)' } : { color: 'var(--text-muted)' }
-            }
+            style={({ isActive }) => ({
+              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+            })}
           >
             {({ isActive }) => (
               <>
                 <div
-                  className="h-7 w-7 rounded-full flex items-center justify-center transition-all duration-200"
+                  className="relative p-1.5 rounded-xl transition-all duration-200"
                   style={{
                     background: isActive ? 'var(--bg-surface)' : 'transparent',
-                    boxShadow: isActive ? '0 2px 10px var(--accent-glow)' : 'none',
                   }}
                 >
-                  <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                  <Calendar size={19} strokeWidth={isActive ? 2.4 : 1.7} />
                 </div>
-                <span className="text-[9px] font-bold tracking-tight mt-0.5">Schedule</span>
+                <span className="text-[10px] font-semibold tracking-tight mt-0.5">
+                  Schedule
+                </span>
+                <span
+                  className="w-1 h-1 rounded-full mt-0.5 transition-all duration-300"
+                  style={{
+                    background: isActive ? 'var(--accent-color)' : 'transparent',
+                    boxShadow: isActive ? '0 0 6px var(--accent-glow)' : 'none',
+                    opacity: isActive ? 1 : 0,
+                  }}
+                />
               </>
             )}
           </NavLink>
