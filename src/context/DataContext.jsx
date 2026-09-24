@@ -5,8 +5,6 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  getDoc,
-  setDoc,
   getDocs,
   doc,
   query,
@@ -16,7 +14,6 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from './AuthContext';
-import { makeSampleNotes, makeSampleTasks, makeSampleEvents } from '../utils/sampleData';
 
 const DataContext = createContext(null);
 
@@ -49,64 +46,7 @@ export function DataProvider({ children }) {
       if (resolved === 3) setLoading(false);
     };
 
-    // 1. One-time check for first-time account initialization
-    async function checkAndSeedInitialData() {
-      try {
-        const userDocRef = doc(db, 'users', uid);
-        const userSnap = await getDoc(userDocRef);
-        const userData = userSnap.data();
-
-        // If user document already exists and has been seeded, do nothing!
-        if (userSnap.exists() && userData?.seeded === true) {
-          return;
-        }
-
-        // Check if user already has any items across collections
-        const [notesSnap, tasksSnap, eventsSnap] = await Promise.all([
-          getDocs(query(col('notes'))),
-          getDocs(query(col('tasks'))),
-          getDocs(query(col('events'))),
-        ]);
-
-        const hasAnyData = !notesSnap.empty || !tasksSnap.empty || !eventsSnap.empty;
-
-        if (!hasAnyData) {
-          // Brand new account: seed sample data in a single atomic batch
-          const batch = writeBatch(db);
-
-          makeSampleNotes().forEach((item) => {
-            const { id: _id, ...rest } = item;
-            const ref = doc(collection(db, 'users', uid, 'notes'));
-            batch.set(ref, { ...rest, createdAt: serverTimestamp() });
-          });
-
-          makeSampleTasks().forEach((item) => {
-            const { id: _id, ...rest } = item;
-            const ref = doc(collection(db, 'users', uid, 'tasks'));
-            batch.set(ref, { ...rest, createdAt: serverTimestamp() });
-          });
-
-          makeSampleEvents().forEach((item) => {
-            const { id: _id, ...rest } = item;
-            const ref = doc(collection(db, 'users', uid, 'events'));
-            batch.set(ref, { ...rest, createdAt: serverTimestamp() });
-          });
-
-          // Mark user as seeded in Firestore permanently
-          batch.set(userDocRef, { seeded: true, initializedAt: serverTimestamp() }, { merge: true });
-          await batch.commit();
-        } else {
-          // User already has data from before, mark as seeded so we never overwrite
-          await setDoc(userDocRef, { seeded: true }, { merge: true });
-        }
-      } catch (err) {
-        console.error('Error during initial data check:', err);
-      }
-    }
-
-    checkAndSeedInitialData();
-
-    // 2. Real-time multi-device listeners (pure sync, zero auto-re-seeding)
+    // Real-time multi-device listeners (pure clean sync, zero sample pre-seeding)
     const unsubNotes = onSnapshot(
       query(col('notes'), orderBy('createdAt', 'desc')),
       (snap) => {
