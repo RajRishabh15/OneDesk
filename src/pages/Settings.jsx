@@ -653,7 +653,7 @@ export default function Settings() {
         onClose={() => !deleting && setDeleteModalOpen(false)}
         title="Delete Account"
       >
-        <div className="p-5 sm:p-6 space-y-5">
+        <div className="space-y-5">
           <div className="flex items-start gap-3.5 p-3.5 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-rose-300">
             <AlertTriangle size={20} className="shrink-0 text-rose-400 mt-0.5" />
             <div className="text-xs space-y-1">
@@ -750,7 +750,7 @@ export default function Settings() {
         onClose={() => !passwordLoading && setPasswordModalOpen(false)}
         title="Change Password"
       >
-        <div className="p-5 sm:p-6 space-y-5">
+        <div className="space-y-5">
           <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
             Ensure your account is using a strong password with at least 6 characters.
           </p>

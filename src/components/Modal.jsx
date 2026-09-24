@@ -46,9 +46,10 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         ref={panelRef}
         tabIndex={-1}
         className={[
-          'relative w-full outline-none',
+          'relative w-full outline-none flex flex-col',
           'rounded-t-[32px] sm:rounded-[32px]',
-          'max-h-[90vh] overflow-y-auto overscroll-contain',
+          'max-h-[92vh] sm:max-h-[88vh]',
+          'overflow-hidden',
           wide ? 'sm:max-w-2xl' : 'sm:max-w-md',
           'animate-modal-up shadow-2xl',
         ].join(' ')}
@@ -62,17 +63,20 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
       >
         {/* Thin accent line at the top */}
         <div
-          className="absolute inset-x-0 top-0 h-[1px] rounded-t-[32px]"
+          className="absolute inset-x-0 top-0 h-[1px] rounded-t-[32px] pointer-events-none z-20"
           style={{
             background:
               'linear-gradient(90deg, transparent, var(--border-card) 40%, rgba(255,255,255,0.18) 50%, var(--border-card) 60%, transparent)',
           }}
         />
 
-        {/* Header */}
+        {/* Header - Fixed & pinned, never scrolls away */}
         <div
-          className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid var(--border-subtle)' }}
+          className="flex items-center justify-between px-6 py-4 shrink-0 z-10"
+          style={{
+            borderBottom: '1px solid var(--border-subtle)',
+            background: 'var(--bg-card-solid)',
+          }}
         >
           <h2
             className="text-base font-bold tracking-tight"
@@ -83,7 +87,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-white/10"
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-white/10 active:scale-95"
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
@@ -94,8 +98,10 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           </button>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-5">{children}</div>
+        {/* Body - Clean scrollable content with sleek custom scrollbar */}
+        <div className="px-6 py-5 overflow-y-auto overscroll-contain flex-1 custom-scrollbar">
+          {children}
+        </div>
       </div>
     </div>,
     document.body

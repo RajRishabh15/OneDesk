@@ -1174,7 +1174,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
             </div>
 
             {/* Items Column */}
-            <div className="space-y-1.5 flex-1 overflow-y-auto">
+            <div className="space-y-1.5 flex-1 overflow-y-auto custom-scrollbar">
               {dayItems.length === 0 ? (
                 <p className="text-[10px] text-center py-2 sm:py-4 font-mono opacity-40" style={{ color: 'var(--text-muted)' }}>
                   —

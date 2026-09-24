@@ -536,7 +536,7 @@ export default function Dashboard() {
           </form>
 
           {/* Task List */}
-          <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
             {filteredTasks.length === 0 ? (
               <div className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>
                 <CheckCircle2 size={24} className="mx-auto mb-2 opacity-40 text-emerald-400" />

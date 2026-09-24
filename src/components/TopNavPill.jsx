@@ -288,7 +288,7 @@ export default function TopNavPill() {
                   {dueSoon.length === 0 ? (
                     <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>All caught up ✓</p>
                   ) : (
-                    <ul className="space-y-1.5 max-h-56 overflow-y-auto">
+                    <ul className="space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar">
                       {dueSoon.slice(0, 5).map(t => (
                         <li
                           key={t.id}
@@ -906,7 +906,7 @@ export default function TopNavPill() {
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>No urgent deadlines pending</p>
               </div>
             ) : (
-              <ul className="space-y-1.5 max-h-60 overflow-y-auto">
+              <ul className="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar">
                 {dueSoon.map(t => (
                   <li
                     key={t.id}
@@ -1272,7 +1272,7 @@ export default function TopNavPill() {
 
           {/* Sheet Panel */}
           <div
-            className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto"
+            className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto custom-scrollbar"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',

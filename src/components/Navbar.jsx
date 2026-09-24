@@ -298,7 +298,7 @@ export default function Navbar({ onMenuClick }) {
               {dueSoon.length === 0 ? (
                 <p className="text-xs text-stone-400 py-2 text-center">All caught up.</p>
               ) : (
-                <ul className="space-y-1.5 max-h-56 overflow-y-auto">
+                <ul className="space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar">
                   {dueSoon.slice(0, 5).map((t) => (
                     <li key={t.id} className="text-xs p-1.5 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800/50 cursor-pointer" onClick={() => { setNotifOpen(false); navigate('/tasks'); }}>
                       <span className="font-medium block text-stone-800 dark:text-stone-200 truncate">{t.title}</span>

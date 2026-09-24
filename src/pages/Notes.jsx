@@ -534,9 +534,9 @@ export default function Notes() {
               id="note-modal-description"
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              rows={7}
+              rows={4}
               placeholder="Write your notes, thoughts, references, markdown, or lists here…"
-              className="w-full rounded-2xl p-4 text-xs sm:text-sm outline-none border transition-all resize-none leading-relaxed"
+              className="w-full rounded-2xl p-3.5 text-xs sm:text-sm outline-none border transition-all resize-y min-h-[105px] max-h-[260px] custom-scrollbar leading-relaxed"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-card)',

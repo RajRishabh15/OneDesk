@@ -876,7 +876,7 @@ export default function Tasks() {
             </div>
 
             {/* Full-width Category Options Panel */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0">
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0 custom-scrollbar">
               {/* 1. Status options */}
               {activeDrawerTab === 'status' && (
                 <div className="space-y-2.5">
