@@ -21,6 +21,9 @@ function localISO(d) {
 }
 
 import Modal from '../components/Modal';
+import CustomSelect from '../components/CustomSelect';
+import CustomDatePicker from '../components/CustomDatePicker';
+import CustomTimePicker from '../components/CustomTimePicker';
 import { LabeledInput } from './Notes';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
@@ -798,35 +801,20 @@ export default function Dashboard() {
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Priority
               </label>
-              <select
+              <CustomSelect
                 value={taskForm.priority}
                 onChange={(e) => setTaskForm((f) => ({ ...f, priority: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-card)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                <option value="High" style={{ background: 'var(--bg-card)' }}>High</option>
-                <option value="Medium" style={{ background: 'var(--bg-card)' }}>Medium</option>
-                <option value="Low" style={{ background: 'var(--bg-card)' }}>Low</option>
-              </select>
+                options={['High', 'Medium', 'Low']}
+              />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Due Date
               </label>
-              <input
-                type="date"
+              <CustomDatePicker
                 value={taskForm.dueDate}
                 onChange={(e) => setTaskForm((f) => ({ ...f, dueDate: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-card)',
-                  color: 'var(--text-primary)',
-                }}
+                placeholder="Select due date"
               />
             </div>
           </div>
@@ -866,33 +854,21 @@ export default function Dashboard() {
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Date
               </label>
-              <input
-                type="date"
+              <CustomDatePicker
                 value={eventForm.date}
                 onChange={(e) => setEventForm((f) => ({ ...f, date: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-card)',
-                  color: 'var(--text-primary)',
-                }}
                 required
+                placeholder="Select date"
               />
             </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Time
               </label>
-              <input
-                type="time"
+              <CustomTimePicker
                 value={eventForm.time}
                 onChange={(e) => setEventForm((f) => ({ ...f, time: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-card)',
-                  color: 'var(--text-primary)',
-                }}
+                placeholder="Select time"
               />
             </div>
           </div>
@@ -900,21 +876,16 @@ export default function Dashboard() {
             <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
               Category
             </label>
-            <select
+            <CustomSelect
               value={eventForm.category}
               onChange={(e) => setEventForm((f) => ({ ...f, category: e.target.value }))}
-              className="w-full rounded-xl px-3 py-2 text-xs outline-none border transition-all"
-              style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-card)',
-                color: 'var(--text-primary)',
-              }}
-            >
-              <option value="work" style={{ background: 'var(--bg-card)' }}>Work</option>
-              <option value="meeting" style={{ background: 'var(--bg-card)' }}>Meeting</option>
-              <option value="personal" style={{ background: 'var(--bg-card)' }}>Personal</option>
-              <option value="urgent" style={{ background: 'var(--bg-card)' }}>Urgent</option>
-            </select>
+              options={[
+                { value: 'work', label: 'Work', color: '#818cf8' },
+                { value: 'meeting', label: 'Meeting', color: '#a855f7' },
+                { value: 'personal', label: 'Personal', color: '#fb7185' },
+                { value: 'urgent', label: 'Urgent', color: '#f43f5e' },
+              ]}
+            />
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>

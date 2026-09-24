@@ -15,6 +15,7 @@
 
 /* ─── CSS Custom Properties — the single source of truth for all themes ─── */
 :root {
+  color-scheme:      dark;
   --bg-page:         #090715;
   --bg-overlay:      rgba(9,7,21,0.65);
   --bg-card:         rgba(18, 14, 36, 0.92);
@@ -36,6 +37,7 @@
 
 /* ── Midnight (default dark) ───────────────────────────── */
 .theme-dark {
+  color-scheme:      dark;
   --bg-page:         #090715;
   --bg-overlay:      rgba(9,7,21,0.75);
   --bg-card:         rgba(18, 14, 36, 0.94);
@@ -56,6 +58,7 @@
 
 /* ── Daylight (light) ──────────────────────────────────── */
 .theme-light {
+  color-scheme:      light;
   --bg-page:         #f0eefd;
   --bg-overlay:      rgba(240,238,253,0.80);
   --bg-card:         rgba(255,255,255,0.95);
@@ -76,6 +79,7 @@
 
 /* ── Aurora (emerald green) ────────────────────────────── */
 .theme-aurora {
+  color-scheme:      dark;
   --bg-page:         #020d09;
   --bg-overlay:      rgba(2,13,9,0.75);
   --bg-card:         rgba(4, 24, 16, 0.94);
@@ -96,6 +100,7 @@
 
 /* ── Rosé (pink) ───────────────────────────────────────── */
 .theme-rose {
+  color-scheme:      dark;
   --bg-page:         #160610;
   --bg-overlay:      rgba(22,6,16,0.75);
   --bg-card:         rgba(35, 8, 22, 0.94);
@@ -116,6 +121,7 @@
 
 /* ── Ocean (cyan blue) ─────────────────────────────────── */
 .theme-ocean {
+  color-scheme:      dark;
   --bg-page:         #020c18;
   --bg-overlay:      rgba(2,12,24,0.75);
   --bg-card:         rgba(4, 20, 40, 0.94);
@@ -136,6 +142,7 @@
 
 /* ── Ember (warm amber) ────────────────────────────────── */
 .theme-amber {
+  color-scheme:      dark;
   --bg-page:         #160a00;
   --bg-overlay:      rgba(22,10,0,0.75);
   --bg-card:         rgba(35, 18, 0, 0.94);
@@ -550,5 +557,21 @@ select option {
   border-radius: 9999px !important;
 }
 
-
-
+/* ─── Form Controls & Date/Time Native Styling ───────────── */
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+.theme-light input[type="date"],
+.theme-light input[type="time"] {
+  color-scheme: light;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+.theme-light input[type="date"]::-webkit-calendar-picker-indicator,
+.theme-light input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: none;
+}

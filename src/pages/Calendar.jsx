@@ -19,6 +19,8 @@ import Card from '../components/Card';
 import Modal from '../components/Modal';
 import EmptyState from '../components/EmptyState';
 import Toggle from '../components/Toggle';
+import CustomDatePicker from '../components/CustomDatePicker';
+import CustomTimePicker from '../components/CustomTimePicker';
 import { useData } from '../context/DataContext';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -689,25 +691,20 @@ export default function CalendarPage() {
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Date">
-              <input
-                type="date"
+              <CustomDatePicker
                 required
                 disabled={editing?.isTask}
                 value={form.date}
                 onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                className={inputCls}
-                style={inputStyle}
+                placeholder="Select date"
               />
             </Field>
             <Field label="Time">
-              <input
-                type="time"
-                required
+              <CustomTimePicker
                 disabled={editing?.isTask}
                 value={form.time}
                 onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
-                className={inputCls}
-                style={inputStyle}
+                placeholder="Select time"
               />
             </Field>
           </div>

@@ -14,6 +14,8 @@ import Modal from '../components/Modal';
 import TaskCard from '../components/TaskCard';
 import EmptyState from '../components/EmptyState';
 import Card from '../components/Card';
+import CustomSelect from '../components/CustomSelect';
+import CustomDatePicker from '../components/CustomDatePicker';
 import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
 
@@ -685,42 +687,22 @@ export default function Tasks() {
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Priority
               </label>
-              <select
+              <CustomSelect
                 value={form.priority}
                 onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
-                className="w-full rounded-2xl px-3.5 py-2.5 text-xs outline-none border transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-card)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                <option value="High" style={{ background: 'var(--bg-card)' }}>High</option>
-                <option value="Medium" style={{ background: 'var(--bg-card)' }}>Medium</option>
-                <option value="Low" style={{ background: 'var(--bg-card)' }}>Low</option>
-              </select>
+                options={['High', 'Medium', 'Low']}
+              />
             </div>
 
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Status
               </label>
-              <select
+              <CustomSelect
                 value={form.status}
                 onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-                className="w-full rounded-2xl px-3.5 py-2.5 text-xs outline-none border transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-card)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                {columns.map((c) => (
-                  <option key={c} value={c} style={{ background: 'var(--bg-card)' }}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                options={columns}
+              />
             </div>
           </div>
 
@@ -730,16 +712,10 @@ export default function Tasks() {
               <label className="block text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Due date
               </label>
-              <input
-                type="date"
+              <CustomDatePicker
                 value={form.dueDate}
                 onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
-                className="w-full rounded-2xl px-3.5 py-2.5 text-xs outline-none border transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-card)',
-                  color: 'var(--text-primary)',
-                }}
+                placeholder="Select due date"
               />
             </div>
 
