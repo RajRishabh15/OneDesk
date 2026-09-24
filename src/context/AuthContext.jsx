@@ -8,6 +8,7 @@ import {
   deleteUser,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  updatePassword as fbUpdatePassword,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -143,8 +144,28 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function changePassword({ currentPassword, newPassword }) {
+    setAuthError('');
+    if (!auth.currentUser) return { success: false, error: 'No user signed in.' };
+
+    try {
+      const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await fbUpdatePassword(auth.currentUser, newPassword);
+      return { success: true };
+    } catch (err) {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        return { success: false, error: 'Current password is incorrect.' };
+      }
+      if (err.code === 'auth/weak-password') {
+        return { success: false, error: 'New password must be at least 6 characters.' };
+      }
+      return { success: false, error: friendlyError(err.code) };
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile, deleteAccount }}>
+    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile, deleteAccount, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

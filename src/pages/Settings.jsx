@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Download, Upload, Trash2, LogOut,
-  Palette, Check, Sparkles, Lock, AlertTriangle, Eye, EyeOff, Loader2,
+  Palette, Check, Sparkles, Lock, AlertTriangle, Eye, EyeOff, Loader2, Key,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -130,7 +130,7 @@ function ThemeSwatch({ t, active, onClick }) {
 /* ─── Main Settings page ─────────────────────────────────── */
 export default function Settings() {
   const { theme, setTheme } = useTheme();
-  const { user, updateProfile, logout, deleteAccount } = useAuth();
+  const { user, updateProfile, logout, deleteAccount, changePassword } = useAuth();
   const { notes, tasks, events, clearAll, addNote, addTask, addEvent } = useData();
   const {
     settings,
@@ -191,6 +191,60 @@ export default function Settings() {
       setDeleteError(err.message || 'An unexpected error occurred while deleting account.');
       setDeleting(false);
     }
+  }
+
+  // Change Password States
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  async function handleChangePassword(e) {
+    if (e) e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess(false);
+
+    if (!currentPassword) {
+      setPasswordError('Please enter your current password.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setPasswordError('New password cannot be the same as your current password.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    const res = await changePassword({ currentPassword, newPassword });
+    setPasswordLoading(false);
+
+    if (!res.success) {
+      setPasswordError(res.error || 'Failed to update password. Please check your current password.');
+      return;
+    }
+
+    setPasswordSuccess(true);
+    if (playChime) playChime('success');
+    setTimeout(() => {
+      setPasswordModalOpen(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordSuccess(false);
+    }, 1500);
   }
 
   const initials = (name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
@@ -399,11 +453,19 @@ export default function Settings() {
                   ✓ Active
                 </span>
               </Row>
-              <Row label="Password" sub="Managed by Firebase.">
-                <span className="flex items-center gap-1 text-[10px] font-mono px-2.5 py-1 rounded-lg border"
-                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)', color: 'var(--text-muted)' }}>
-                  <Lock size={10} /> ••••••
-                </span>
+              <Row label="Password" sub="Change your account sign-in password.">
+                <GhostBtn
+                  onClick={() => {
+                    setPasswordError('');
+                    setPasswordSuccess(false);
+                    setCurrentPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setPasswordModalOpen(true);
+                  }}
+                >
+                  <Key size={13} /> Change
+                </GhostBtn>
               </Row>
             </div>
           </div>
@@ -674,6 +736,177 @@ export default function Settings() {
                   <>
                     <Trash2 size={14} />
                     <span>Permanently Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+
+      {/* ── Change Password Modal ─────────────────────────────── */}
+      <Modal
+        open={passwordModalOpen}
+        onClose={() => !passwordLoading && setPasswordModalOpen(false)}
+        title="Change Password"
+      >
+        <div className="p-5 sm:p-6 space-y-5">
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            Ensure your account is using a strong password with at least 6 characters.
+          </p>
+
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            {/* Current Password */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                Current Password <span className="text-rose-400">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => {
+                    setCurrentPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  placeholder="Enter current password"
+                  required
+                  className="w-full rounded-xl px-3.5 py-2.5 pr-10 text-sm outline-none border transition-all"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-card)',
+                    color: 'var(--text-primary)',
+                  }}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white p-1 cursor-pointer"
+                  tabIndex={-1}
+                  aria-label="Toggle current password visibility"
+                >
+                  {showCurrentPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                New Password <span className="text-rose-400">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  placeholder="Minimum 6 characters"
+                  minLength={6}
+                  required
+                  className="w-full rounded-xl px-3.5 py-2.5 pr-10 text-sm outline-none border transition-all"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-card)',
+                    color: 'var(--text-primary)',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white p-1 cursor-pointer"
+                  tabIndex={-1}
+                  aria-label="Toggle new password visibility"
+                >
+                  {showNewPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm New Password */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                Confirm New Password <span className="text-rose-400">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  placeholder="Re-enter new password"
+                  required
+                  className="w-full rounded-xl px-3.5 py-2.5 pr-10 text-sm outline-none border transition-all"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-card)',
+                    color: 'var(--text-primary)',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white p-1 cursor-pointer"
+                  tabIndex={-1}
+                  aria-label="Toggle confirm password visibility"
+                >
+                  {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {passwordError && (
+              <div className="p-3 rounded-xl border bg-rose-500/10 border-rose-500/25 text-xs text-rose-400 font-medium animate-fade-in">
+                {passwordError}
+              </div>
+            )}
+
+            {/* Success Message */}
+            {passwordSuccess && (
+              <div className="p-3 rounded-xl border bg-emerald-500/10 border-emerald-500/25 text-xs text-emerald-400 font-medium flex items-center gap-2 animate-fade-in">
+                <Check size={14} className="shrink-0" />
+                <span>Password updated successfully!</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={passwordLoading}
+                onClick={() => setPasswordModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={passwordLoading || passwordSuccess}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+                style={{
+                  background: 'var(--accent-gradient)',
+                  boxShadow: '0 4px 14px var(--accent-glow)',
+                }}
+              >
+                {passwordLoading ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Updating…</span>
+                  </>
+                ) : (
+                  <>
+                    <Key size={14} />
+                    <span>Update Password</span>
                   </>
                 )}
               </button>
