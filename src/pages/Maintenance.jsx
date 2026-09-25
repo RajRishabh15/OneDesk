@@ -224,7 +224,7 @@ export default function Maintenance() {
           >
             <Clock size={13} className="text-amber-400 shrink-0" />
             <span>
-              Expected back: <strong className="text-white font-semibold">10:00 PM today</strong>
+              Expected back: <strong className="text-white font-semibold">11:00 PM today</strong>
             </span>
           </div>
         </div>
@@ -287,7 +287,7 @@ export default function Maintenance() {
               style={{ color: 'var(--text-muted, rgba(245,243,255,0.7))' }}
             >
               Our developer is actively rolling out improvements and database optimizations. We're on schedule to be back online by{' '}
-              <strong className="text-white font-semibold">10:00 PM today</strong>.
+              <strong className="text-white font-semibold">11:00 PM today</strong>.
             </p>
 
             {/* Confirmation Button */}
