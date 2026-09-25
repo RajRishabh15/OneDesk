@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Wrench,
   ShieldCheck,
@@ -10,6 +10,10 @@ import {
   Clock,
   X,
   Radio,
+  Info,
+  GitBranch,
+  Code2,
+  Calendar,
 } from 'lucide-react';
 import OneDeskLogo from '../components/OneDeskLogo';
 import GhostFibers from '../components/GhostFibers';
@@ -234,6 +238,9 @@ export default function Maintenance() {
         </p>
       </div>
 
+      {/* Floating Info Trigger & Dialog Box for Laptops and Phones */}
+      <SystemInfoButton />
+
       {/* Pop-up Dialog Box: "Not yet stay tuned" */}
       {showDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md animate-fade-in">
@@ -301,3 +308,229 @@ export default function Maintenance() {
     </div>
   );
 }
+
+export function SystemInfoButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') setIsOpen(false);
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  function playPop() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } catch (e) {}
+  }
+
+  function handleToggle() {
+    setIsOpen((prev) => {
+      const next = !prev;
+      playPop();
+      return next;
+    });
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-8 z-40 pointer-events-auto"
+    >
+      {/* Floating Info Trigger Button — Visible on laptops and phones */}
+      <button
+        type="button"
+        onClick={handleToggle}
+        title="System Information & Version Details"
+        aria-label="System information"
+        className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border shadow-xl backdrop-blur-xl transition-all duration-200 cursor-pointer ${
+          isOpen ? 'scale-110 shadow-2xl' : 'hover:scale-105 active:scale-95'
+        }`}
+        style={{
+          background: 'var(--bg-card-solid, #0d0a1b)',
+          borderColor: isOpen ? 'var(--accent-color, #818cf8)' : 'var(--border-card, rgba(255,255,255,0.12))',
+          color: isOpen ? 'var(--accent-color, #818cf8)' : 'var(--text-muted, rgba(245,243,255,0.6))',
+          boxShadow: isOpen
+            ? '0 0 16px rgba(129,140,248,0.4), 0 10px 25px rgba(0,0,0,0.4)'
+            : '0 8px 20px rgba(0,0,0,0.2)',
+        }}
+      >
+        <Info size={17} strokeWidth={2.2} />
+      </button>
+
+      {/* Info Dialog Box */}
+      {isOpen && (
+        <div
+          className="absolute bottom-12 sm:bottom-13 right-0 w-[calc(100vw-2rem)] sm:w-80 max-w-[340px] rounded-2xl border p-4 sm:p-5 backdrop-blur-2xl shadow-2xl overflow-hidden animate-fade-in select-none text-left"
+          style={{
+            background: 'var(--bg-card-solid, #0d0a1b)',
+            borderColor: 'var(--border-card, rgba(255,255,255,0.14))',
+            boxShadow: '0 25px 60px -12px rgba(99,102,241,0.35), 0 12px 30px rgba(0,0,0,0.5)',
+          }}
+        >
+          {/* Top Specular Line Highlight */}
+          <div
+            className="absolute top-0 inset-x-6 h-px"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+            }}
+          />
+
+          {/* Header */}
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-[rgba(255,255,255,0.08)]">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-7 h-7 rounded-lg border flex items-center justify-center"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  borderColor: 'rgba(255,255,255,0.08)',
+                  color: 'var(--accent-color, #818cf8)',
+                }}
+              >
+                <Info size={14} />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold font-display tracking-tight text-white">
+                  System Information
+                </h3>
+                <p className="text-[10px]" style={{ color: 'var(--text-muted, rgba(245,243,255,0.6))' }}>
+                  OneDesk Workspace OS
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                playPop();
+              }}
+              className="p-1 rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              title="Close"
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          {/* Details List */}
+          <div className="space-y-2">
+            {/* Website Version */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted, rgba(245,243,255,0.6))' }}>
+                <GitBranch size={13} style={{ color: 'var(--accent-color, #818cf8)' }} />
+                <span className="text-[11px] font-medium">Version</span>
+              </div>
+              <span
+                className="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-white"
+              >
+                v2.4.0
+              </span>
+            </div>
+
+            {/* Developer Name */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted, rgba(245,243,255,0.6))' }}>
+                <Code2 size={13} style={{ color: 'var(--accent-color, #818cf8)' }} />
+                <span className="text-[11px] font-medium">Developer</span>
+              </div>
+              <span className="text-[11px] font-bold text-white">
+                Rishabh Raj
+              </span>
+            </div>
+
+            {/* Sync Status */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted, rgba(245,243,255,0.6))' }}>
+                <Radio size={13} className="text-amber-400" />
+                <span className="text-[11px] font-medium">Sync Status</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+                </span>
+                <span className="text-[11px] font-semibold text-amber-400">
+                  Maintenance
+                </span>
+              </div>
+            </div>
+
+            {/* Last Updated On */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted, rgba(245,243,255,0.6))' }}>
+                <Calendar size={13} style={{ color: 'var(--accent-color, #818cf8)' }} />
+                <span className="text-[11px] font-medium">Last Updated</span>
+              </div>
+              <span className="text-[11px] font-semibold text-white">
+                25 Sep 2026
+              </span>
+            </div>
+          </div>
+
+          {/* Footer Status Line */}
+          <div
+            className="mt-3 pt-2.5 border-t border-[rgba(255,255,255,0.08)] flex items-center justify-between text-[10px]"
+            style={{ color: 'var(--text-muted, rgba(245,243,255,0.6))' }}
+          >
+            <span>Cloud Sync Active</span>
+            <span className="flex items-center gap-1 font-medium text-indigo-400">
+              <CheckCircle2 size={11} /> Verified Build
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
