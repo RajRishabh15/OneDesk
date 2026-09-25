@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { AuthShell, Field } from './Login';
+import { AuthShell, Field, GoogleAuthButton } from './Login';
 
 export default function Signup() {
   const { signup, authError } = useAuth();
@@ -23,7 +23,7 @@ export default function Signup() {
 
   return (
     <AuthShell activeTab="signup">
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-2.5">
         <Field
           label="Your Name"
           icon={User}
@@ -58,7 +58,7 @@ export default function Signup() {
 
         {authError && (
           <div
-            className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border text-xs font-medium animate-fade-in flex items-start gap-2"
+            className="p-2 sm:p-2.5 rounded-xl border text-xs font-medium animate-fade-in flex items-start gap-2"
             style={{
               background: 'rgba(244,63,94,0.1)',
               borderColor: 'rgba(244,63,94,0.25)',
@@ -72,7 +72,7 @@ export default function Signup() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl text-white py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
+          className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl text-white py-2.5 text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-1"
           style={{
             background: 'var(--accent-gradient)',
             boxShadow: '0 6px 20px var(--accent-glow)',
@@ -83,6 +83,9 @@ export default function Signup() {
           {!isLoading && <ArrowRight size={14} />}
         </button>
       </form>
+
+      {/* Google Signup Option (Coming Soon) */}
+      <GoogleAuthButton mode="signup" />
     </AuthShell>
   );
 }

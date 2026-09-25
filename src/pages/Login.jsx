@@ -42,7 +42,7 @@ export default function Login() {
 
   return (
     <AuthShell activeTab="login">
-      <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
         <Field
           label="Email Address"
           icon={Mail}
@@ -66,7 +66,7 @@ export default function Login() {
 
         {authError && (
           <div
-            className="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border text-xs font-medium animate-fade-in flex items-start gap-2"
+            className="p-2 sm:p-2.5 rounded-xl border text-xs font-medium animate-fade-in flex items-start gap-2"
             style={{
               background: 'rgba(244,63,94,0.1)',
               borderColor: 'rgba(244,63,94,0.25)',
@@ -80,7 +80,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl text-white py-2.5 sm:py-3.5 text-xs sm:text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-2"
+          className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl text-white py-2.5 text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-1"
           style={{
             background: 'var(--accent-gradient)',
             boxShadow: '0 6px 20px var(--accent-glow)',
@@ -91,6 +91,9 @@ export default function Login() {
           {!isLoading && <ArrowRight size={14} />}
         </button>
       </form>
+
+      {/* Google Login Option (Coming Soon) */}
+      <GoogleAuthButton mode="login" />
     </AuthShell>
   );
 }
@@ -159,7 +162,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
 
   return (
     <div
-      className="relative flex min-h-[100dvh] flex-col items-center justify-center px-3 sm:px-6 py-4 sm:py-8 overflow-x-hidden transition-colors duration-500"
+      className="relative flex min-h-[100dvh] flex-col items-center justify-center px-3 sm:px-6 pt-14 pb-16 sm:py-4 overflow-x-hidden transition-colors duration-500"
       style={{
         background: 'var(--bg-page)',
         color: 'var(--text-primary)',
@@ -366,11 +369,11 @@ export function AuthShell({ children, activeTab = 'login' }) {
         </div>
       )}
 
-      {/* Main Auth Container — Dynamic Safe Spacing for All Phone Heights */}
-      <div className="relative z-10 w-full max-w-[420px] my-auto pt-14 sm:pt-20 pb-16 sm:pb-8">
+      {/* Main Auth Container — Mobile responsive, compact centered container */}
+      <div className="relative z-10 w-full max-w-[380px] sm:max-w-[390px] my-auto">
         {/* Auth Glass Card */}
         <div
-          className="rounded-[24px] sm:rounded-[32px] border p-5 sm:p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden transition-all duration-300 w-full"
+          className="rounded-[22px] sm:rounded-[28px] border p-4 sm:p-5 backdrop-blur-2xl shadow-2xl relative overflow-hidden transition-all duration-300 w-full"
           style={{
             background: 'var(--bg-card-solid)',
             borderColor: 'var(--border-card)',
@@ -386,27 +389,27 @@ export function AuthShell({ children, activeTab = 'login' }) {
           />
 
           {/* Header Branding */}
-          <div className="flex flex-col items-center text-center mb-4 sm:mb-5">
+          <div className="flex flex-col items-center text-center mb-2.5 sm:mb-3">
             <div
-              className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border shadow-md mb-2 sm:mb-3 transition-transform hover:scale-105 duration-200"
+              className="p-1.5 sm:p-2 rounded-xl border shadow-md mb-1.5 transition-transform hover:scale-105 duration-200"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-card)',
               }}
             >
-              <OneDeskLogo size={34} className="sm:w-[38px] sm:h-[38px]" />
+              <OneDeskLogo size={28} className="sm:w-[30px] sm:h-[30px]" />
             </div>
-            <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+            <h2 className="font-display text-lg sm:text-xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
               OneDesk
             </h2>
-            <p className="text-[11px] sm:text-xs mt-0.5 sm:mt-1" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[10px] sm:text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
               Personal workspace &amp; productivity operating system
             </p>
           </div>
 
           {/* Mode Switcher Tabs (Sign in / Create account) */}
           <div
-            className="grid grid-cols-2 p-1 rounded-full border mb-5 sm:mb-6"
+            className="grid grid-cols-2 p-0.5 rounded-full border mb-3 sm:mb-3.5"
             style={{
               background: 'var(--bg-surface)',
               borderColor: 'var(--border-card)',
@@ -414,7 +417,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
           >
             <Link
               to="/login"
-              className={`py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full text-center transition-all ${
+              className={`py-1 sm:py-1.5 text-xs font-bold rounded-full text-center transition-all ${
                 activeTab === 'login' ? 'shadow-md' : 'hover:text-[var(--text-primary)]'
               }`}
               style={{
@@ -426,7 +429,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
             </Link>
             <Link
               to="/signup"
-              className={`py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full text-center transition-all ${
+              className={`py-1 sm:py-1.5 text-xs font-bold rounded-full text-center transition-all ${
                 activeTab === 'signup' ? 'shadow-md' : 'hover:text-[var(--text-primary)]'
               }`}
               style={{
@@ -452,7 +455,7 @@ export function Field({ icon: Icon, type = 'text', placeholder, value, onChange,
   const effectiveType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
   return (
-    <div className="space-y-1 sm:space-y-1.5">
+    <div className="space-y-1">
       {label && (
         <label className="block text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--text-muted)' }}>
           {label}
@@ -461,7 +464,7 @@ export function Field({ icon: Icon, type = 'text', placeholder, value, onChange,
       <div className="relative flex items-center">
         {Icon && (
           <Icon
-            size={15}
+            size={14}
             className="pointer-events-none absolute left-3.5 transition-colors shrink-0"
             style={{ color: 'var(--text-muted)' }}
           />
@@ -472,9 +475,9 @@ export function Field({ icon: Icon, type = 'text', placeholder, value, onChange,
           required={required}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-xl sm:rounded-2xl border py-2.5 sm:py-3 text-sm font-medium outline-none transition-all ${
-            Icon ? 'pl-10' : 'pl-3.5 sm:pl-4'
-          } ${isPassword ? 'pr-11' : 'pr-3.5 sm:pr-4'}`}
+          className={`w-full rounded-xl sm:rounded-2xl border py-2 sm:py-2.5 text-[14px] sm:text-sm font-medium outline-none transition-all ${
+            Icon ? 'pl-9' : 'pl-3.5'
+          } ${isPassword ? 'pr-10' : 'pr-3.5'}`}
           style={{
             background: 'var(--bg-surface)',
             borderColor: 'var(--border-card)',
@@ -496,7 +499,7 @@ export function Field({ icon: Icon, type = 'text', placeholder, value, onChange,
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute right-2 sm:right-3 p-1.5 sm:p-2 rounded-lg text-xs transition-colors hover:text-[var(--text-primary)] cursor-pointer flex items-center justify-center min-w-[32px] min-h-[32px]"
+            className="absolute right-1.5 sm:right-2 p-1.5 sm:p-2 rounded-lg text-xs transition-colors hover:text-[var(--text-primary)] cursor-pointer flex items-center justify-center min-w-[36px] min-h-[36px] active:scale-95"
             style={{ color: 'var(--text-muted)' }}
           >
             {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -506,3 +509,75 @@ export function Field({ icon: Icon, type = 'text', placeholder, value, onChange,
     </div>
   );
 }
+
+export function GoogleIcon({ size = 18, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.24C.45 8.15 0 9.92 0 12s.45 3.85 1.24 5.42l4.04-3.15z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.24 6.58l4.04 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+      />
+    </svg>
+  );
+}
+
+export function GoogleAuthButton({ mode = 'login' }) {
+  const label = mode === 'signup' ? 'Sign up with Google' : 'Sign in with Google';
+
+  return (
+    <div className="mt-2 sm:mt-2.5">
+      {/* Hairline Divider with Flanking Lines and Center Rounded Box */}
+      <div className="flex items-center gap-2.5 my-3 sm:my-3.5">
+        <div className="flex-1 border-t border-[var(--border-subtle)]" />
+        <span
+          className="px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider rounded-md border shadow-sm select-none shrink-0"
+          style={{
+            background: 'var(--bg-surface)',
+            borderColor: 'var(--border-card)',
+            color: 'var(--text-muted)',
+          }}
+        >
+          or
+        </span>
+        <div className="flex-1 border-t border-[var(--border-subtle)]" />
+      </div>
+
+      {/* Colorful Faded Google Option */}
+      <div
+        className="w-full flex items-center justify-between px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border select-none opacity-70 cursor-not-allowed transition-all"
+        style={{
+          background: 'var(--bg-surface)',
+          borderColor: 'var(--border-subtle)',
+          color: 'var(--text-primary)',
+        }}
+        title="Google login is coming soon"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <GoogleIcon size={16} className="shrink-0" />
+          <span className="text-xs sm:text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+            {label}
+          </span>
+        </div>
+
+        <span
+          className="text-[9px] sm:text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-500 dark:text-amber-300 shrink-0 ml-2"
+        >
+          Coming soon
+        </span>
+      </div>
+    </div>
+  );
+}
+
