@@ -10,6 +10,13 @@ import {
   Sparkles,
   Check,
   ArrowRight,
+  Info,
+  X,
+  GitBranch,
+  Code2,
+  Radio,
+  Calendar,
+  CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme, THEMES } from '../context/ThemeContext';
@@ -18,12 +25,12 @@ import GhostFibers from '../components/GhostFibers';
 import OneDeskLogo from '../components/OneDeskLogo';
 
 export const THEME_FIBER_COLORS = {
-  dark:   { glowLine: '#140E35', glowColor: '#3437A0' },
-  light:  { glowLine: '#c7d2fe', glowColor: '#818cf8' },
+  dark: { glowLine: '#140E35', glowColor: '#3437A0' },
+  light: { glowLine: '#c7d2fe', glowColor: '#818cf8' },
   aurora: { glowLine: '#042a18', glowColor: '#059669' },
-  rose:   { glowLine: '#3b0a1e', glowColor: '#e11d48' },
-  ocean:  { glowLine: '#042040', glowColor: '#0284c7' },
-  amber:  { glowLine: '#3a1c00', glowColor: '#d97706' },
+  rose: { glowLine: '#3b0a1e', glowColor: '#e11d48' },
+  ocean: { glowLine: '#042040', glowColor: '#0284c7' },
+  amber: { glowLine: '#3a1c00', glowColor: '#d97706' },
 };
 
 export default function Login() {
@@ -323,17 +330,17 @@ export function AuthShell({ children, activeTab = 'login' }) {
                 toast.type === 'theme'
                   ? (toast.isWhite ? 'var(--border-card)' : toast.color)
                   : toast.enabled
-                  ? 'var(--accent-color)'
-                  : 'var(--border-card)',
+                    ? 'var(--accent-color)'
+                    : 'var(--border-card)',
               color: 'var(--text-primary)',
               boxShadow:
                 toast.type === 'theme'
                   ? (toast.isWhite
-                      ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
-                      : `0 8px 24px -4px ${toast.color}66`)
+                    ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
+                    : `0 8px 24px -4px ${toast.color}66`)
                   : toast.enabled
-                  ? '0 8px 24px -4px var(--accent-glow)'
-                  : '0 8px 24px -4px rgba(0,0,0,0.6)',
+                    ? '0 8px 24px -4px var(--accent-glow)'
+                    : '0 8px 24px -4px rgba(0,0,0,0.6)',
             }}
           >
             {toast.type === 'theme' ? (
@@ -355,19 +362,22 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   toast.type === 'theme'
                     ? (toast.isWhite ? 'var(--accent-color)' : toast.color)
                     : toast.enabled
-                    ? '#34d399'
-                    : '#f43f5e',
+                      ? '#34d399'
+                      : '#f43f5e',
                 boxShadow:
                   toast.type === 'theme'
                     ? (toast.isWhite ? '0 0 8px var(--accent-glow)' : `0 0 8px ${toast.color}bb`)
                     : toast.enabled
-                    ? '0 0 6px #34d399'
-                    : 'none',
+                      ? '0 0 6px #34d399'
+                      : 'none',
               }}
             />
           </div>
         </div>
       )}
+
+      {/* Desktop Bottom-Right System Info Button & Dialog Box */}
+      <SystemInfoButton />
 
       {/* Main Auth Container — Mobile responsive, compact centered container */}
       <div className="relative z-10 w-full max-w-[380px] sm:max-w-[390px] my-auto">
@@ -403,7 +413,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
               OneDesk
             </h2>
             <p className="text-[10px] sm:text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              Personal workspace &amp; productivity operating system
+              Personal workspace &amp; productivity system
             </p>
           </div>
 
@@ -417,9 +427,8 @@ export function AuthShell({ children, activeTab = 'login' }) {
           >
             <Link
               to="/login"
-              className={`py-1 sm:py-1.5 text-xs font-bold rounded-full text-center transition-all ${
-                activeTab === 'login' ? 'shadow-md' : 'hover:text-[var(--text-primary)]'
-              }`}
+              className={`py-1 sm:py-1.5 text-xs font-bold rounded-full text-center transition-all ${activeTab === 'login' ? 'shadow-md' : 'hover:text-[var(--text-primary)]'
+                }`}
               style={{
                 background: activeTab === 'login' ? 'var(--accent-gradient)' : 'transparent',
                 color: activeTab === 'login' ? '#ffffff' : 'var(--text-muted)',
@@ -429,9 +438,8 @@ export function AuthShell({ children, activeTab = 'login' }) {
             </Link>
             <Link
               to="/signup"
-              className={`py-1 sm:py-1.5 text-xs font-bold rounded-full text-center transition-all ${
-                activeTab === 'signup' ? 'shadow-md' : 'hover:text-[var(--text-primary)]'
-              }`}
+              className={`py-1 sm:py-1.5 text-xs font-bold rounded-full text-center transition-all ${activeTab === 'signup' ? 'shadow-md' : 'hover:text-[var(--text-primary)]'
+                }`}
               style={{
                 background: activeTab === 'signup' ? 'var(--accent-gradient)' : 'transparent',
                 color: activeTab === 'signup' ? '#ffffff' : 'var(--text-muted)',
@@ -475,9 +483,8 @@ export function Field({ icon: Icon, type = 'text', placeholder, value, onChange,
           required={required}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-xl sm:rounded-2xl border py-2 sm:py-2.5 text-[14px] sm:text-sm font-medium outline-none transition-all ${
-            Icon ? 'pl-9' : 'pl-3.5'
-          } ${isPassword ? 'pr-10' : 'pr-3.5'}`}
+          className={`w-full rounded-xl sm:rounded-2xl border py-2 sm:py-2.5 text-[14px] sm:text-sm font-medium outline-none transition-all ${Icon ? 'pl-9' : 'pl-3.5'
+            } ${isPassword ? 'pr-10' : 'pr-3.5'}`}
           style={{
             background: 'var(--bg-surface)',
             borderColor: 'var(--border-card)',
@@ -580,4 +587,220 @@ export function GoogleAuthButton({ mode = 'login' }) {
     </div>
   );
 }
+
+export function SystemInfoButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+  const { playChime } = useSettings();
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') setIsOpen(false);
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  function handleToggle() {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (playChime) playChime('pop');
+      return next;
+    });
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="hidden sm:block fixed bottom-5 right-6 sm:bottom-6 sm:right-8 z-30 pointer-events-auto"
+    >
+      {/* Floating Info Trigger Button */}
+      <button
+        type="button"
+        onClick={handleToggle}
+        title="System Information & Version Details"
+        aria-label="System information"
+        className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border shadow-lg backdrop-blur-xl transition-all duration-200 cursor-pointer ${isOpen ? 'scale-110 shadow-2xl' : 'hover:scale-105 active:scale-95'
+          }`}
+        style={{
+          background: 'var(--bg-card-solid)',
+          borderColor: isOpen ? 'var(--accent-color)' : 'var(--border-card)',
+          color: isOpen ? 'var(--accent-color)' : 'var(--text-muted)',
+          boxShadow: isOpen
+            ? '0 0 16px var(--accent-glow), 0 10px 25px rgba(0,0,0,0.3)'
+            : '0 8px 20px rgba(0,0,0,0.15)',
+        }}
+      >
+        <Info size={17} strokeWidth={2.2} />
+      </button>
+
+      {/* Info Dialog Box */}
+      {isOpen && (
+        <div
+          className="absolute bottom-13 right-0 w-80 rounded-2xl border p-4 sm:p-5 backdrop-blur-2xl shadow-2xl overflow-hidden animate-fade-in select-none"
+          style={{
+            background: 'var(--bg-card-solid)',
+            borderColor: 'var(--border-card)',
+            boxShadow: '0 25px 60px -12px var(--accent-glow), 0 12px 30px rgba(0,0,0,0.4)',
+          }}
+        >
+          {/* Top Specular Line Highlight */}
+          <div
+            className="absolute top-0 inset-x-6 h-px"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+            }}
+          />
+
+          {/* Header */}
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-7 h-7 rounded-lg border flex items-center justify-center"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--accent-color)',
+                }}
+              >
+                <Info size={14} />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                  System Information
+                </h3>
+                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                  OneDesk Workspace OS
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                if (playChime) playChime('pop');
+              }}
+              className="p-1 rounded-lg transition-colors cursor-pointer hover:text-[var(--text-primary)]"
+              style={{ color: 'var(--text-muted)' }}
+              title="Close"
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          {/* Details List */}
+          <div className="space-y-2">
+            {/* Website Version */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <GitBranch size={13} style={{ color: 'var(--accent-color)' }} />
+                <span className="text-[11px] font-medium">Version</span>
+              </div>
+              <span
+                className="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full border"
+                style={{
+                  background: 'var(--bg-card-solid)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                v2.4.0
+              </span>
+            </div>
+
+            {/* Developer Name */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <Code2 size={13} style={{ color: 'var(--accent-color)' }} />
+                <span className="text-[11px] font-medium">Developer</span>
+              </div>
+              <span className="text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>
+                Rishabh Raj
+              </span>
+            </div>
+
+            {/* Sync Status */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <Radio size={13} className="text-emerald-400" />
+                <span className="text-[11px] font-medium">Sync Status</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                </span>
+                <span className="text-[11px] font-semibold text-emerald-400">
+                  Operational
+                </span>
+              </div>
+            </div>
+
+            {/* Last Updated On */}
+            <div
+              className="flex items-center justify-between p-2 rounded-xl border text-xs"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <Calendar size={13} style={{ color: 'var(--accent-color)' }} />
+                <span className="text-[11px] font-medium">Last Updated</span>
+              </div>
+              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                25 Sep 2026
+              </span>
+            </div>
+          </div>
+
+          {/* Footer Status Line */}
+          <div
+            className="mt-3 pt-2.5 border-t flex items-center justify-between text-[10px]"
+            style={{
+              borderColor: 'var(--border-subtle)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            <span>Cloud Sync Active</span>
+            <span className="flex items-center gap-1 font-medium" style={{ color: 'var(--accent-color)' }}>
+              <CheckCircle2 size={11} /> Verified Build
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 
