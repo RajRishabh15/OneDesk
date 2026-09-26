@@ -1,8 +1,31 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Download, Upload, Trash2, LogOut,
-  Palette, Check, Sparkles, Lock, AlertTriangle, Eye, EyeOff, Loader2, Key,
+  Download,
+  Upload,
+  Trash2,
+  LogOut,
+  Palette,
+  Check,
+  Sparkles,
+  Lock,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+  Loader2,
+  Key,
+  Bell,
+  Volume2,
+  Database,
+  User,
+  Mail,
+  CheckCircle2,
+  Zap,
+  Sliders,
+  Clock,
+  Heart,
+  Pencil,
+  Camera,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -11,123 +34,183 @@ import { useSettings } from '../context/SettingsContext';
 import Toggle from '../components/Toggle';
 import Modal from '../components/Modal';
 
-/* ─── Small reusable pieces ──────────────────────────────── */
+/* ─── Preset Avatars: Nature & Automotive Photography ──────── */
+const PRESET_AVATARS = [
+  // Nature & Landscapes
+  { id: 'nat1', category: 'Nature', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&auto=format&fit=crop&q=80', label: 'Mountain Peak' },
+  { id: 'nat2', category: 'Nature', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&auto=format&fit=crop&q=80', label: 'Misty Pine Forest' },
+  { id: 'nat3', category: 'Nature', url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=200&auto=format&fit=crop&q=80', label: 'Ocean Waves' },
+  { id: 'nat4', category: 'Nature', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=200&auto=format&fit=crop&q=80', label: 'Aurora Night Sky' },
+  { id: 'nat5', category: 'Nature', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=200&auto=format&fit=crop&q=80', label: 'Alpine Lake' },
+  { id: 'nat6', category: 'Nature', url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=200&auto=format&fit=crop&q=80', label: 'Desert Dunes' },
 
-function SectionLabel({ children }) {
-  return (
-    <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'var(--text-muted)' }}>
-      {children}
-    </p>
-  );
-}
+  // Cars & Automotive
+  { id: 'car1', category: 'Cars', url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=200&auto=format&fit=crop&q=80', label: 'Dark Porsche 911' },
+  { id: 'car2', category: 'Cars', url: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=200&auto=format&fit=crop&q=80', label: 'Matte Supercar' },
+  { id: 'car3', category: 'Cars', url: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=200&auto=format&fit=crop&q=80', label: 'Exotic Sportscar' },
+  { id: 'car4', category: 'Cars', url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=200&auto=format&fit=crop&q=80', label: 'Classic Blue Coupe' },
+  { id: 'car5', category: 'Cars', url: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=200&auto=format&fit=crop&q=80', label: 'Audi Performance' },
+];
 
-function Panel({ children, className = '' }) {
+/* ─── Clean UI Card & Row Primitives ──────────────────────── */
+
+function SettingCard({ children, className = '' }) {
   return (
     <div
-      className={`rounded-[26px] border p-5 sm:p-6 transition-all duration-300 shadow-[0_6px_28px_rgba(0,0,0,0.18)] backdrop-blur-xl ${className}`}
-      style={{ background: 'var(--bg-card)', borderColor: 'var(--border-card)' }}
+      className={`rounded-2xl sm:rounded-3xl border p-5 sm:p-7 backdrop-blur-2xl transition-all duration-200 relative overflow-hidden shadow-sm ${className}`}
+      style={{
+        background: 'var(--bg-card)',
+        borderColor: 'var(--border-card)',
+      }}
     >
+      {/* Top subtle hairline highlight */}
+      <div
+        className="absolute top-0 inset-x-8 h-px pointer-events-none"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)',
+        }}
+      />
       {children}
     </div>
   );
 }
 
-function Divider() {
-  return <div className="my-3.5" style={{ borderTop: '1px solid var(--border-subtle)' }} />;
+function SectionHeader({ icon: Icon, title, description }) {
+  return (
+    <div className="flex items-start gap-3 mb-5">
+      {Icon && (
+        <div
+          className="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs"
+          style={{
+            background: 'var(--bg-surface)',
+            borderColor: 'var(--border-subtle)',
+            color: 'var(--accent-color)',
+          }}
+        >
+          <Icon size={17} strokeWidth={2.2} />
+        </div>
+      )}
+      <div>
+        <h2 className="text-base sm:text-lg font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+          {title}
+        </h2>
+        {description && (
+          <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
 
-function Row({ label, sub, children, danger, onClick }) {
+function SettingRow({ icon: Icon, label, description, children, onClick, danger = false }) {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center justify-between gap-4 ${onClick ? 'cursor-pointer select-none' : ''}`}
+      className={`group flex items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ${
+        onClick ? 'cursor-pointer hover:border-[var(--accent-color)] active:scale-[0.99] select-none' : ''
+      }`}
+      style={{
+        background: danger ? 'rgba(251,113,133,0.04)' : 'var(--bg-surface)',
+        borderColor: danger ? 'rgba(251,113,133,0.2)' : 'var(--border-subtle)',
+      }}
     >
-      <div className="min-w-0">
-        <p
-          className="text-sm font-medium leading-snug"
-          style={{ color: danger ? '#fb7185' : 'var(--text-primary)' }}
-        >
-          {label}
-        </p>
-        {sub && (
-          <p className="text-[11px] mt-0.5 leading-snug" style={{ color: 'var(--text-muted)' }}>
-            {sub}
-          </p>
+      <div className="flex items-center gap-3.5 min-w-0">
+        {Icon && (
+          <div
+            className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 transition-colors"
+            style={{
+              background: danger ? 'rgba(251,113,133,0.1)' : 'var(--bg-card-solid)',
+              borderColor: danger ? 'rgba(251,113,133,0.3)' : 'var(--border-subtle)',
+              color: danger ? '#fb7185' : 'var(--accent-color)',
+            }}
+          >
+            <Icon size={15} />
+          </div>
         )}
+        <div className="min-w-0">
+          <p
+            className="text-xs sm:text-sm font-semibold leading-snug truncate"
+            style={{ color: danger ? '#fb7185' : 'var(--text-primary)' }}
+          >
+            {label}
+          </p>
+          {description && (
+            <p className="text-[11px] sm:text-xs mt-0.5 leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>
+              {description}
+            </p>
+          )}
+        </div>
       </div>
       <div className="shrink-0">{children}</div>
     </div>
   );
 }
 
-function GhostBtn({ children, danger, onClick, type = 'button', disabled }) {
+/* ─── Clean Theme Card ─────────────────────────────────────── */
+
+function ThemeOptionCard({ t, active, onClick }) {
+  const [bg, surface, accent] = t.preview;
+  const isWhite = t.id === 'light';
+
   return (
     <button
-      type={type}
+      type="button"
       onClick={onClick}
-      disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className={`group relative flex flex-col justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer ${
+        active ? 'ring-2 ring-[var(--accent-color)] shadow-md' : 'hover:border-[var(--border-card)]'
+      }`}
       style={{
-        background: danger ? 'rgba(251,113,133,0.08)' : 'var(--bg-surface)',
-        borderColor: danger ? 'rgba(251,113,133,0.25)' : 'var(--border-card)',
-        color: danger ? '#fb7185' : 'var(--text-primary)',
+        background: active ? 'var(--bg-surface)' : 'var(--bg-card-solid)',
+        borderColor: active ? 'var(--accent-color)' : 'var(--border-subtle)',
       }}
     >
-      {children}
-    </button>
-  );
-}
-
-function PrimaryBtn({ children, type = 'button', onClick, disabled }) {
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-xs font-bold text-white transition-all disabled:opacity-50 shadow-md hover:brightness-110 active:scale-95"
-      style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 16px var(--accent-glow)' }}
-    >
-      {children}
-    </button>
-  );
-}
-
-/* ─── Theme swatch card ──────────────────────────────────── */
-function ThemeSwatch({ t, active, onClick }) {
-  const [p1, p2, p3] = t.preview;
-  return (
-    <button
-      onClick={onClick}
-      className="group flex flex-col gap-2 rounded-xl p-3 border text-left transition-all duration-200"
-      style={{
-        background: active ? 'var(--bg-surface)' : 'transparent',
-        borderColor: active ? 'var(--border-card)' : 'var(--border-subtle)',
-        outline: active ? '2px solid rgba(99,102,241,0.5)' : '2px solid transparent',
-        outlineOffset: '2px',
-      }}
-    >
-      {/* Mini preview pill */}
-      <div className="relative h-9 w-full rounded-lg overflow-hidden flex-shrink-0" style={{ background: p1 }}>
-        <div className="absolute bottom-0 left-0 right-0 h-4 opacity-60" style={{ background: p2 }} />
-        <div className="absolute right-2 top-2 h-2 w-2 rounded-full" style={{ background: p3 }} />
-        <div className="absolute left-2 top-2.5 h-1 w-5 rounded-full opacity-70" style={{ background: p3 }} />
+      {/* Palette Preview */}
+      <div
+        className="w-full h-11 rounded-lg mb-2.5 relative overflow-hidden border shadow-inner flex items-end p-1.5"
+        style={{
+          background: bg,
+          borderColor: isWhite ? '#e5e7eb' : 'rgba(255,255,255,0.1)',
+        }}
+      >
+        <div
+          className="absolute inset-x-1.5 bottom-1.5 h-3.5 rounded-md shadow-xs opacity-80"
+          style={{ background: surface }}
+        />
+        <div
+          className="absolute top-1.5 right-1.5 w-3 h-3 rounded-full border border-white/20 shadow-xs"
+          style={{ background: accent }}
+        />
       </div>
+
       <div className="flex items-center justify-between w-full">
-        <div>
-          <p className="text-xs font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{t.name}</p>
-          <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{t.description}</p>
+        <div className="min-w-0 pr-1.5">
+          <p className="text-xs font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+            {t.name}
+          </p>
+          <p className="text-[10px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            {t.description}
+          </p>
         </div>
-        {active && (
-          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-500/20 border border-indigo-500/40">
-            <Check size={9} className="text-indigo-400" />
-          </span>
-        )}
+
+        <div
+          className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+            active ? 'border-transparent text-white' : 'border-[var(--border-subtle)] opacity-20'
+          }`}
+          style={{
+            background: active ? 'var(--accent-gradient)' : 'transparent',
+          }}
+        >
+          {active && <Check size={10} strokeWidth={3} />}
+        </div>
       </div>
     </button>
   );
 }
 
-/* ─── Main Settings page ─────────────────────────────────── */
+/* ─── Main Settings Component ─────────────────────────────── */
+
 export default function Settings() {
   const { theme, setTheme } = useTheme();
   const { user, updateProfile, logout, deleteAccount, changePassword } = useAuth();
@@ -142,11 +225,18 @@ export default function Settings() {
   } = useSettings();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || user?.displayName || '');
-  const [testSent, setTestSent] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const fileRef = useRef(null);
+  const photoFileRef = useRef(null);
+
+  // Edit Profile States
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhoto, setEditPhoto] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  // Test Alert state
+  const [testSent, setTestSent] = useState(false);
 
   // Delete Account States
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -155,43 +245,6 @@ export default function Settings() {
   const [deleteError, setDeleteError] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [requirePassword, setRequirePassword] = useState(false);
-
-  async function handleDeleteAccount(e) {
-    if (e) e.preventDefault();
-    setDeleting(true);
-    setDeleteError('');
-
-    try {
-      // 1. Wipe all user data from collections & user document
-      try {
-        await clearAll();
-      } catch (clearErr) {
-        console.warn('Workspace cleanup note:', clearErr);
-      }
-
-      // 2. Delete Firebase Auth account
-      const res = await deleteAccount(deletePassword);
-      if (!res.success) {
-        if (res.requiresPassword) {
-          setRequirePassword(true);
-        }
-        setDeleteError(res.error || 'Failed to delete account. Please try again.');
-        setDeleting(false);
-        return;
-      }
-
-      // 3. Clear local storage traces
-      localStorage.removeItem('lifeos_dashboard_scratchpad');
-      localStorage.removeItem('onedesk_settings');
-
-      if (playChime) playChime('pop');
-      setDeleteModalOpen(false);
-      navigate('/login');
-    } catch (err) {
-      setDeleteError(err.message || 'An unexpected error occurred while deleting account.');
-      setDeleting(false);
-    }
-  }
 
   // Change Password States
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -204,6 +257,130 @@ export default function Settings() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Mobile toast feedback
+  const [mobileToast, setMobileToast] = useState(null);
+  const mobileToastTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
+    };
+  }, []);
+
+  function handleOpenEditProfile() {
+    setEditName(user?.name || user?.displayName || '');
+    setEditPhoto(user?.photoURL || '');
+    setEditError('');
+    setEditProfileOpen(true);
+  }
+
+  function handlePhotoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setEditError('Please select a valid image file (PNG, JPG, WebP).');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setEditError('Image is too large. Please select a photo under 8MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize onto a crisp canvas (max 200x200) to keep profile photo lightweight & speedy
+        const canvas = document.createElement('canvas');
+        const maxDim = 200;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) {
+          if (w > maxDim) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          }
+        } else {
+          if (h > maxDim) {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setEditPhoto(dataUrl);
+        setEditError('');
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function handleSaveProfile(e) {
+    if (e) e.preventDefault();
+    if (!editName.trim()) {
+      setEditError('Please enter a display name.');
+      return;
+    }
+    setEditSaving(true);
+    setEditError('');
+
+    try {
+      const success = await updateProfile({
+        name: editName.trim(),
+        photoURL: editPhoto,
+      });
+
+      if (success !== false) {
+        if (playChime) playChime('success');
+        setEditProfileOpen(false);
+      } else {
+        setEditError('Failed to save profile. Please try again.');
+      }
+    } catch {
+      setEditError('An unexpected error occurred while saving.');
+    } finally {
+      setEditSaving(false);
+    }
+  }
+
+  async function handleDeleteAccount(e) {
+    if (e) e.preventDefault();
+    setDeleting(true);
+    setDeleteError('');
+
+    try {
+      try {
+        await clearAll();
+      } catch (clearErr) {
+        console.warn('Workspace cleanup note:', clearErr);
+      }
+
+      const res = await deleteAccount(deletePassword);
+      if (!res.success) {
+        if (res.requiresPassword) {
+          setRequirePassword(true);
+        }
+        setDeleteError(res.error || 'Failed to delete account. Please try again.');
+        setDeleting(false);
+        return;
+      }
+
+      localStorage.removeItem('lifeos_dashboard_scratchpad');
+      localStorage.removeItem('onedesk_settings');
+
+      if (playChime) playChime('pop');
+      setDeleteModalOpen(false);
+      navigate('/login');
+    } catch (err) {
+      setDeleteError(err.message || 'An unexpected error occurred while deleting account.');
+      setDeleting(false);
+    }
+  }
 
   async function handleChangePassword(e) {
     if (e) e.preventDefault();
@@ -247,29 +424,19 @@ export default function Settings() {
     }, 1500);
   }
 
-  const initials = (name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
-
-  const [mobileToast, setMobileToast] = useState(null);
-  const mobileToastTimeoutRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
-    };
-  }, []);
+  const initials = (user?.name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
 
   function handleThemeSelect(t) {
     setTheme(t.id);
     if (playChime) playChime('pop');
-    if (typeof window !== 'undefined' && window.innerWidth < 640) {
-      const isWhite = t.id === 'light';
-      const circleColor = isWhite ? '#ffffff' : (t.color || t.preview?.[2] || '#818cf8');
+
+    if (window.innerWidth < 640) {
       setMobileToast({
         id: Date.now(),
         type: 'theme',
-        text: `${t.name} theme applied`,
-        color: circleColor,
-        isWhite,
+        text: `Theme: ${t.name}`,
+        color: t.preview[2],
+        isWhite: t.id === 'light',
       });
       if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
       mobileToastTimeoutRef.current = setTimeout(() => {
@@ -279,16 +446,15 @@ export default function Settings() {
   }
 
   function handleToggleFibers() {
-    const isCurrentlyOn = settings?.ghostFibers !== false;
-    const willBeEnabled = !isCurrentlyOn;
+    const nextVal = settings?.ghostFibers === false;
     toggleSetting('ghostFibers');
-    if (playChime) playChime('pop');
-    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+
+    if (window.innerWidth < 640) {
       setMobileToast({
         id: Date.now(),
-        type: 'bg',
-        text: `Background animation ${willBeEnabled ? 'enabled' : 'disabled'}`,
-        enabled: willBeEnabled,
+        type: 'fibers',
+        text: nextVal ? 'Ambient waves enabled' : 'Ambient waves disabled',
+        enabled: nextVal,
       });
       if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
       mobileToastTimeoutRef.current = setTimeout(() => {
@@ -302,350 +468,756 @@ export default function Settings() {
     navigate('/login', { replace: true });
   }
 
-  async function saveProfile(e) {
-    e.preventDefault();
-    setSaving(true);
-    await updateProfile({ name });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  }
-
   function handleExport() {
-    const blob = new Blob([JSON.stringify({ notes, tasks, events, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'onedesk-backup.json' });
-    a.click(); URL.revokeObjectURL(a.href);
+    const blob = new Blob(
+      [JSON.stringify({ notes, tasks, events, exportedAt: new Date().toISOString() }, null, 2)],
+      { type: 'application/json' }
+    );
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `onedesk-backup-${new Date().toISOString().slice(0, 10)}.json`,
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+    if (playChime) playChime('pop');
   }
 
   function handleImport(e) {
-    const file = e.target.files?.[0]; if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = async () => {
       try {
         const b = JSON.parse(reader.result);
-        if (Array.isArray(b.notes))  for (const n  of b.notes)  { const { id: _, createdAt: __, ...r } = n;  await addNote(r);  }
-        if (Array.isArray(b.tasks))  for (const t  of b.tasks)  { const { id: _, createdAt: __, ...r } = t;  await addTask(r);  }
-        if (Array.isArray(b.events)) for (const ev of b.events) { const { id: _, createdAt: __, ...r } = ev; await addEvent(r); }
-        alert('Backup imported!');
-      } catch { alert('Invalid backup file.'); }
+        if (Array.isArray(b.notes)) {
+          for (const n of b.notes) {
+            const { id: _, createdAt: __, ...r } = n;
+            await addNote(r);
+          }
+        }
+        if (Array.isArray(b.tasks)) {
+          for (const t of b.tasks) {
+            const { id: _, createdAt: __, ...r } = t;
+            await addTask(r);
+          }
+        }
+        if (Array.isArray(b.events)) {
+          for (const ev of b.events) {
+            const { id: _, createdAt: __, ...r } = ev;
+            await addEvent(r);
+          }
+        }
+        if (playChime) playChime('success');
+        alert('Backup imported successfully!');
+      } catch {
+        alert('Invalid or corrupted backup file.');
+      }
     };
     reader.readAsText(file);
   }
 
   return (
-    <div className="animate-fade-up max-w-3xl mx-auto space-y-7 pb-12">
+    <div className="animate-fade-up max-w-4xl mx-auto space-y-6 sm:space-y-7 pb-16">
 
-      {/* ── Page title ─────────────────────────────────────── */}
-      <div>
-        <div className="flex items-center gap-2.5 mb-1">
-          <Sparkles size={16} style={{ color: 'var(--text-muted)' }} />
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Preferences
+      {/* ── Page Header ────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+            Settings
           </h1>
+          <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            Manage your personal profile, workspace theme, notifications, and data.
+          </p>
         </div>
-        <p className="text-sm" style={{ color: 'var(--text-muted)', marginLeft: '26px' }}>
-          Manage your account, appearance, and workspace data.
-        </p>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-400 active:scale-95 cursor-pointer shadow-xs"
+          style={{
+            background: 'var(--bg-surface)',
+            borderColor: 'var(--border-subtle)',
+            color: 'var(--text-muted)',
+          }}
+        >
+          <LogOut size={13} />
+          <span>Sign Out</span>
+        </button>
       </div>
 
-      {/* ── TOP ROW: Profile + Account side by side ─────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        {/* Profile */}
-        <Panel>
-          <SectionLabel>Profile</SectionLabel>
-
-          {/* Avatar row */}
-          <div className="flex items-center gap-3 mb-4">
-            <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white text-base font-black shadow-lg"
-              style={{ background: 'var(--accent-gradient)', boxShadow: '0 4px 16px var(--accent-glow)' }}
-            >
-              {initials}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{name || 'User'}</p>
-              <p className="text-[11px] truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
-              <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
-                style={{ color: '#34d399', borderColor: 'rgba(52,211,153,0.25)', background: 'rgba(52,211,153,0.08)' }}>
-                ● Connected
-              </span>
-            </div>
-          </div>
-
-          <form onSubmit={saveProfile} className="space-y-3">
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                Full name
-              </label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none border transition-all"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)', color: 'var(--text-primary)' }}
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                Email
-              </label>
-              <input
-                value={user?.email || ''}
-                disabled
-                className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none border opacity-40 cursor-not-allowed"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)', color: 'var(--text-primary)' }}
-              />
-            </div>
-            <div className="flex items-center gap-2.5 pt-1">
-              <PrimaryBtn type="submit" disabled={saving}>
-                {saving ? 'Saving…' : saved ? <><Check size={13} /> Saved</> : 'Save changes'}
-              </PrimaryBtn>
-            </div>
-          </form>
-        </Panel>
-
-        {/* Account & Security */}
-        <Panel className="flex flex-col gap-4">
-          <div>
-            <SectionLabel>Account</SectionLabel>
-            <div className="space-y-3">
-              <Row label="Sign out" sub="End your current session on this device.">
-                <GhostBtn danger onClick={handleLogout}>
-                  <LogOut size={13} /> Log out
-                </GhostBtn>
-              </Row>
-              <Divider />
-              <Row
-                label="Delete Account"
-                sub="Permanently delete your account and wipe all workspace data."
-                danger
+      {/* ── 1. Profile Box (Non-changeable with Edit Icon) ─── */}
+      <SettingCard>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5">
+          {/* Avatar & User Details */}
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="relative shrink-0">
+              <div
+                className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl flex items-center justify-center text-white text-lg sm:text-2xl font-bold shadow-md overflow-hidden border border-white/10"
+                style={{
+                  background: 'var(--accent-gradient)',
+                }}
               >
-                <GhostBtn
-                  danger
-                  onClick={() => {
-                    setDeleteError('');
-                    setDeletePassword('');
-                    setRequirePassword(false);
-                    setDeleteModalOpen(true);
-                  }}
-                >
-                  <Trash2 size={13} /> Delete Account
-                </GhostBtn>
-              </Row>
+                {user?.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user?.name || 'User'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
+              </div>
+            </div>
+
+            {/* Non-changeable Name & Email */}
+            <div className="min-w-0 flex-1">
+              <h2
+                className="text-base sm:text-xl font-bold font-display tracking-tight truncate"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {user?.name || 'User'}
+              </h2>
+              <p
+                className="text-xs sm:text-sm truncate mt-0.5"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                {user?.email || 'No email associated'}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium text-emerald-500 dark:text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Cloud Connected
+                </span>
+              </div>
             </div>
           </div>
 
-          <Divider />
-
-          <div>
-            <SectionLabel>Security</SectionLabel>
-            <div className="space-y-3">
-              <Row label="Auth Provider" sub="Managed via Firebase Auth.">
-                <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg border"
-                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-card)', color: 'var(--text-muted)' }}>
-                  Firebase
-                </span>
-              </Row>
-              <Row label="Encryption" sub="Data encrypted in transit and at rest.">
-                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg border"
-                  style={{ color: '#34d399', borderColor: 'rgba(52,211,153,0.25)', background: 'rgba(52,211,153,0.08)' }}>
-                  ✓ Active
-                </span>
-              </Row>
-              <Row label="Password" sub="Change your account sign-in password.">
-                <GhostBtn
-                  onClick={() => {
-                    setPasswordError('');
-                    setPasswordSuccess(false);
-                    setCurrentPassword('');
-                    setNewPassword('');
-                    setConfirmPassword('');
-                    setPasswordModalOpen(true);
-                  }}
-                >
-                  <Key size={13} /> Change
-                </GhostBtn>
-              </Row>
-            </div>
+          {/* Edit Icon / Button */}
+          <div className="flex items-center gap-2 self-stretch sm:self-center shrink-0">
+            <button
+              type="button"
+              onClick={handleOpenEditProfile}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-[var(--accent-color)] hover:text-[var(--text-primary)] active:scale-95 cursor-pointer shadow-xs"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--text-primary)',
+              }}
+              title="Edit profile name and picture"
+            >
+              <Pencil size={13} />
+              <span>Edit Profile</span>
+            </button>
           </div>
-        </Panel>
-      </div>
-
-      {/* ── FULL WIDTH: Appearance / Themes ─────────────────── */}
-      <Panel>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <SectionLabel>Appearance</SectionLabel>
-            <p className="text-sm font-semibold -mt-1" style={{ color: 'var(--text-primary)' }}>Interface Theme</p>
-            <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              Active: <strong style={{ color: 'var(--text-primary)' }}>{THEMES.find(t => t.id === theme)?.name}</strong>
-            </p>
-          </div>
-          <Palette size={18} style={{ color: 'var(--text-muted)' }} />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+
+        {/* Password & Security Quick Link */}
+        <div className="mt-5 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+            <Key size={13} />
+            <span>Password &amp; Security</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setPasswordError('');
+              setPasswordSuccess(false);
+              setCurrentPassword('');
+              setNewPassword('');
+              setConfirmPassword('');
+              setPasswordModalOpen(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all hover:border-[var(--accent-color)] hover:text-[var(--text-primary)] active:scale-95 cursor-pointer shadow-xs"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+              color: 'var(--accent-color)',
+            }}
+          >
+            <Key size={12} />
+            <span>Change password</span>
+          </button>
+        </div>
+      </SettingCard>
+
+      {/* ── 2. Appearance & Themes ─────────────────────────── */}
+      <SettingCard>
+        <SectionHeader
+          icon={Palette}
+          title="Appearance & Theme"
+          description="Select your preferred workspace palette and background effects."
+        />
+
+        {/* Themes Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
           {THEMES.map((t) => (
-            <ThemeSwatch key={t.id} t={t} active={theme === t.id} onClick={() => handleThemeSelect(t)} />
+            <ThemeOptionCard
+              key={t.id}
+              t={t}
+              active={theme === t.id}
+              onClick={() => handleThemeSelect(t)}
+            />
           ))}
         </div>
-      </Panel>
 
-      {/* ── BOTTOM ROW: Notifications + Data ─────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Ambient Canvas Switch */}
+        <SettingRow
+          icon={Sparkles}
+          label="Ambient Background Waves"
+          description="Dynamic floating wave fibers that render gently behind your workspace."
+          onClick={handleToggleFibers}
+        >
+          <Toggle
+            on={settings?.ghostFibers !== false}
+            onToggle={handleToggleFibers}
+            label="Toggle ambient background fibers"
+          />
+        </SettingRow>
+      </SettingCard>
 
-        {/* Preferences & System */}
-        <Panel>
-          <SectionLabel>Preferences &amp; System</SectionLabel>
-          <div className="space-y-4">
-            <Row
-              label="Due Task Badges"
-              sub="Show red alert badge & count in navbar for tasks due today."
-              onClick={() => toggleSetting('dueTaskBadges')}
-            >
-              <Toggle
-                on={settings.dueTaskBadges}
-                onToggle={() => toggleSetting('dueTaskBadges')}
-                label="Toggle due task badges"
-              />
-            </Row>
+      {/* ── 3. Notifications & Sensory Feedback ────────────── */}
+      <SettingCard>
+        <SectionHeader
+          icon={Bell}
+          title="Notifications & Feedback"
+          description="Control reminders, auditory cues, and interface micro-interactions."
+        />
 
-            <Divider />
+        <div className="space-y-3">
+          {/* Due Task Badges */}
+          <SettingRow
+            icon={CheckCircle2}
+            label="Due Task Badges"
+            description="Display badge indicators on the navigation bar when tasks are due today."
+            onClick={() => toggleSetting('dueTaskBadges')}
+          >
+            <Toggle
+              on={settings?.dueTaskBadges}
+              onToggle={() => toggleSetting('dueTaskBadges')}
+              label="Toggle due task badges"
+            />
+          </SettingRow>
 
-            <Row
-              label="Reminder Alerts"
-              sub="Desktop browser notifications for approaching deadlines."
-              onClick={async () => {
-                if (!settings.reminderAlerts) {
-                  await requestNotificationPermission();
-                } else {
-                  updateSetting('reminderAlerts', false);
-                }
-              }}
-            >
-              <Toggle
-                on={settings.reminderAlerts}
-                onToggle={async () => {
-                  if (!settings.reminderAlerts) {
-                    await requestNotificationPermission();
-                  } else {
-                    updateSetting('reminderAlerts', false);
-                  }
-                }}
-                label="Toggle reminder alerts"
-              />
-            </Row>
-
-            {settings.reminderAlerts && (
-              <div className="flex items-center justify-between p-2.5 rounded-xl border bg-white/[0.02]" style={{ borderColor: 'var(--border-subtle)' }}>
-                <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Live alerts active
-                </span>
+          {/* Desktop Deadline Reminders */}
+          <SettingRow
+            icon={Clock}
+            label="Desktop Reminder Alerts"
+            description="Browser desktop notifications for upcoming schedule events and task deadlines."
+            onClick={async () => {
+              if (!settings?.reminderAlerts) {
+                await requestNotificationPermission();
+              } else {
+                updateSetting('reminderAlerts', false);
+              }
+            }}
+          >
+            <div className="flex items-center gap-2">
+              {settings?.reminderAlerts && (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const ok = sendPushNotification('OneDesk: Push Alert Test', {
-                      body: 'Your browser desktop alerts are active and working smoothly!',
+                    const ok = sendPushNotification('OneDesk: Reminder Alert Test', {
+                      body: 'Your desktop deadline notifications are active and working smoothly!',
                     });
                     if (ok) {
                       setTestSent(true);
                       setTimeout(() => setTestSent(false), 2500);
                     }
                   }}
-                  className="btn-glass px-3 py-1 text-[10px] font-bold rounded-full text-indigo-300 hover:text-white"
+                  className="px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-all hover:brightness-110 active:scale-95 cursor-pointer"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                  }}
                 >
-                  {testSent ? '✓ Alert Dispatched' : 'Send Test Alert'}
+                  {testSent ? '✓ Alert Sent' : 'Test Alert'}
                 </button>
-              </div>
-            )}
-
-            <Divider />
-
-            <Row
-              label="Interactive Chimes"
-              sub="Synthesized audio feedback when completing tasks."
-              onClick={() => {
-                toggleSetting('soundEffects');
-                if (!settings.soundEffects) {
-                  setTimeout(() => playChime('success'), 60);
-                }
-              }}
-            >
+              )}
               <Toggle
-                on={settings.soundEffects}
+                on={settings?.reminderAlerts}
+                onToggle={async () => {
+                  if (!settings?.reminderAlerts) {
+                    await requestNotificationPermission();
+                  } else {
+                    updateSetting('reminderAlerts', false);
+                  }
+                }}
+                label="Toggle desktop reminder alerts"
+              />
+            </div>
+          </SettingRow>
+
+          {/* Interactive Sound Effects */}
+          <SettingRow
+            icon={Volume2}
+            label="Interactive Audio Chimes"
+            description="Gentle audio chimes on task completion and major workspace actions."
+            onClick={() => {
+              toggleSetting('soundEffects');
+              if (!settings?.soundEffects) {
+                setTimeout(() => playChime('success'), 60);
+              }
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playChime('pop');
+                }}
+                title="Preview sound chime"
+                className="p-1.5 rounded-lg border transition-all hover:text-[var(--text-primary)] active:scale-90 cursor-pointer"
+                style={{
+                  background: 'var(--bg-card-solid)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <Zap size={13} />
+              </button>
+              <Toggle
+                on={settings?.soundEffects}
                 onToggle={() => {
                   toggleSetting('soundEffects');
-                  if (!settings.soundEffects) {
+                  if (!settings?.soundEffects) {
                     setTimeout(() => playChime('success'), 60);
                   }
                 }}
-                label="Toggle interactive chimes"
+                label="Toggle interactive audio chimes"
               />
-            </Row>
+            </div>
+          </SettingRow>
 
-            <Divider />
+          {/* Bouncy Spring Micro-Animations */}
+          <SettingRow
+            icon={Zap}
+            label="Tactile Spring Physics"
+            description="Smooth spring physics on buttons and modal transitions."
+            onClick={() => toggleSetting('bouncyAnimations')}
+          >
+            <Toggle
+              on={settings?.bouncyAnimations}
+              onToggle={() => toggleSetting('bouncyAnimations')}
+              label="Toggle spring micro-animations"
+            />
+          </SettingRow>
+        </div>
+      </SettingCard>
 
-            <Row
-              label="Bouncy Physics"
-              sub="Tactile spring & bounce micro-animations on controls."
-              onClick={() => toggleSetting('bouncyAnimations')}
+      {/* ── 4. Workspace Data & Portability ────────────────── */}
+      <SettingCard>
+        <SectionHeader
+          icon={Database}
+          title="Data & Backups"
+          description="Export an offline copy of your workspace data or restore from a previous JSON backup."
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {/* Export Tile */}
+          <div
+            className="p-4 rounded-xl sm:rounded-2xl border flex flex-col justify-between space-y-3"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Download size={15} style={{ color: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  Export Workspace Data
+                </h3>
+              </div>
+              <p className="text-[11px] sm:text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Download your notes, tasks, and schedule events into a portable JSON file.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-[var(--accent-color)] active:scale-95 cursor-pointer shadow-xs"
+              style={{
+                background: 'var(--bg-card-solid)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--text-primary)',
+              }}
             >
-              <Toggle
-                on={settings.bouncyAnimations}
-                onToggle={() => toggleSetting('bouncyAnimations')}
-                label="Toggle bouncy animations"
-              />
-            </Row>
+              <Download size={13} />
+              <span>Export Archive (.json)</span>
+            </button>
+          </div>
 
-            <Divider />
-
-            <Row
-              label="Ambient Fibers"
-              sub="Glowing dynamic background wave canvas."
-              onClick={handleToggleFibers}
+          {/* Import Tile */}
+          <div
+            className="p-4 rounded-xl sm:rounded-2xl border flex flex-col justify-between space-y-3"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Upload size={15} style={{ color: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  Restore from Backup
+                </h3>
+              </div>
+              <p className="text-[11px] sm:text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Import notes, tasks, and schedule events from an exported OneDesk backup file.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-[var(--accent-color)] active:scale-95 cursor-pointer shadow-xs"
+              style={{
+                background: 'var(--bg-card-solid)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--text-primary)',
+              }}
             >
-              <Toggle
-                on={settings.ghostFibers}
-                onToggle={handleToggleFibers}
-                label="Toggle background fibers"
-              />
-            </Row>
+              <Upload size={13} />
+              <span>Import Archive (.json)</span>
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={handleImport}
+            />
           </div>
-        </Panel>
+        </div>
+      </SettingCard>
 
-        {/* Data */}
-        <Panel>
-          <SectionLabel>Data Portability</SectionLabel>
-          <div className="space-y-4">
-            <Row label="Export Archive" sub="Download notes, tasks & events as JSON.">
-              <GhostBtn onClick={handleExport}>
-                <Download size={13} /> Export
-              </GhostBtn>
-            </Row>
-            <Divider />
-            <Row label="Import Archive" sub="Restore from a previously exported file.">
-              <GhostBtn onClick={() => fileRef.current?.click()}>
-                <Upload size={13} /> Import
-              </GhostBtn>
-              <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={handleImport} />
-            </Row>
-            <Divider />
-            <Row label="Clear Workspace" sub="Permanently delete all notes, tasks, and events." danger>
-              <GhostBtn danger onClick={() => confirm('Clear all data? This cannot be undone.') && clearAll()}>
-                <Trash2 size={13} /> Clear
-              </GhostBtn>
-            </Row>
+      {/* ── 5. Danger Zone ─────────────────────────────────── */}
+      <div
+        className="rounded-2xl sm:rounded-3xl border p-5 sm:p-7 backdrop-blur-2xl relative overflow-hidden"
+        style={{
+          background: 'rgba(244,63,94,0.03)',
+          borderColor: 'rgba(244,63,94,0.18)',
+        }}
+      >
+        <div className="flex items-start gap-3 mb-5">
+          <div
+            className="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs"
+            style={{
+              background: 'rgba(244,63,94,0.08)',
+              borderColor: 'rgba(244,63,94,0.22)',
+              color: '#fb7185',
+            }}
+          >
+            <AlertTriangle size={17} strokeWidth={2.2} />
           </div>
-        </Panel>
+          <div>
+            <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-rose-400">
+              Danger Zone
+            </h2>
+            <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              Irreversible actions affecting your workspace contents and account authentication.
+            </p>
+          </div>
+        </div>
 
+        <div className="space-y-3">
+          {/* Clear Workspace Data */}
+          <SettingRow
+            icon={Trash2}
+            label="Clear Workspace Items"
+            description="Permanently deletes all tasks, notes, and calendar events while keeping your login account."
+            danger
+          >
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm('Clear all workspace items (tasks, notes, events)? This action cannot be undone.')) {
+                  clearAll();
+                  if (playChime) playChime('pop');
+                }
+              }}
+              className="px-3 py-1.5 rounded-xl border text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-500/20 transition-all active:scale-95 cursor-pointer"
+              style={{
+                background: 'rgba(244,63,94,0.08)',
+                borderColor: 'rgba(244,63,94,0.25)',
+              }}
+            >
+              Clear Workspace
+            </button>
+          </SettingRow>
+
+          {/* Delete Account */}
+          <SettingRow
+            icon={AlertTriangle}
+            label="Delete Account Permanently"
+            description="Completely erases your user profile, credentials, and data from the cloud database."
+            danger
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setDeleteError('');
+                setDeletePassword('');
+                setRequirePassword(false);
+                setDeleteModalOpen(true);
+              }}
+              className="px-3 py-1.5 rounded-xl border text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-600 transition-all active:scale-95 cursor-pointer shadow-xs"
+              style={{
+                background: 'rgba(244,63,94,0.12)',
+                borderColor: 'rgba(244,63,94,0.3)',
+              }}
+            >
+              Delete Account
+            </button>
+          </SettingRow>
+        </div>
       </div>
 
-      {/* Footer */}
-      <p className="text-center text-[10px] pb-2 tracking-widest uppercase" style={{ color: 'var(--text-muted)', opacity: 0.4 }}>
-        OneDesk · Your personal workspace
-      </p>
+      {/* Footer Note */}
+      <div className="text-center pt-2">
+        <p className="text-[11px] font-medium tracking-wide flex items-center justify-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+          <span>Crafted with care for OneDesk</span>
+        </p>
+      </div>
+
+      {/* ── Edit Profile Modal (Name + PFP) ───────────────────── */}
+      <Modal
+        open={editProfileOpen}
+        onClose={() => !editSaving && setEditProfileOpen(false)}
+        title="Edit Profile"
+      >
+        <form onSubmit={handleSaveProfile} className="space-y-4 sm:space-y-5">
+          {/* Profile Picture (PFP) Editor */}
+          <div>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
+              Profile Picture
+            </label>
+            <div
+              className="flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border"
+              style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+            >
+              {/* Avatar Preview */}
+              <div
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-md overflow-hidden border border-white/10 shrink-0"
+                style={{ background: 'var(--accent-gradient)' }}
+              >
+                {editPhoto ? (
+                  <img src={editPhoto} alt="Avatar preview" className="w-full h-full object-cover" />
+                ) : (
+                  (editName || user?.email || 'U').trim()[0]?.toUpperCase() || 'U'
+                )}
+              </div>
+
+              {/* Upload & Clear Controls */}
+              <div className="flex-1 space-y-2 text-center sm:text-left w-full sm:w-auto">
+                <div className="flex flex-row items-center justify-center sm:justify-start gap-2 w-full">
+                  <button
+                    type="button"
+                    onClick={() => photoFileRef.current?.click()}
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold hover:border-[var(--accent-color)] transition-all cursor-pointer shadow-xs active:scale-95"
+                    style={{
+                      background: 'var(--bg-card-solid)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    <Camera size={13} />
+                    <span>Upload Photo</span>
+                  </button>
+                  <input
+                    ref={photoFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoUpload}
+                  />
+
+                  {editPhoto && (
+                    <button
+                      type="button"
+                      onClick={() => setEditPhoto('')}
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all cursor-pointer active:scale-95"
+                      style={{
+                        background: 'transparent',
+                        borderColor: 'rgba(244,63,94,0.2)',
+                      }}
+                    >
+                      <Trash2 size={13} />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  PNG, JPG, or WebP. Auto-scaled for crisp performance.
+                </p>
+              </div>
+            </div>
+
+            {/* Curated Presets: Nature & Cars */}
+            <div className="mt-3.5 space-y-3">
+              {/* Nature & Landscapes */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                    Nature &amp; Landscapes
+                  </span>
+                  <span className="text-[10px] opacity-60" style={{ color: 'var(--text-muted)' }}>
+                    6 presets
+                  </span>
+                </div>
+                <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
+                  {PRESET_AVATARS.filter((a) => a.category === 'Nature').map((av) => (
+                    <button
+                      key={av.id}
+                      type="button"
+                      onClick={() => setEditPhoto(av.url)}
+                      title={av.label}
+                      className={`aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all cursor-pointer active:scale-90 touch-manipulation ${
+                        editPhoto === av.url
+                          ? 'ring-2 ring-[var(--accent-color)] border-[var(--accent-color)] scale-105 shadow-sm'
+                          : 'border-transparent opacity-75 hover:opacity-100 hover:scale-102'
+                      }`}
+                    >
+                      <img src={av.url} alt={av.label} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Cars & Automotive */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                    Cars &amp; Automotive
+                  </span>
+                  <span className="text-[10px] opacity-60" style={{ color: 'var(--text-muted)' }}>
+                    5 presets
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 sm:grid-cols-6 gap-1.5 sm:gap-2">
+                  {PRESET_AVATARS.filter((a) => a.category === 'Cars').map((av) => (
+                    <button
+                      key={av.id}
+                      type="button"
+                      onClick={() => setEditPhoto(av.url)}
+                      title={av.label}
+                      className={`aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all cursor-pointer active:scale-90 touch-manipulation ${
+                        editPhoto === av.url
+                          ? 'ring-2 ring-[var(--accent-color)] border-[var(--accent-color)] scale-105 shadow-sm'
+                          : 'border-transparent opacity-75 hover:opacity-100 hover:scale-102'
+                      }`}
+                    >
+                      <img src={av.url} alt={av.label} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Name Field (The Rename Box) */}
+          <div>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
+              Display Name
+            </label>
+            <div className="relative">
+              <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => {
+                  setEditName(e.target.value);
+                  setEditError('');
+                }}
+                placeholder="Your full name"
+                required
+                className="w-full rounded-xl pl-10 pr-3.5 py-2.5 text-base sm:text-sm outline-none border transition-all font-medium"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Account Email (Non-editable) */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Account Email
+              </label>
+              <span className="text-[10px] text-stone-400 flex items-center gap-1">
+                <Lock size={10} /> Read-only
+              </span>
+            </div>
+            <div className="relative">
+              <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+              <input
+                type="email"
+                value={user?.email || ''}
+                disabled
+                className="w-full rounded-xl pl-10 pr-3.5 py-2.5 text-base sm:text-sm outline-none border opacity-60 cursor-not-allowed font-medium select-none"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                }}
+              />
+            </div>
+            <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>
+              Your login email is managed via authentication credentials.
+            </p>
+          </div>
+
+          {/* Error Message */}
+          {editError && (
+            <div className="p-3 rounded-xl border bg-rose-500/10 border-rose-500/25 text-xs text-rose-400 font-medium">
+              {editError}
+            </div>
+          )}
+
+          {/* Modal Actions */}
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-2.5 pt-2">
+            <button
+              type="button"
+              disabled={editSaving}
+              onClick={() => setEditProfileOpen(false)}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 rounded-full border text-xs font-semibold transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--text-primary)',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={editSaving}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold text-white transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+              style={{
+                background: 'var(--accent-gradient)',
+                boxShadow: '0 4px 14px var(--accent-glow)',
+              }}
+            >
+              {editSaving ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  <span>Saving…</span>
+                </>
+              ) : (
+                <>
+                  <Check size={14} />
+                  <span>Save Changes</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
       {/* ── Delete Account Confirmation Modal ─────────────────── */}
       <Modal
@@ -703,7 +1275,7 @@ export default function Settings() {
             </div>
 
             {deleteError && (
-              <div className="p-3 rounded-xl border bg-rose-500/10 border-rose-500/25 text-xs text-rose-400 font-medium animate-fade-in">
+              <div className="p-3 rounded-xl border bg-rose-500/10 border-rose-500/25 text-xs text-rose-400 font-medium">
                 {deleteError}
               </div>
             )}
@@ -725,17 +1297,17 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={deleting}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all bg-rose-600 hover:bg-rose-500 active:scale-95 disabled:opacity-50 shadow-lg shadow-rose-900/30 cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 {deleting ? (
                   <>
                     <Loader2 size={14} className="animate-spin" />
-                    <span>Deleting account…</span>
+                    <span>Deleting…</span>
                   </>
                 ) : (
                   <>
                     <Trash2 size={14} />
-                    <span>Permanently Delete</span>
+                    <span>Confirm Delete</span>
                   </>
                 )}
               </button>
@@ -751,10 +1323,6 @@ export default function Settings() {
         title="Change Password"
       >
         <div className="space-y-5">
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            Ensure your account is using a strong password with at least 6 characters.
-          </p>
-
           <form onSubmit={handleChangePassword} className="space-y-4">
             {/* Current Password */}
             <div>
@@ -771,13 +1339,13 @@ export default function Settings() {
                   }}
                   placeholder="Enter current password"
                   required
+                  autoFocus
                   className="w-full rounded-xl px-3.5 py-2.5 pr-10 text-sm outline-none border transition-all"
                   style={{
                     background: 'var(--bg-surface)',
                     borderColor: 'var(--border-card)',
                     color: 'var(--text-primary)',
                   }}
-                  autoFocus
                 />
                 <button
                   type="button"
@@ -880,7 +1448,7 @@ export default function Settings() {
                 type="button"
                 disabled={passwordLoading}
                 onClick={() => setPasswordModalOpen(false)}
-                className="px-4 py-2.5 rounded-xl border text-xs font-semibold transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="px-4 py-2.5 rounded-full border text-xs font-semibold transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
                 style={{
                   background: 'var(--bg-surface)',
                   borderColor: 'var(--border-subtle)',
@@ -892,7 +1460,7 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={passwordLoading || passwordSuccess}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold text-white transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
                 style={{
                   background: 'var(--accent-gradient)',
                   boxShadow: '0 4px 14px var(--accent-glow)',

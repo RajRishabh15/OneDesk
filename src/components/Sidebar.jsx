@@ -81,8 +81,12 @@ export default function Sidebar({ mobileOpen, onClose }) {
         {/* User profile & logout */}
         <div className="px-3 py-2.5 border-t border-stone-200/60 dark:border-stone-800/60 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[10px] font-bold">
-              {initials || <UserIcon size={12} />}
+            <div className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[10px] font-bold overflow-hidden">
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
+              ) : (
+                initials || <UserIcon size={12} />
+              )}
             </div>
             <div className="min-w-0 flex-1 leading-none">
               <p className="truncate text-xs font-semibold text-stone-800 dark:text-stone-200">{user?.name || 'Workspace'}</p>

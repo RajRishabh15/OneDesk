@@ -70,9 +70,12 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           }}
         />
 
+        {/* Mobile grab handle bar */}
+        <div className="w-10 h-1 rounded-full bg-stone-400/40 dark:bg-stone-600/40 mx-auto mt-2.5 sm:hidden shrink-0" />
+
         {/* Header - Fixed & pinned, never scrolls away */}
         <div
-          className="flex items-center justify-between px-6 py-4 shrink-0 z-10"
+          className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 shrink-0 z-10"
           style={{
             borderBottom: '1px solid var(--border-subtle)',
             background: 'var(--bg-card-solid)',
@@ -87,7 +90,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-white/10 active:scale-95"
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
@@ -99,7 +102,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         </div>
 
         {/* Body - Clean scrollable content with sleek custom scrollbar */}
-        <div className="px-6 py-5 overflow-y-auto overscroll-contain flex-1 custom-scrollbar">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto overscroll-contain flex-1 custom-scrollbar">
           {children}
         </div>
       </div>

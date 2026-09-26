@@ -37,10 +37,12 @@ export function AuthProvider({ children }) {
 
       if (firebaseUser) {
         const cachedName = localStorage.getItem(`onedesk_user_name_${firebaseUser.uid}`);
+        const cachedPhoto = localStorage.getItem(`onedesk_user_photo_${firebaseUser.uid}`);
         setUser({
           id: firebaseUser.uid,
           name: firebaseUser.displayName || cachedName || firebaseUser.email.split('@')[0],
           email: firebaseUser.email,
+          photoURL: firebaseUser.photoURL || cachedPhoto || '',
         });
       } else {
         setUser(null);
@@ -93,17 +95,55 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  async function updateProfile({ name }) {
-    if (!auth.currentUser) return;
+  async function updateProfile({ name, photoURL }) {
+    if (!auth.currentUser) return false;
     try {
-      const trimmedName = (name || '').trim();
-      await fbUpdateProfile(auth.currentUser, { displayName: trimmedName });
-      if (trimmedName) {
+      const updates = {};
+      let trimmedName = undefined;
+      if (name !== undefined) {
+        trimmedName = (name || '').trim();
+        updates.displayName = trimmedName;
+      }
+      if (photoURL !== undefined) {
+        if (photoURL && photoURL.startsWith('http')) {
+          updates.photoURL = photoURL;
+        } else if (!photoURL) {
+          updates.photoURL = '';
+        }
+      }
+
+      if (Object.keys(updates).length > 0) {
+        try {
+          await fbUpdateProfile(auth.currentUser, updates);
+        } catch (e) {
+          console.warn('Firebase profile update warning:', e);
+        }
+      }
+
+      if (trimmedName !== undefined && trimmedName) {
         localStorage.setItem(`onedesk_user_name_${auth.currentUser.uid}`, trimmedName);
       }
-      setUser((prev) => prev ? { ...prev, name: trimmedName } : prev);
-    } catch {
-      // silently fail on profile update
+      if (photoURL !== undefined) {
+        if (photoURL) {
+          localStorage.setItem(`onedesk_user_photo_${auth.currentUser.uid}`, photoURL);
+        } else {
+          localStorage.removeItem(`onedesk_user_photo_${auth.currentUser.uid}`);
+        }
+      }
+
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...(trimmedName !== undefined ? { name: trimmedName } : {}),
+              ...(photoURL !== undefined ? { photoURL } : {}),
+            }
+          : prev
+      );
+      return true;
+    } catch (err) {
+      console.error('Update profile error:', err);
+      return false;
     }
   }
 
@@ -130,6 +170,7 @@ export function AuthProvider({ children }) {
 
       await deleteUser(currentUser);
       localStorage.removeItem(`onedesk_user_name_${uid}`);
+      localStorage.removeItem(`onedesk_user_photo_${uid}`);
       setUser(null);
       return { success: true };
     } catch (err) {

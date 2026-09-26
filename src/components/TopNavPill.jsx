@@ -596,10 +596,14 @@ export default function TopNavPill() {
                 aria-label="Account profile"
               >
                 <div
-                  className="h-7 w-7 rounded-full grid place-items-center text-white text-xs font-black tracking-tight shrink-0 select-none shadow-sm"
+                  className="h-7 w-7 rounded-full grid place-items-center text-white text-xs font-black tracking-tight shrink-0 select-none shadow-sm overflow-hidden"
                   style={{ background: 'var(--accent-gradient)' }}
                 >
-                  {initials || <UserIcon size={12} />}
+                  {user?.photoURL ? (
+                    <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
+                  ) : (
+                    initials || <UserIcon size={12} />
+                  )}
                 </div>
               </button>
 
@@ -615,10 +619,14 @@ export default function TopNavPill() {
                   >
                     <div className="flex items-center gap-2.5 mb-0.5">
                       <div
-                        className="h-8 w-8 rounded-full grid place-items-center text-white text-xs font-black shrink-0"
+                        className="h-8 w-8 rounded-full grid place-items-center text-white text-xs font-black shrink-0 overflow-hidden"
                         style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
                       >
-                        {initials}
+                        {user?.photoURL ? (
+                          <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
+                        ) : (
+                          initials
+                        )}
                       </div>
                       <div className="min-w-0">
                         <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
@@ -979,10 +987,14 @@ export default function TopNavPill() {
             <div className="px-4 py-3.5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
               <div className="flex items-center gap-2.5">
                 <div
-                  className="h-9 w-9 rounded-xl grid place-items-center text-white text-xs font-black shrink-0 select-none shadow-sm"
+                  className="h-9 w-9 rounded-xl grid place-items-center text-white text-xs font-black shrink-0 select-none shadow-sm overflow-hidden"
                   style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
                 >
-                  {initials}
+                  {user?.photoURL ? (
+                    <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
+                  ) : (
+                    initials
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user?.name || 'User'}</p>
