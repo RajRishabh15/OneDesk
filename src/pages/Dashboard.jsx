@@ -372,12 +372,12 @@ export default function Dashboard() {
             </span>
           </div>
 
-          {/* Quick Update 3: Velocity & Momentum */}
+          {/* Quick Update 3: Today's Progress */}
           <div className="sm:px-4 last:pr-0 pt-3 sm:pt-0 flex flex-col justify-between space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider font-mono text-emerald-400 flex items-center gap-1.5">
                 <TrendingUp size={11} />
-                Daily Velocity
+                Today's Progress
               </span>
               <span className="text-xs font-mono font-bold" style={{ color: 'var(--text-primary)' }}>
                 {pct}%

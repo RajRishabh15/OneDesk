@@ -12,7 +12,6 @@ import {
   X,
   StickyNote,
   Calendar,
-  BarChart2,
   Sliders,
   Home,
   Settings,
@@ -27,11 +26,10 @@ import { useSettings } from '../context/SettingsContext';
 import OneDeskLogo from './OneDeskLogo';
 
 const navLinks = [
-  { to: '/', label: 'Home',     icon: Home,        end: true },
+  { to: '/',         label: 'Home',     icon: Home,        end: true },
   { to: '/tasks',    label: 'Tasks',    icon: CheckSquare },
   { to: '/notes',    label: 'Notes',    icon: StickyNote },
   { to: '/calendar', label: 'Schedule', icon: Calendar },
-  { to: '/analytics',label: 'Insights', icon: BarChart2 },
 ];
 
 const mobileLinks = [
@@ -1386,20 +1384,11 @@ export default function TopNavPill() {
               <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
                 Quick Jump Spaces
               </p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setMobileQuickSheetOpen(false); navigate('/analytics'); }}
-                  className="flex items-center gap-2 p-2.5 rounded-full border text-xs font-bold transition-all active:scale-95"
-                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
-                >
-                  <BarChart2 size={15} style={{ color: 'var(--accent-color)' }} />
-                  <span>Insights</span>
-                </button>
+              <div className="grid grid-cols-1 gap-2">
                 <button
                   type="button"
                   onClick={() => { setMobileQuickSheetOpen(false); navigate('/settings'); }}
-                  className="flex items-center gap-2 p-2.5 rounded-full border text-xs font-bold transition-all active:scale-95"
+                  className="flex items-center justify-center gap-2 p-2.5 rounded-full border text-xs font-bold transition-all active:scale-95"
                   style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
                 >
                   <Settings size={15} style={{ color: 'var(--accent-color)' }} />

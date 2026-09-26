@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
@@ -11,7 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Notes from './pages/Notes';
 import Tasks from './pages/Tasks';
 import CalendarPage from './pages/Calendar';
-import Analytics from './pages/Analytics';
+// import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 
 export default function App() {
@@ -38,7 +38,7 @@ export default function App() {
               <Route path="/notes" element={<Notes />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/calendar" element={<CalendarPage />} />
-              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/analytics" element={<Navigate to="/" replace />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Routes>

@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import { useData } from '../context/DataContext';
 
-const SHORTCUT_MAP = { d: '/', n: '/notes', t: '/tasks', c: '/calendar', a: '/analytics', s: '/settings' };
+const SHORTCUT_MAP = { d: '/', n: '/notes', t: '/tasks', c: '/calendar', s: '/settings' };
 
 export default function AppLayout() {
   const navigate = useNavigate();
