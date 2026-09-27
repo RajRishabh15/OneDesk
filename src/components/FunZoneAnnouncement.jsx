@@ -138,7 +138,6 @@ export default function FunZoneAnnouncement() {
             position: "absolute",
             bottom: 0, left: 0, right: 0,
             height: 3,
-            borderRadius: "0 0 18px 18px",
             overflow: "hidden",
           }}
         >
@@ -164,6 +163,7 @@ export default function FunZoneAnnouncement() {
           width: min(330px, calc(100vw - 40px));
           padding: 15px 16px 18px;
           box-sizing: border-box;
+          overflow: hidden;
           animation: fz-enter-right 0.44s cubic-bezier(0.34,1.45,0.64,1) forwards;
         }
 
