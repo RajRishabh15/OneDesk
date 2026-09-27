@@ -26,6 +26,7 @@ import {
   Heart,
   Pencil,
   Camera,
+  Info,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -108,9 +109,8 @@ function SettingRow({ icon: Icon, label, description, children, onClick, danger 
   return (
     <div
       onClick={onClick}
-      className={`group flex items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ${
-        onClick ? 'cursor-pointer hover:border-[var(--accent-color)] active:scale-[0.99] select-none' : ''
-      }`}
+      className={`group flex items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ${onClick ? 'cursor-pointer hover:border-[var(--accent-color)] active:scale-[0.99] select-none' : ''
+        }`}
       style={{
         background: danger ? 'rgba(251,113,133,0.04)' : 'var(--bg-surface)',
         borderColor: danger ? 'rgba(251,113,133,0.2)' : 'var(--border-subtle)',
@@ -158,9 +158,8 @@ function ThemeOptionCard({ t, active, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`group relative flex flex-col justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer ${
-        active ? 'ring-2 ring-[var(--accent-color)] shadow-md' : 'hover:border-[var(--border-card)]'
-      }`}
+      className={`group relative flex flex-col justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer ${active ? 'ring-2 ring-[var(--accent-color)] shadow-md' : 'hover:border-[var(--border-card)]'
+        }`}
       style={{
         background: active ? 'var(--bg-surface)' : 'var(--bg-card-solid)',
         borderColor: active ? 'var(--accent-color)' : 'var(--border-subtle)',
@@ -195,9 +194,8 @@ function ThemeOptionCard({ t, active, onClick }) {
         </div>
 
         <div
-          className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
-            active ? 'border-transparent text-white' : 'border-[var(--border-subtle)] opacity-20'
-          }`}
+          className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${active ? 'border-transparent text-white' : 'border-[var(--border-subtle)] opacity-20'
+            }`}
           style={{
             background: active ? 'var(--accent-gradient)' : 'transparent',
           }}
@@ -257,6 +255,9 @@ export default function Settings() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Latest Updates Modal State
+  const [changelogModalOpen, setChangelogModalOpen] = useState(false);
 
   // Mobile toast feedback
   const [mobileToast, setMobileToast] = useState(null);
@@ -893,7 +894,65 @@ export default function Settings() {
         </div>
       </SettingCard>
 
-      {/* ── 5. Danger Zone ─────────────────────────────────── */}
+      {/* ── 5. App Info ────────────────────────────────────── */}
+      <SettingCard>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div
+              className="w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <Info size={18} strokeWidth={2.2} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                  OneDesk
+                </h2>
+                <span
+                  className="text-[10px] px-2 py-0.5 rounded-full font-bold border"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                  }}
+                >
+                  v2.9.26
+                </span>
+                <span className="text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>
+                  Build #OD-2.09
+                </span>
+              </div>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Last updated: <span className="font-medium" style={{ color: 'var(--text-primary)' }}>September 27, 2026</span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              setChangelogModalOpen(true);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-[var(--accent-color)] hover:text-[var(--text-primary)] active:scale-95 cursor-pointer shadow-xs whitespace-nowrap self-start sm:self-auto"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+              color: 'var(--text-primary)',
+            }}
+          >
+            <Sparkles size={13} style={{ color: 'var(--accent-color)' }} />
+            <span>Latest Updates</span>
+          </button>
+        </div>
+      </SettingCard>
+
+      {/* ── 6. Danger Zone ─────────────────────────────────── */}
       <div
         className="rounded-2xl sm:rounded-3xl border p-5 sm:p-7 backdrop-blur-2xl relative overflow-hidden"
         style={{
@@ -977,8 +1036,18 @@ export default function Settings() {
 
       {/* Footer Note */}
       <div className="text-center pt-2">
-        <p className="text-[11px] font-medium tracking-wide flex items-center justify-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-          <span>Crafted with care for OneDesk</span>
+        <p className="text-[11px] font-semibold tracking-wider flex items-center justify-center gap-1" style={{ color: 'var(--text-muted)' }}>
+          <span>ONEDESK | MADE BY{' '}
+            <a
+              href="https://www.linkedin.com/in/rishabhr15"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline transition-colors duration-150 inline-block font-bold"
+              style={{ color: 'var(--accent-color)' }}
+            >
+              RISHABH
+            </a>
+          </span>
         </p>
       </div>
 
@@ -1074,11 +1143,10 @@ export default function Settings() {
                       type="button"
                       onClick={() => setEditPhoto(av.url)}
                       title={av.label}
-                      className={`aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all cursor-pointer active:scale-90 touch-manipulation ${
-                        editPhoto === av.url
-                          ? 'ring-2 ring-[var(--accent-color)] border-[var(--accent-color)] scale-105 shadow-sm'
-                          : 'border-transparent opacity-75 hover:opacity-100 hover:scale-102'
-                      }`}
+                      className={`aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all cursor-pointer active:scale-90 touch-manipulation ${editPhoto === av.url
+                        ? 'ring-2 ring-[var(--accent-color)] border-[var(--accent-color)] scale-105 shadow-sm'
+                        : 'border-transparent opacity-75 hover:opacity-100 hover:scale-102'
+                        }`}
                     >
                       <img src={av.url} alt={av.label} className="w-full h-full object-cover" />
                     </button>
@@ -1103,11 +1171,10 @@ export default function Settings() {
                       type="button"
                       onClick={() => setEditPhoto(av.url)}
                       title={av.label}
-                      className={`aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all cursor-pointer active:scale-90 touch-manipulation ${
-                        editPhoto === av.url
-                          ? 'ring-2 ring-[var(--accent-color)] border-[var(--accent-color)] scale-105 shadow-sm'
-                          : 'border-transparent opacity-75 hover:opacity-100 hover:scale-102'
-                      }`}
+                      className={`aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all cursor-pointer active:scale-90 touch-manipulation ${editPhoto === av.url
+                        ? 'ring-2 ring-[var(--accent-color)] border-[var(--accent-color)] scale-105 shadow-sm'
+                        : 'border-transparent opacity-75 hover:opacity-100 hover:scale-102'
+                        }`}
                     >
                       <img src={av.url} alt={av.label} className="w-full h-full object-cover" />
                     </button>
@@ -1483,6 +1550,146 @@ export default function Settings() {
         </div>
       </Modal>
 
+      {/* ── Latest Updates Modal ─────────────────────────────── */}
+      <Modal
+        open={changelogModalOpen}
+        onClose={() => setChangelogModalOpen(false)}
+        title="What's New in OneDesk"
+        wide
+      >
+        <div className="space-y-4">
+          {/* Header Banner */}
+          <div
+            className="p-3.5 sm:p-4 rounded-2xl border flex items-center justify-between gap-3"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  Release v2.9.26
+                </span>
+                <span
+                  className="text-[10px] px-2 py-0.5 rounded-full font-bold border"
+                  style={{
+                    background: 'var(--bg-card-solid)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                  }}
+                >
+                  Current
+                </span>
+              </div>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Released on September 27, 2026 • Build #OD-2.09
+              </p>
+            </div>
+            <div
+              className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0"
+              style={{
+                background: 'var(--bg-card-solid)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <Sparkles size={15} />
+            </div>
+          </div>
+
+          {/* Changelog Highlights */}
+          <div className="space-y-2.5">
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  🎮 Fun Zone Preview &amp; Game Hub
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Introduced the new Fun Zone teaser portal for quick relaxation, integrated seamless navigation switches, and added animated welcome alerts.
+              </p>
+            </div>
+
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  🎨 Dynamic Themes &amp; Ambient FX
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                6 handcrafted theme palettes, customizable ambient wave fibers toggle, and interactive audio feedback chimes for task interactions.
+              </p>
+            </div>
+
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  🔒 Profile Customization &amp; Data Portability
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Select from curated Unsplash avatars, upload custom profile pictures, update account passwords, and export or restore full JSON backups.
+              </p>
+            </div>
+
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  📱 Mobile Dock &amp; Responsiveness
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Redesigned bottom floating dock navigation, optimized toast notifications for mobile screens, and smooth tactile spring physics.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end pt-2">
+            <button
+              type="button"
+              onClick={() => setChangelogModalOpen(false)}
+              className="w-full sm:w-auto px-5 py-2 rounded-full border text-xs font-semibold transition-all hover:brightness-110 active:scale-95 cursor-pointer shadow-xs text-center"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--text-primary)',
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Mobile Pop-up Notification (Only for Mobile) */}
       {mobileToast && (
         <div
@@ -1497,17 +1704,17 @@ export default function Settings() {
                 mobileToast.type === 'theme'
                   ? (mobileToast.isWhite ? 'var(--border-card)' : mobileToast.color)
                   : mobileToast.enabled
-                  ? 'var(--accent-color)'
-                  : 'var(--border-card)',
+                    ? 'var(--accent-color)'
+                    : 'var(--border-card)',
               color: 'var(--text-primary)',
               boxShadow:
                 mobileToast.type === 'theme'
                   ? (mobileToast.isWhite
-                      ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
-                      : `0 8px 24px -4px ${mobileToast.color}66`)
+                    ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
+                    : `0 8px 24px -4px ${mobileToast.color}66`)
                   : mobileToast.enabled
-                  ? '0 8px 24px -4px var(--accent-glow)'
-                  : '0 8px 24px -4px rgba(0,0,0,0.6)',
+                    ? '0 8px 24px -4px var(--accent-glow)'
+                    : '0 8px 24px -4px rgba(0,0,0,0.6)',
             }}
           >
             {mobileToast.type === 'theme' ? (
@@ -1529,14 +1736,14 @@ export default function Settings() {
                   mobileToast.type === 'theme'
                     ? (mobileToast.isWhite ? 'var(--accent-color)' : mobileToast.color)
                     : mobileToast.enabled
-                    ? '#34d399'
-                    : '#f43f5e',
+                      ? '#34d399'
+                      : '#f43f5e',
                 boxShadow:
                   mobileToast.type === 'theme'
                     ? (mobileToast.isWhite ? '0 0 8px var(--accent-glow)' : `0 0 8px ${mobileToast.color}bb`)
                     : mobileToast.enabled
-                    ? '0 0 6px #34d399'
-                    : 'none',
+                      ? '0 0 6px #34d399'
+                      : 'none',
               }}
             />
           </div>

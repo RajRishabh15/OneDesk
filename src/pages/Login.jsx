@@ -722,7 +722,7 @@ export function SystemInfoButton() {
                   color: 'var(--text-primary)',
                 }}
               >
-                v2.4.0
+                v2.9.26
               </span>
             </div>
 
@@ -779,7 +779,7 @@ export function SystemInfoButton() {
                 <span className="text-[11px] font-medium">Last Updated</span>
               </div>
               <span className="text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                25 Sep 2026
+                27 Sep 2026
               </span>
             </div>
           </div>
