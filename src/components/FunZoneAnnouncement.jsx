@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Gamepad2, X, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -47,16 +47,13 @@ export default function FunZoneAnnouncement() {
         aria-label="Fun Zone coming soon"
         className="fz-toast"
         style={{
-          position: "fixed",
-          zIndex: 1200,
           background: "var(--bg-card-solid)",
           border: "1px solid var(--border-card)",
           borderRadius: "18px",
-          padding: "15px 16px 18px",
           boxShadow: "0 18px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
-          transition: "transform 0.34s cubic-bezier(0.34,1.45,0.64,1), opacity 0.28s ease",
+          transition: "opacity 0.28s ease",
           opacity: leaving ? 0 : 1,
         }}
       >
@@ -158,21 +155,26 @@ export default function FunZoneAnnouncement() {
       </div>
 
       <style>{`
-        /* ── Desktop: bottom-right corner ── */
+        /* All positioning in CSS — no inline overrides */
         .fz-toast {
+          position: fixed;
+          z-index: 1200;
           right: 20px;
           bottom: 24px;
           width: min(330px, calc(100vw - 40px));
+          padding: 15px 16px 18px;
+          box-sizing: border-box;
           animation: fz-enter-right 0.44s cubic-bezier(0.34,1.45,0.64,1) forwards;
         }
 
-        /* ── Mobile: centered above the dock ── */
-        @media (max-width: 767px) {
+        /* Mobile + small tablet: full-width above dock */
+        @media (max-width: 900px) {
           .fz-toast {
             left: 12px;
             right: 12px;
-            bottom: 84px;   /* clears the floating mobile dock (58px tall + 14px gap + some air) */
+            bottom: 82px;
             width: auto;
+            max-width: 100%;
             animation: fz-enter-up 0.44s cubic-bezier(0.34,1.45,0.64,1) forwards;
           }
         }
@@ -187,7 +189,7 @@ export default function FunZoneAnnouncement() {
           to   { transform: translateX(0);    opacity: 1; }
         }
         @keyframes fz-enter-up {
-          from { transform: translateY(24px); opacity: 0; }
+          from { transform: translateY(20px); opacity: 0; }
           to   { transform: translateY(0);    opacity: 1; }
         }
         @keyframes fz-bar {
