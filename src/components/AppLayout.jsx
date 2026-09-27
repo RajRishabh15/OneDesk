@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import TopNavPill from './TopNavPill';
 import GhostFibers from './GhostFibers';
 import LoadingScreen from './LoadingScreen';
+import FunZoneAnnouncement from './FunZoneAnnouncement';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import { useData } from '../context/DataContext';
@@ -107,6 +108,9 @@ export default function AppLayout() {
       <main className="relative z-10 pt-[72px] sm:pt-24 md:pt-28 pb-28 md:pb-10 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
         <Outlet />
       </main>
+
+      {/* Fun Zone coming-soon announcement — shows once per session */}
+      <FunZoneAnnouncement />
     </div>
   );
 }

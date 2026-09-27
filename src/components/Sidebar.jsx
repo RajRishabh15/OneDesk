@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutGrid, StickyNote, CheckSquare, Calendar, Sliders, X, LogOut, User as UserIcon } from 'lucide-react';
+import { LayoutGrid, StickyNote, CheckSquare, Calendar, Sliders, X, LogOut, User as UserIcon, Gamepad2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const links = [
@@ -7,6 +7,7 @@ const links = [
   { to: '/tasks', label: 'Tasks', icon: CheckSquare },
   { to: '/notes', label: 'Notes', icon: StickyNote },
   { to: '/calendar', label: 'Schedule', icon: Calendar },
+  { to: '/fun-zone', label: 'Fun Zone', icon: Gamepad2 },
   { to: '/settings', label: 'Settings', icon: Sliders },
 ];
 

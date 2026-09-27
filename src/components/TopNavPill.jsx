@@ -5,7 +5,7 @@ import {
   Bell,
   LogOut,
   User as UserIcon,
-  Plus,
+  Gamepad2,
   CheckSquare,
   FileText,
   CalendarPlus,
@@ -26,17 +26,17 @@ import { useSettings } from '../context/SettingsContext';
 import OneDeskLogo from './OneDeskLogo';
 
 const navLinks = [
-  { to: '/',         label: 'Home',     icon: Home,        end: true },
-  { to: '/tasks',    label: 'Tasks',    icon: CheckSquare },
-  { to: '/notes',    label: 'Notes',    icon: StickyNote },
-  { to: '/calendar', label: 'Schedule', icon: Calendar },
+  { to: '/',          label: 'Home',     icon: Home,        end: true },
+  { to: '/tasks',     label: 'Tasks',    icon: CheckSquare },
+  { to: '/notes',     label: 'Notes',    icon: StickyNote },
+  { to: '/calendar',  label: 'Schedule', icon: Calendar },
 ];
 
 const mobileLinks = [
-  { to: '/',         label: 'Home',     icon: Home,        end: true },
-  { to: '/tasks',    label: 'Tasks',    icon: CheckSquare },
-  { to: '/notes',    label: 'Notes',    icon: StickyNote },
-  { to: '/calendar', label: 'Schedule', icon: Calendar },
+  { to: '/',          label: 'Home',     icon: Home,        end: true },
+  { to: '/tasks',     label: 'Tasks',    icon: CheckSquare },
+  { to: '/notes',     label: 'Notes',    icon: StickyNote },
+  { to: '/calendar',  label: 'Schedule', icon: Calendar },
 ];
 
 const quickActions = [
@@ -438,26 +438,22 @@ export default function TopNavPill() {
               )}
             </div>
 
-            {/* Quick Add — plus icon expands to fluid Quick Create card */}
-            <div className="relative" ref={quickAddRef}>
+            {/* Fun Zone — game icon navigates to /fun-zone */}
+            <div className="relative">
               <button
                 type="button"
-                onClick={() => { setQuickAddOpen(v => !v); setProfileOpen(false); setNotifOpen(false); setSearchOpen(false); }}
+                onClick={() => { setQuickAddOpen(false); setProfileOpen(false); setNotifOpen(false); setSearchOpen(false); navigate('/fun-zone'); }}
                 className="h-[34px] w-[34px] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 text-white"
                 style={{
                   background: 'var(--accent-gradient)',
-                  boxShadow: quickAddOpen ? '0 0 20px var(--accent-glow)' : '0 2px 14px var(--accent-glow)',
+                  boxShadow: '0 2px 14px var(--accent-glow)',
                 }}
-                aria-label="Quick Create"
-                title="Quick Create"
+                aria-label="Fun Zone"
+                title="Fun Zone"
               >
-                <Plus
+                <Gamepad2
                   size={17}
-                  strokeWidth={2.4}
-                  style={{
-                    transition: 'transform 0.28s cubic-bezier(0.34, 1.45, 0.64, 1)',
-                    transform: quickAddOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-                  }}
+                  strokeWidth={2.2}
                 />
               </button>
 
@@ -1158,32 +1154,26 @@ export default function TopNavPill() {
             )}
           </NavLink>
 
-          {/* 3. Center Hero Action Button (Quick Create FAB) */}
+          {/* 3. Center Hero Action Button (Fun Zone FAB) */}
           <div className="flex items-center justify-center shrink-0 px-0.5">
             <button
               type="button"
               onClick={() => {
                 if (playChime) playChime('pop');
-                setMobileQuickSheetOpen(v => !v);
+                navigate('/fun-zone');
               }}
               className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer border shadow-lg group relative"
               style={{
                 background: 'var(--accent-gradient)',
                 borderColor: 'rgba(255,255,255,0.25)',
-                boxShadow: mobileQuickSheetOpen
-                  ? '0 0 24px var(--accent-glow)'
-                  : '0 4px 16px var(--accent-glow)',
+                boxShadow: '0 4px 16px var(--accent-glow)',
               }}
-              aria-label="Quick Create"
-              title="Quick Create"
+              aria-label="Fun Zone"
+              title="Fun Zone"
             >
-              <Plus
+              <Gamepad2
                 size={19}
-                strokeWidth={2.8}
-                style={{
-                  transition: 'transform 0.3s cubic-bezier(0.34, 1.45, 0.64, 1)',
-                  transform: mobileQuickSheetOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-                }}
+                strokeWidth={2.4}
               />
             </button>
           </div>
