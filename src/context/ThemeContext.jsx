@@ -18,6 +18,7 @@ export const THEMES = [
     description: 'Teal blue-green blend',
     preview: ['#021616', '#04322e', '#14b8a6'],
     color: '#2dd4bf',
+    comingSoon: true,
   },
   {
     id: 'lavender',
@@ -25,6 +26,7 @@ export const THEMES = [
     description: 'Ethereal violet & lilac',
     preview: ['#0e0719', '#24103c', '#c084fc'],
     color: '#c084fc',
+    comingSoon: true,
   },
   {
     id: 'light',
@@ -62,11 +64,12 @@ export const THEMES = [
     color: '#fbbf24',
   },
   {
-    id: 'crimson',
-    name: 'Crimson',
-    description: 'Deep ruby & scarlet',
-    preview: ['#180307', '#3f0712', '#f43f5e'],
-    color: '#f43f5e',
+    id: 'babypink',
+    name: 'Baby Pink',
+    description: 'Pastel cotton candy & sakura',
+    preview: ['#150610', '#36102a', '#f472b6'],
+    color: '#f472b6',
+    comingSoon: true,
   },
 ];
 

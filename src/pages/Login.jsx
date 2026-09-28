@@ -30,12 +30,12 @@ export const THEME_FIBER_COLORS = {
   dark: { glowLine: '#140E35', glowColor: '#3437A0' },
   peacock: { glowLine: '#04322e', glowColor: '#0d9488' },
   lavender: { glowLine: '#24103c', glowColor: '#9333ea' },
+  babypink: { glowLine: '#36102a', glowColor: '#ec4899' },
   light: { glowLine: '#c7d2fe', glowColor: '#818cf8' },
   aurora: { glowLine: '#042a18', glowColor: '#059669' },
   ocean: { glowLine: '#042040', glowColor: '#0284c7' },
   rose: { glowLine: '#3b0a1e', glowColor: '#e11d48' },
   amber: { glowLine: '#3a1c00', glowColor: '#d97706' },
-  crimson: { glowLine: '#3f0712', glowColor: '#e11d48' },
 };
 
 export default function Login() {
@@ -176,12 +176,28 @@ export function AuthShell({ children, activeTab = 'login' }) {
   const themeColors = THEME_FIBER_COLORS[theme] || THEME_FIBER_COLORS.dark;
 
   function handleThemeChange(newThemeId) {
+    const selectedTheme = THEMES.find((t) => t.id === newThemeId);
+    if (selectedTheme?.comingSoon) {
+      if (playChime) playChime('warning');
+      setToast({
+        id: Date.now(),
+        type: 'theme',
+        text: `${selectedTheme.name} theme is coming soon!`,
+        color: selectedTheme.color || '#f59e0b',
+        isWhite: false,
+      });
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => {
+        setToast(null);
+      }, 2200);
+      return;
+    }
+
     setTheme(newThemeId);
     if (playChime) playChime('pop');
 
     // Pop up notification strictly on mobile devices (<640px)
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
-      const selectedTheme = THEMES.find((t) => t.id === newThemeId);
       const themeName = selectedTheme?.name || newThemeId;
       const isWhite = newThemeId === 'light';
       const circleColor = isWhite ? '#ffffff' : (selectedTheme?.color || selectedTheme?.preview?.[2] || '#818cf8');
@@ -318,37 +334,47 @@ export function AuthShell({ children, activeTab = 'login' }) {
               const active = theme === t.id;
               const isWhite = t.id === 'light';
               const circleColor = isWhite ? '#ffffff' : (t.color || t.preview[2] || t.preview[0]);
+              const isLocked = Boolean(t.comingSoon);
+
               return (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => handleThemeChange(t.id)}
-                  title={`${t.name}: ${t.description}`}
-                  className="group relative flex items-center justify-center p-0.5 sm:p-1 rounded-full transition-all duration-200 cursor-pointer"
+                  title={isLocked ? `${t.name} (Coming Soon)` : `${t.name}: ${t.description}`}
+                  className={`group relative flex items-center justify-center p-0.5 sm:p-1 rounded-full transition-all duration-200 ${
+                    isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+                  }`}
                   style={{
                     outline: 'none',
                     transform: active ? 'scale(1.18)' : 'scale(1)',
                   }}
                 >
                   <span
-                    className="w-5 h-5 rounded-full flex items-center justify-center transition-all border shadow-sm"
+                    className="w-5 h-5 rounded-full flex items-center justify-center transition-all border shadow-sm relative overflow-hidden"
                     style={{
                       background: circleColor,
                       borderColor: active
                         ? (isWhite ? 'var(--accent-color)' : '#ffffff')
+                        : isLocked
+                        ? 'rgba(245, 158, 11, 0.45)'
                         : (isWhite ? 'rgba(0,0,0,0.3)' : 'transparent'),
                       boxShadow: active
                         ? (isWhite ? '0 0 10px rgba(255,255,255,0.9)' : `0 0 10px ${circleColor}aa`)
                         : 'none',
                     }}
                   >
-                    {active && (
+                    {isLocked ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[0.5px]">
+                        <Lock size={9} className="text-amber-300 drop-shadow-sm" strokeWidth={2.5} />
+                      </div>
+                    ) : active ? (
                       <Check
                         size={10}
                         className={isWhite ? 'text-stone-900' : 'text-white drop-shadow'}
                         strokeWidth={3}
                       />
-                    )}
+                    ) : null}
                   </span>
                 </button>
               );

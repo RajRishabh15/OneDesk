@@ -157,16 +157,28 @@ function SettingRow({ icon: Icon, label, description, children, onClick, danger 
 function ThemeOptionCard({ t, active, onClick }) {
   const [bg, surface, accent] = t.preview;
   const isWhite = t.id === 'light';
+  const isLocked = Boolean(t.comingSoon);
 
   return (
     <button
       type="button"
-      onClick={onClick}
-      className={`group relative flex flex-col justify-between p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer ${active ? 'ring-2 ring-[var(--accent-color)] shadow-md' : 'hover:border-[var(--border-card)]'
-        }`}
+      onClick={isLocked ? undefined : onClick}
+      disabled={isLocked}
+      aria-disabled={isLocked}
+      className={`group relative flex flex-col justify-between p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 ${
+        isLocked
+          ? 'opacity-85 cursor-not-allowed border-dashed hover:border-amber-500/40'
+          : active
+          ? 'ring-2 ring-[var(--accent-color)] shadow-md cursor-pointer'
+          : 'hover:border-[var(--border-card)] cursor-pointer'
+      }`}
       style={{
         background: active ? 'var(--bg-surface)' : 'var(--bg-card-solid)',
-        borderColor: active ? 'var(--accent-color)' : 'var(--border-subtle)',
+        borderColor: active
+          ? 'var(--accent-color)'
+          : isLocked
+          ? 'rgba(245, 158, 11, 0.35)'
+          : 'var(--border-subtle)',
       }}
     >
       {/* Palette Preview */}
@@ -185,26 +197,54 @@ function ThemeOptionCard({ t, active, onClick }) {
           className="absolute top-1 sm:top-1.5 right-1 sm:right-1.5 w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full border border-white/20 shadow-xs"
           style={{ background: accent }}
         />
+
+        {/* Coming Soon Glass Overlay */}
+        {isLocked && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-[1.5px] transition-all group-hover:bg-black/50">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300">
+              <Lock size={9} className="shrink-0 text-amber-400" />
+              <span className="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wide text-amber-200">
+                Coming Soon
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between w-full">
         <div className="min-w-0 pr-1 flex-1">
-          <p className="text-[11px] sm:text-xs font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
-            {t.name}
-          </p>
+          <div className="flex items-center gap-1">
+            <p className="text-[11px] sm:text-xs font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
+              {t.name}
+            </p>
+            {isLocked && (
+              <span className="shrink-0 px-1 py-0.2 rounded text-[8px] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/25 tracking-wide uppercase">
+                Soon
+              </span>
+            )}
+          </div>
           <p className="text-[9px] sm:text-[10px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
             {t.description}
           </p>
         </div>
 
         <div
-          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${active ? 'border-transparent text-white' : 'border-[var(--border-subtle)] opacity-20'
-            }`}
+          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+            isLocked
+              ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+              : active
+              ? 'border-transparent text-white'
+              : 'border-[var(--border-subtle)] opacity-20'
+          }`}
           style={{
-            background: active ? 'var(--accent-gradient)' : 'transparent',
+            background: isLocked ? 'rgba(245, 158, 11, 0.12)' : active ? 'var(--accent-gradient)' : 'transparent',
           }}
         >
-          {active && <Check size={9} strokeWidth={3} />}
+          {isLocked ? (
+            <Lock size={8} strokeWidth={2.5} />
+          ) : (
+            active && <Check size={9} strokeWidth={3} />
+          )}
         </div>
       </div>
     </button>
@@ -432,6 +472,10 @@ export default function Settings() {
   const initials = (user?.name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
 
   function handleThemeSelect(t) {
+    if (t.comingSoon) {
+      if (playChime) playChime('warning');
+      return;
+    }
     setTheme(t.id);
     if (playChime) playChime('pop');
 

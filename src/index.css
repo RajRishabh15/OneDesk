@@ -203,24 +203,24 @@
   --fiber-opacity:   1;
 }
 
-/* ── Crimson (deep ruby & scarlet) ─────────────────────── */
-.theme-crimson {
+/* ── Baby Pink (soft pastel sakura & blush) ─────────────── */
+.theme-babypink {
   color-scheme:      dark;
-  --bg-page:         #180307;
-  --bg-overlay:      rgba(24,3,7,0.75);
-  --bg-card:         rgba(38, 6, 14, 0.94);
-  --bg-card-solid:   #20040a;
-  --bg-card-hover:   rgba(50, 8, 18, 0.98);
-  --bg-surface:      rgba(244,63,94,0.07);
-  --border-card:     rgba(244,63,94,0.22);
-  --border-subtle:   rgba(244,63,94,0.09);
-  --text-primary:    #ffe4e6;
-  --text-muted:      rgba(255,228,230,0.50);
-  --glow-line:       #3f0712;
-  --glow-color:      #e11d48;
-  --accent-gradient: linear-gradient(135deg, #e11d48, #f43f5e, #fb7185);
-  --accent-color:    #f43f5e;
-  --accent-glow:     rgba(244,63,94,0.40);
+  --bg-page:         #150610;
+  --bg-overlay:      rgba(21,6,16,0.75);
+  --bg-card:         rgba(34, 10, 26, 0.94);
+  --bg-card-solid:   #1b0714;
+  --bg-card-hover:   rgba(46, 14, 35, 0.98);
+  --bg-surface:      rgba(244,114,182,0.08);
+  --border-card:     rgba(244,114,182,0.22);
+  --border-subtle:   rgba(244,114,182,0.09);
+  --text-primary:    #fdf2f8;
+  --text-muted:      rgba(253,242,248,0.50);
+  --glow-line:       #36102a;
+  --glow-color:      #ec4899;
+  --accent-gradient: linear-gradient(135deg, #ec4899, #f472b6, #f9a8d4);
+  --accent-color:    #f472b6;
+  --accent-glow:     rgba(244,114,182,0.40);
   --fiber-opacity:   1;
 }
 

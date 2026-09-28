@@ -4,6 +4,7 @@ import {
   Palette,
   Sparkles,
   Check,
+  Lock,
   Volume2,
   VolumeX,
   CheckCircle2,
@@ -23,6 +24,10 @@ export default function Appearance() {
   const activeThemeObj = THEMES.find((t) => t.id === theme) || THEMES[0];
 
   function handleThemeSelect(t) {
+    if (t.comingSoon) {
+      if (playChime) playChime('warning');
+      return;
+    }
     setTheme(t.id);
     if (playChime) playChime('pop');
   }
@@ -114,20 +119,29 @@ export default function Appearance() {
             const [bg, surface, accent] = t.preview;
             const active = theme === t.id;
             const isWhite = t.id === 'light';
+            const isLocked = Boolean(t.comingSoon);
 
             return (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => handleThemeSelect(t)}
-                className={`group relative flex flex-col justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-200 cursor-pointer active:scale-[0.98] ${
-                  active
-                    ? 'ring-2 ring-[var(--accent-color)] shadow-lg'
-                    : 'hover:border-[var(--border-card)] hover:bg-[var(--bg-surface)]'
+                disabled={isLocked}
+                aria-disabled={isLocked}
+                className={`group relative flex flex-col justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-200 ${
+                  isLocked
+                    ? 'opacity-85 cursor-not-allowed border-dashed hover:border-amber-500/40'
+                    : active
+                    ? 'ring-2 ring-[var(--accent-color)] shadow-lg cursor-pointer active:scale-[0.98]'
+                    : 'hover:border-[var(--border-card)] hover:bg-[var(--bg-surface)] cursor-pointer active:scale-[0.98]'
                 }`}
                 style={{
                   background: active ? 'var(--bg-surface)' : 'var(--bg-card-solid)',
-                  borderColor: active ? 'var(--accent-color)' : 'var(--border-subtle)',
+                  borderColor: active
+                    ? 'var(--accent-color)'
+                    : isLocked
+                    ? 'rgba(245, 158, 11, 0.35)'
+                    : 'var(--border-subtle)',
                 }}
               >
                 {/* Palette Canvas Preview */}
@@ -146,13 +160,32 @@ export default function Appearance() {
                     className="absolute top-2 right-2 w-3.5 h-3.5 rounded-full border border-white/30 shadow-sm"
                     style={{ background: accent }}
                   />
+
+                  {/* Coming Soon Glass Overlay */}
+                  {isLocked && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-[2px] transition-all group-hover:bg-black/50">
+                      <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-500/20 border border-amber-400/40 shadow-sm text-amber-300 backdrop-blur-md">
+                        <Lock size={11} className="shrink-0 text-amber-400" />
+                        <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-amber-200">
+                          Coming Soon
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between w-full">
                   <div className="min-w-0 pr-1 flex-1">
-                    <p className="text-xs sm:text-sm font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
-                      {t.name}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs sm:text-sm font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                        {t.name}
+                      </p>
+                      {isLocked && (
+                        <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/25 tracking-wide uppercase">
+                          Soon
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[10px] sm:text-[11px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
                       {t.description}
                     </p>
@@ -160,13 +193,21 @@ export default function Appearance() {
 
                   <div
                     className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center shrink-0 border transition-all ${
-                      active ? 'border-transparent text-white' : 'border-[var(--border-subtle)] opacity-30'
+                      isLocked
+                        ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+                        : active
+                        ? 'border-transparent text-white'
+                        : 'border-[var(--border-subtle)] opacity-30'
                     }`}
                     style={{
-                      background: active ? 'var(--accent-gradient)' : 'transparent',
+                      background: isLocked ? 'rgba(245, 158, 11, 0.12)' : active ? 'var(--accent-gradient)' : 'transparent',
                     }}
                   >
-                    {active && <Check size={10} strokeWidth={3} />}
+                    {isLocked ? (
+                      <Lock size={9} strokeWidth={2.5} />
+                    ) : (
+                      active && <Check size={10} strokeWidth={3} />
+                    )}
                   </div>
                 </div>
               </button>
