@@ -38,7 +38,7 @@ export default function Signup() {
           label="Email Address"
           icon={Mail}
           type="email"
-          placeholder="name@example.com"
+          placeholder="name@gmail.com"
           required
           autoComplete="email"
           value={form.email}

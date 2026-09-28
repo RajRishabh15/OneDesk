@@ -12,6 +12,137 @@ import {
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
+// Recognized genuine email domains (Gmail, Outlook, Microsoft, Yahoo, Apple, Proton, Zoho, AOL, etc.)
+export const GENUINE_EMAIL_DOMAINS = new Set([
+  // Google
+  'gmail.com',
+  'googlemail.com',
+
+  // Microsoft / Outlook / Hotmail / Live
+  'outlook.com',
+  'hotmail.com',
+  'live.com',
+  'msn.com',
+  'passport.com',
+
+  // Yahoo
+  'yahoo.com',
+  'ymail.com',
+  'rocketmail.com',
+  'yahoo.co.in',
+  'yahoo.co.uk',
+  'yahoo.fr',
+  'yahoo.de',
+  'yahoo.es',
+  'yahoo.it',
+  'yahoo.com.br',
+
+  // Apple
+  'icloud.com',
+  'me.com',
+  'mac.com',
+
+  // Proton
+  'proton.me',
+  'protonmail.com',
+  'pm.me',
+
+  // Zoho
+  'zoho.com',
+  'zoho.in',
+
+  // AOL / Mail / GMX / Fastmail / Tuta
+  'aol.com',
+  'mail.com',
+  'gmx.com',
+  'gmx.net',
+  'gmx.de',
+  'fastmail.com',
+  'tuta.com',
+  'tutanota.com',
+  'rediffmail.com',
+  'yandex.com',
+]);
+
+// Known disposable and temporary email domains to explicitly reject
+export const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  'mailinator.com',
+  'tempmail.com',
+  'temp-mail.org',
+  '10minutemail.com',
+  'guerrillamail.com',
+  'yopmail.com',
+  'trashmail.com',
+  'sharklasers.com',
+  'getairmail.com',
+  'dispostable.com',
+  'fakemail.net',
+  'throwawaymail.com',
+  'fakeinbox.com',
+  'burnermail.io',
+  'crazymailing.com',
+  'nada.ltd',
+  'tempail.com',
+  'mohmal.com',
+  'generator.email',
+  'dropmail.me',
+  'maildrop.cc',
+  'inboxkitten.com',
+]);
+
+/**
+ * Validates whether an email address is properly formatted and belongs to a genuine provider or institution.
+ */
+export function validateGenuineEmail(rawEmail) {
+  const email = (rawEmail || '').trim().toLowerCase();
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  if (!email || !emailRegex.test(email)) {
+    return { valid: false, error: 'Please enter a valid email address.' };
+  }
+
+  const parts = email.split('@');
+  if (parts.length !== 2) {
+    return { valid: false, error: 'Please enter a valid email address.' };
+  }
+
+  const domain = parts[1].toLowerCase();
+
+  // Reject disposable / temp email providers
+  if (DISPOSABLE_EMAIL_DOMAINS.has(domain)) {
+    return {
+      valid: false,
+      error: 'Temporary/disposable emails are not allowed. Please use a genuine email (e.g., @gmail.com or @outlook.com).',
+    };
+  }
+
+  // Allow recognized genuine domains
+  if (GENUINE_EMAIL_DOMAINS.has(domain)) {
+    return { valid: true, email };
+  }
+
+  // Allow recognized institutional, educational (.edu, .ac.*), or government domains
+  const isInstitutional =
+    domain.endsWith('.edu') ||
+    domain.includes('.edu.') ||
+    domain.endsWith('.ac.in') ||
+    domain.endsWith('.ac.uk') ||
+    domain.includes('.ac.') ||
+    domain.endsWith('.gov') ||
+    domain.includes('.gov.') ||
+    domain.endsWith('.org');
+
+  if (isInstitutional) {
+    return { valid: true, email };
+  }
+
+  // Otherwise, reject non-genuine / unverified domains
+  return {
+    valid: false,
+    error: 'Only genuine emails (such as @gmail.com, @outlook.com, @yahoo.com, @icloud.com, @proton.me, or institutional mail) are allowed.',
+  };
+}
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -54,9 +185,16 @@ export function AuthProvider({ children }) {
 
   async function signup({ name, email, password }) {
     setAuthError('');
+    const validation = validateGenuineEmail(email);
+    if (!validation.valid) {
+      setAuthError(validation.error);
+      return false;
+    }
+
     try {
       const trimmedName = (name || '').trim();
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const cleanEmail = validation.email;
+      const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password);
       // Store the display name in Firebase Auth profile
       await fbUpdateProfile(cred.user, { displayName: trimmedName });
 
@@ -81,8 +219,15 @@ export function AuthProvider({ children }) {
 
   async function login({ email, password }) {
     setAuthError('');
+    const validation = validateGenuineEmail(email);
+    if (!validation.valid) {
+      setAuthError(validation.error);
+      return false;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const cleanEmail = validation.email;
+      await signInWithEmailAndPassword(auth, cleanEmail, password);
       return true;
     } catch (err) {
       setAuthError(friendlyError(err.code));
