@@ -28,11 +28,14 @@ import OneDeskLogo from '../components/OneDeskLogo';
 
 export const THEME_FIBER_COLORS = {
   dark: { glowLine: '#140E35', glowColor: '#3437A0' },
+  peacock: { glowLine: '#04322e', glowColor: '#0d9488' },
+  lavender: { glowLine: '#24103c', glowColor: '#9333ea' },
   light: { glowLine: '#c7d2fe', glowColor: '#818cf8' },
   aurora: { glowLine: '#042a18', glowColor: '#059669' },
-  rose: { glowLine: '#3b0a1e', glowColor: '#e11d48' },
   ocean: { glowLine: '#042040', glowColor: '#0284c7' },
+  rose: { glowLine: '#3b0a1e', glowColor: '#e11d48' },
   amber: { glowLine: '#3a1c00', glowColor: '#d97706' },
+  crimson: { glowLine: '#3f0712', glowColor: '#e11d48' },
 };
 
 export default function Login() {

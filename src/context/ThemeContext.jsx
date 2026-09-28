@@ -13,6 +13,20 @@ export const THEMES = [
     color: '#6366f1',
   },
   {
+    id: 'peacock',
+    name: 'Peacock',
+    description: 'Teal blue-green blend',
+    preview: ['#021616', '#04322e', '#14b8a6'],
+    color: '#2dd4bf',
+  },
+  {
+    id: 'lavender',
+    name: 'Lavender',
+    description: 'Ethereal violet & lilac',
+    preview: ['#0e0719', '#24103c', '#c084fc'],
+    color: '#c084fc',
+  },
+  {
     id: 'light',
     name: 'Daylight',
     description: 'Warm stone light mode',
@@ -27,13 +41,6 @@ export const THEMES = [
     color: '#34d399',
   },
   {
-    id: 'rose',
-    name: 'Rosé',
-    description: 'Soft pink & warm cream',
-    preview: ['#1a0a0f', '#4c0519', '#fb7185'],
-    color: '#fb7185',
-  },
-  {
     id: 'ocean',
     name: 'Ocean',
     description: 'Deep sea cyan blue',
@@ -41,11 +48,25 @@ export const THEMES = [
     color: '#38bdf8',
   },
   {
+    id: 'rose',
+    name: 'Rosé',
+    description: 'Soft pink & warm cream',
+    preview: ['#1a0a0f', '#4c0519', '#fb7185'],
+    color: '#fb7185',
+  },
+  {
     id: 'amber',
     name: 'Ember',
     description: 'Warm amber & gold',
     preview: ['#1a0f00', '#451a03', '#fbbf24'],
     color: '#fbbf24',
+  },
+  {
+    id: 'crimson',
+    name: 'Crimson',
+    description: 'Deep ruby & scarlet',
+    preview: ['#180307', '#3f0712', '#f43f5e'],
+    color: '#f43f5e',
   },
 ];
 

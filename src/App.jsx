@@ -14,6 +14,7 @@ import Tasks from './pages/Tasks';
 import CalendarPage from './pages/Calendar';
 // import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import Appearance from './pages/Appearance';
 import FunZone from './pages/FunZone';
 
 export default function App() {
@@ -42,6 +43,8 @@ export default function App() {
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/analytics" element={<Navigate to="/" replace />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/settings/appearance" element={<Appearance />} />
+              <Route path="/appearance" element={<Appearance />} />
               <Route path="/fun-zone" element={<FunZone />} />
             </Route>
           </Routes>

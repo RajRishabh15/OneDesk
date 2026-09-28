@@ -27,6 +27,7 @@ import {
   Pencil,
   Camera,
   Info,
+  ChevronRight,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -76,31 +77,34 @@ function SettingCard({ children, className = '' }) {
   );
 }
 
-function SectionHeader({ icon: Icon, title, description }) {
+function SectionHeader({ icon: Icon, title, description, action }) {
   return (
-    <div className="flex items-start gap-2.5 sm:gap-3 mb-3.5 sm:mb-5">
-      {Icon && (
-        <div
-          className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs"
-          style={{
-            background: 'var(--bg-surface)',
-            borderColor: 'var(--border-subtle)',
-            color: 'var(--accent-color)',
-          }}
-        >
-          <Icon size={16} strokeWidth={2.2} />
-        </div>
-      )}
-      <div className="min-w-0 flex-1">
-        <h2 className="text-sm sm:text-base md:text-lg font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
-          {title}
-        </h2>
-        {description && (
-          <p className="text-[11px] sm:text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            {description}
-          </p>
+    <div className="flex items-start justify-between gap-2.5 sm:gap-3 mb-3.5 sm:mb-5">
+      <div className="flex items-start gap-2.5 sm:gap-3 min-w-0">
+        {Icon && (
+          <div
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+              color: 'var(--accent-color)',
+            }}
+          >
+            <Icon size={16} strokeWidth={2.2} />
+          </div>
         )}
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm sm:text-base md:text-lg font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+            {title}
+          </h2>
+          {description && (
+            <p className="text-[11px] sm:text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              {description}
+            </p>
+          )}
+        </div>
       </div>
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }
@@ -641,40 +645,113 @@ export default function Settings() {
         </div>
       </SettingCard>
 
-      {/* ── 2. Appearance & Themes ─────────────────────────── */}
-      <SettingCard>
-        <SectionHeader
-          icon={Palette}
-          title="Appearance & Theme"
-          description="Select your preferred workspace palette and background effects."
-        />
+      {/* ── 2. Appearance & Themes (Mobile Nav Link + Desktop Inline) ── */}
+      {/* Mobile: Clean compact row navigating to dedicated Appearance page */}
+      <div className="md:hidden">
+        <SettingCard>
+          <div
+            onClick={() => {
+              if (playChime) playChime('pop');
+              navigate('/settings/appearance');
+            }}
+            className="flex items-center justify-between gap-3 cursor-pointer select-none group active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="w-9 h-9 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--accent-color)',
+                }}
+              >
+                <Palette size={17} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-sm font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                    Appearance & Theme
+                  </h2>
+                  <span
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                    style={{
+                      background: 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--accent-color)',
+                    }}
+                  >
+                    {THEMES.find((t) => t.id === theme)?.name || theme}
+                  </span>
+                </div>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  Workspace color schemes, background waves & visuals
+                </p>
+              </div>
+            </div>
 
-        {/* Themes Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-          {THEMES.map((t) => (
-            <ThemeOptionCard
-              key={t.id}
-              t={t}
-              active={theme === t.id}
-              onClick={() => handleThemeSelect(t)}
-            />
-          ))}
-        </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span
+                className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-xs"
+                style={{
+                  background: THEMES.find((t) => t.id === theme)?.preview?.[2] || 'var(--accent-color)',
+                }}
+              />
+              <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+            </div>
+          </div>
+        </SettingCard>
+      </div>
 
-        {/* Ambient Canvas Switch */}
-        <SettingRow
-          icon={Sparkles}
-          label="Ambient Background Waves"
-          description="Dynamic floating wave fibers that render gently behind your workspace."
-          onClick={handleToggleFibers}
-        >
-          <Toggle
-            on={settings?.ghostFibers !== false}
-            onToggle={handleToggleFibers}
-            label="Toggle ambient background fibers"
+      {/* Desktop (md+): Full inline appearance section */}
+      <div className="hidden md:block">
+        <SettingCard>
+          <SectionHeader
+            icon={Palette}
+            title="Appearance & Theme"
+            description="Select your preferred workspace palette and background effects."
+            action={
+              <button
+                type="button"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  navigate('/settings/appearance');
+                }}
+                className="text-[11px] font-semibold flex items-center gap-1 hover:underline cursor-pointer py-1 px-2 rounded-lg hover:bg-white/5 transition-all"
+                style={{ color: 'var(--accent-color)' }}
+              >
+                <span>Full Page</span>
+                <ChevronRight size={13} />
+              </button>
+            }
           />
-        </SettingRow>
-      </SettingCard>
+
+          {/* Themes Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
+            {THEMES.map((t) => (
+              <ThemeOptionCard
+                key={t.id}
+                t={t}
+                active={theme === t.id}
+                onClick={() => handleThemeSelect(t)}
+              />
+            ))}
+          </div>
+
+          {/* Ambient Canvas Switch */}
+          <SettingRow
+            icon={Sparkles}
+            label="Ambient Background Waves"
+            description="Dynamic floating wave fibers that render gently behind your workspace."
+            onClick={handleToggleFibers}
+          >
+            <Toggle
+              on={settings?.ghostFibers !== false}
+              onToggle={handleToggleFibers}
+              label="Toggle ambient background fibers"
+            />
+          </SettingRow>
+        </SettingCard>
+      </div>
 
       {/* ── 3. Notifications & Sensory Feedback ────────────── */}
       <SettingCard>
@@ -953,42 +1030,41 @@ export default function Settings() {
       </SettingCard>
 
       {/* ── 6. Danger Zone ─────────────────────────────────── */}
-      <div
-        className="rounded-2xl sm:rounded-3xl border p-5 sm:p-7 backdrop-blur-2xl relative overflow-hidden"
-        style={{
-          background: 'rgba(244,63,94,0.03)',
-          borderColor: 'rgba(244,63,94,0.18)',
-        }}
+      <SettingCard
+        icon={AlertTriangle}
+        title="Danger Zone"
+        description="Permanent and irreversible actions for your workspace."
       >
-        <div className="flex items-start gap-3 mb-5">
+        <div className="space-y-2.5 sm:space-y-3">
+          {/* Clear Workspace Data */}
           <div
-            className="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all"
             style={{
-              background: 'rgba(244,63,94,0.08)',
-              borderColor: 'rgba(244,63,94,0.22)',
-              color: '#fb7185',
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
             }}
           >
-            <AlertTriangle size={17} strokeWidth={2.2} />
-          </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-bold font-display tracking-tight text-rose-400">
-              Danger Zone
-            </h2>
-            <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              Irreversible actions affecting your workspace contents and account authentication.
-            </p>
-          </div>
-        </div>
+            <div className="flex items-start sm:items-center gap-3 min-w-0">
+              <div
+                className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0"
+                style={{
+                  background: 'rgba(244,63,94,0.08)',
+                  borderColor: 'rgba(244,63,94,0.2)',
+                  color: '#fb7185',
+                }}
+              >
+                <Trash2 size={15} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  Clear Workspace Data
+                </p>
+                <p className="text-[11px] sm:text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  Permanently deletes all tasks, notes, and calendar events.
+                </p>
+              </div>
+            </div>
 
-        <div className="space-y-3">
-          {/* Clear Workspace Data */}
-          <SettingRow
-            icon={Trash2}
-            label="Clear Workspace Items"
-            description="Permanently deletes all tasks, notes, and calendar events while keeping your login account."
-            danger
-          >
             <button
               type="button"
               onClick={() => {
@@ -997,23 +1073,45 @@ export default function Settings() {
                   if (playChime) playChime('pop');
                 }
               }}
-              className="px-3 py-1.5 rounded-xl border text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-500/20 transition-all active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl border text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-500/20 transition-all active:scale-95 cursor-pointer shrink-0 text-center"
               style={{
                 background: 'rgba(244,63,94,0.08)',
-                borderColor: 'rgba(244,63,94,0.25)',
+                borderColor: 'rgba(244,63,94,0.22)',
               }}
             >
               Clear Workspace
             </button>
-          </SettingRow>
+          </div>
 
           {/* Delete Account */}
-          <SettingRow
-            icon={AlertTriangle}
-            label="Delete Account Permanently"
-            description="Completely erases your user profile, credentials, and data from the cloud database."
-            danger
+          <div
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
           >
+            <div className="flex items-start sm:items-center gap-3 min-w-0">
+              <div
+                className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0"
+                style={{
+                  background: 'rgba(244,63,94,0.08)',
+                  borderColor: 'rgba(244,63,94,0.2)',
+                  color: '#fb7185',
+                }}
+              >
+                <AlertTriangle size={15} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  Delete Account Permanently
+                </p>
+                <p className="text-[11px] sm:text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  Completely removes your user profile, credentials, and cloud data.
+                </p>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => {
@@ -1022,7 +1120,7 @@ export default function Settings() {
                 setRequirePassword(false);
                 setDeleteModalOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl border text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-600 transition-all active:scale-95 cursor-pointer shadow-xs"
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl border text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-600 transition-all active:scale-95 cursor-pointer shrink-0 text-center shadow-xs"
               style={{
                 background: 'rgba(244,63,94,0.12)',
                 borderColor: 'rgba(244,63,94,0.3)',
@@ -1030,9 +1128,9 @@ export default function Settings() {
             >
               Delete Account
             </button>
-          </SettingRow>
+          </div>
         </div>
-      </div>
+      </SettingCard>
 
       {/* Footer Note */}
       <div className="text-center pt-2">
