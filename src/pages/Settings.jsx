@@ -58,7 +58,7 @@ const PRESET_AVATARS = [
 function SettingCard({ children, className = '' }) {
   return (
     <div
-      className={`rounded-2xl sm:rounded-3xl border p-5 sm:p-7 backdrop-blur-2xl transition-all duration-200 relative overflow-hidden shadow-sm ${className}`}
+      className={`rounded-2xl sm:rounded-3xl border p-4 sm:p-6 md:p-7 backdrop-blur-2xl transition-all duration-200 relative overflow-hidden shadow-sm ${className}`}
       style={{
         background: 'var(--bg-card)',
         borderColor: 'var(--border-card)',
@@ -66,7 +66,7 @@ function SettingCard({ children, className = '' }) {
     >
       {/* Top subtle hairline highlight */}
       <div
-        className="absolute top-0 inset-x-8 h-px pointer-events-none"
+        className="absolute top-0 inset-x-6 sm:inset-x-8 h-px pointer-events-none"
         style={{
           background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)',
         }}
@@ -78,25 +78,25 @@ function SettingCard({ children, className = '' }) {
 
 function SectionHeader({ icon: Icon, title, description }) {
   return (
-    <div className="flex items-start gap-3 mb-5">
+    <div className="flex items-start gap-2.5 sm:gap-3 mb-3.5 sm:mb-5">
       {Icon && (
         <div
-          className="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-xs"
           style={{
             background: 'var(--bg-surface)',
             borderColor: 'var(--border-subtle)',
             color: 'var(--accent-color)',
           }}
         >
-          <Icon size={17} strokeWidth={2.2} />
+          <Icon size={16} strokeWidth={2.2} />
         </div>
       )}
-      <div>
-        <h2 className="text-base sm:text-lg font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+      <div className="min-w-0 flex-1">
+        <h2 className="text-sm sm:text-base md:text-lg font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
           {title}
         </h2>
         {description && (
-          <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-[11px] sm:text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
             {description}
           </p>
         )}
@@ -109,27 +109,27 @@ function SettingRow({ icon: Icon, label, description, children, onClick, danger 
   return (
     <div
       onClick={onClick}
-      className={`group flex items-center justify-between gap-4 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ${onClick ? 'cursor-pointer hover:border-[var(--accent-color)] active:scale-[0.99] select-none' : ''
+      className={`group flex items-center justify-between gap-2.5 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ${onClick ? 'cursor-pointer hover:border-[var(--accent-color)] active:scale-[0.99] select-none' : ''
         }`}
       style={{
         background: danger ? 'rgba(251,113,133,0.04)' : 'var(--bg-surface)',
         borderColor: danger ? 'rgba(251,113,133,0.2)' : 'var(--border-subtle)',
       }}
     >
-      <div className="flex items-center gap-3.5 min-w-0">
+      <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0 pr-1">
         {Icon && (
           <div
-            className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 transition-colors"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl border flex items-center justify-center shrink-0 transition-colors"
             style={{
               background: danger ? 'rgba(251,113,133,0.1)' : 'var(--bg-card-solid)',
               borderColor: danger ? 'rgba(251,113,133,0.3)' : 'var(--border-subtle)',
               color: danger ? '#fb7185' : 'var(--accent-color)',
             }}
           >
-            <Icon size={15} />
+            <Icon size={14} />
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p
             className="text-xs sm:text-sm font-semibold leading-snug truncate"
             style={{ color: danger ? '#fb7185' : 'var(--text-primary)' }}
@@ -137,13 +137,13 @@ function SettingRow({ icon: Icon, label, description, children, onClick, danger 
             {label}
           </p>
           {description && (
-            <p className="text-[11px] sm:text-xs mt-0.5 leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[10px] sm:text-xs mt-0.5 leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>
               {description}
             </p>
           )}
         </div>
       </div>
-      <div className="shrink-0">{children}</div>
+      <div className="shrink-0 flex items-center gap-1.5 sm:gap-2">{children}</div>
     </div>
   );
 }
@@ -158,7 +158,7 @@ function ThemeOptionCard({ t, active, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`group relative flex flex-col justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer ${active ? 'ring-2 ring-[var(--accent-color)] shadow-md' : 'hover:border-[var(--border-card)]'
+      className={`group relative flex flex-col justify-between p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 cursor-pointer ${active ? 'ring-2 ring-[var(--accent-color)] shadow-md' : 'hover:border-[var(--border-card)]'
         }`}
       style={{
         background: active ? 'var(--bg-surface)' : 'var(--bg-card-solid)',
@@ -167,40 +167,40 @@ function ThemeOptionCard({ t, active, onClick }) {
     >
       {/* Palette Preview */}
       <div
-        className="w-full h-11 rounded-lg mb-2.5 relative overflow-hidden border shadow-inner flex items-end p-1.5"
+        className="w-full h-8 sm:h-11 rounded-lg mb-2 relative overflow-hidden border shadow-inner flex items-end p-1 sm:p-1.5"
         style={{
           background: bg,
           borderColor: isWhite ? '#e5e7eb' : 'rgba(255,255,255,0.1)',
         }}
       >
         <div
-          className="absolute inset-x-1.5 bottom-1.5 h-3.5 rounded-md shadow-xs opacity-80"
+          className="absolute inset-x-1 sm:inset-x-1.5 bottom-1 sm:bottom-1.5 h-2.5 sm:h-3.5 rounded-md shadow-xs opacity-80"
           style={{ background: surface }}
         />
         <div
-          className="absolute top-1.5 right-1.5 w-3 h-3 rounded-full border border-white/20 shadow-xs"
+          className="absolute top-1 sm:top-1.5 right-1 sm:right-1.5 w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full border border-white/20 shadow-xs"
           style={{ background: accent }}
         />
       </div>
 
       <div className="flex items-center justify-between w-full">
-        <div className="min-w-0 pr-1.5">
-          <p className="text-xs font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+        <div className="min-w-0 pr-1 flex-1">
+          <p className="text-[11px] sm:text-xs font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
             {t.name}
           </p>
-          <p className="text-[10px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-[9px] sm:text-[10px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
             {t.description}
           </p>
         </div>
 
         <div
-          className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${active ? 'border-transparent text-white' : 'border-[var(--border-subtle)] opacity-20'
+          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${active ? 'border-transparent text-white' : 'border-[var(--border-subtle)] opacity-20'
             }`}
           style={{
             background: active ? 'var(--accent-gradient)' : 'transparent',
           }}
         >
-          {active && <Check size={10} strokeWidth={3} />}
+          {active && <Check size={9} strokeWidth={3} />}
         </div>
       </div>
     </button>
@@ -518,12 +518,12 @@ export default function Settings() {
   }
 
   return (
-    <div className="animate-fade-up max-w-4xl mx-auto space-y-6 sm:space-y-7 pb-16">
+    <div className="animate-fade-up max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-28 sm:pb-20 px-0 sm:px-2">
 
       {/* ── Page Header ────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1 sm:pt-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
             Settings
           </h1>
           <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
@@ -534,7 +534,7 @@ export default function Settings() {
         <button
           type="button"
           onClick={handleLogout}
-          className="self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-all hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-400 active:scale-95 cursor-pointer shadow-xs"
+          className="self-start sm:self-auto inline-flex items-center gap-2 px-3.5 py-2 sm:py-1.5 rounded-xl border text-xs font-semibold transition-all hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-400 active:scale-95 cursor-pointer shadow-xs"
           style={{
             background: 'var(--bg-surface)',
             borderColor: 'var(--border-subtle)',
@@ -548,12 +548,12 @@ export default function Settings() {
 
       {/* ── 1. Profile Box (Non-changeable with Edit Icon) ─── */}
       <SettingCard>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-5">
           {/* Avatar & User Details */}
-          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div className="relative shrink-0">
               <div
-                className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl flex items-center justify-center text-white text-lg sm:text-2xl font-bold shadow-md overflow-hidden border border-white/10"
+                className="w-12 h-12 sm:w-16 sm:h-16 md:w-18 md:h-18 rounded-2xl flex items-center justify-center text-white text-base sm:text-xl md:text-2xl font-bold shadow-md overflow-hidden border border-white/10"
                 style={{
                   background: 'var(--accent-gradient)',
                 }}
@@ -573,7 +573,7 @@ export default function Settings() {
             {/* Non-changeable Name & Email */}
             <div className="min-w-0 flex-1">
               <h2
-                className="text-base sm:text-xl font-bold font-display tracking-tight truncate"
+                className="text-sm sm:text-lg md:text-xl font-bold font-display tracking-tight truncate"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {user?.name || 'User'}
@@ -613,10 +613,10 @@ export default function Settings() {
         </div>
 
         {/* Password & Security Quick Link */}
-        <div className="mt-5 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
-            <Key size={13} />
-            <span>Password &amp; Security</span>
+        <div className="mt-4 pt-3.5 sm:mt-5 sm:pt-4 border-t border-[var(--border-subtle)] flex flex-row items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 min-w-0" style={{ color: 'var(--text-muted)' }}>
+            <Key size={13} className="shrink-0" />
+            <span className="truncate">Password &amp; Security</span>
           </div>
           <button
             type="button"
@@ -628,14 +628,14 @@ export default function Settings() {
               setConfirmPassword('');
               setPasswordModalOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-semibold transition-all hover:border-[var(--accent-color)] hover:text-[var(--text-primary)] active:scale-95 cursor-pointer shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full border text-[11px] sm:text-xs font-semibold transition-all hover:border-[var(--accent-color)] hover:text-[var(--text-primary)] active:scale-95 cursor-pointer shadow-xs whitespace-nowrap shrink-0"
             style={{
               background: 'var(--bg-surface)',
               borderColor: 'var(--border-subtle)',
               color: 'var(--accent-color)',
             }}
           >
-            <Key size={12} />
+            <Key size={11} />
             <span>Change password</span>
           </button>
         </div>
@@ -1136,7 +1136,7 @@ export default function Settings() {
                     6 presets
                   </span>
                 </div>
-                <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {PRESET_AVATARS.filter((a) => a.category === 'Nature').map((av) => (
                     <button
                       key={av.id}
@@ -1164,7 +1164,7 @@ export default function Settings() {
                     5 presets
                   </span>
                 </div>
-                <div className="grid grid-cols-5 sm:grid-cols-6 gap-1.5 sm:gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {PRESET_AVATARS.filter((a) => a.category === 'Cars').map((av) => (
                     <button
                       key={av.id}

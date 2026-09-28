@@ -1042,39 +1042,44 @@ export default function TopNavPill() {
       ════════════════════════════════════════════ */}
       {/* ════════════════════════════════════════════
           MOBILE BOTTOM BAR  (< md)
-          Brand New Next-Gen Floating Island Capsule Dock
+          Liquid Blur Floating Island Dock
       ════════════════════════════════════════════ */}
-      {/* Bottom Vignette Gradient Shield — smoothly dissolves content before it slides under the dock */}
+      {/* Bottom Soft Dissolve Fade — smoothly blends page content beneath the dock */}
       <div
-        className="md:hidden fixed bottom-0 inset-x-0 h-28 pointer-events-none z-30"
+        className="md:hidden fixed bottom-0 inset-x-0 h-24 pointer-events-none z-30"
         style={{
-          background: 'linear-gradient(to top, var(--bg-page) 20%, rgba(9,7,21,0.85) 60%, transparent 100%)',
+          background: 'linear-gradient(to top, var(--bg-page) 0%, transparent 100%)',
         }}
       />
 
-      {/* Floating Island Dock */}
+      {/* Floating Island Dock with Liquid Blur Aesthetics */}
       <nav
-        className="md:hidden fixed bottom-3.5 inset-x-3 max-w-[400px] mx-auto z-40 select-none"
+        className="md:hidden fixed bottom-3 inset-x-3 max-w-[410px] mx-auto z-40 select-none"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
+        {/* Ambient Fluid Glow Diffuser */}
         <div
-          className="h-[58px] px-2.5 rounded-full border shadow-2xl backdrop-blur-3xl flex items-center justify-between relative overflow-hidden transition-all duration-300"
+          className="absolute -inset-1 rounded-full pointer-events-none z-0"
           style={{
-            background: 'var(--bg-card-solid)',
-            borderColor: 'var(--border-card)',
-            boxShadow: '0 16px 45px -8px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.14)',
+            background: 'radial-gradient(ellipse at 50% 50%, var(--accent-glow) 0%, transparent 70%)',
+            filter: 'blur(20px)',
+            opacity: 0.5,
+          }}
+        />
+
+        {/* Liquid Blur Capsule Hull */}
+        <div
+          className="h-[60px] px-2 rounded-full flex items-center justify-between relative overflow-hidden transition-all duration-300 z-10"
+          style={{
+            background: 'var(--bg-overlay)',
+            border: '1px solid var(--border-card)',
+            backdropFilter: 'blur(28px) saturate(190%) contrast(105%)',
+            WebkitBackdropFilter: 'blur(28px) saturate(190%) contrast(105%)',
+            boxShadow: '0 10px 30px -4px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 0 16px rgba(255, 255, 255, 0.04)',
           }}
         >
-          {/* Top Hairline Specular Highlight */}
-          <div
-            className="absolute top-0 inset-x-6 h-px pointer-events-none"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)',
-            }}
-          />
-
           {/* 1. Home */}
           <NavLink
             to="/"
@@ -1083,20 +1088,29 @@ export default function TopNavPill() {
             className={({ isActive }) =>
               `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
                 isActive
-                  ? 'px-3.5 py-1.5 font-bold'
-                  : 'p-2.5 opacity-50 hover:opacity-85'
+                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
+                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
               }`
             }
-            style={({ isActive }) => ({
-              background: isActive ? 'var(--bg-surface)' : 'transparent',
-              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
-            })}
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                    boxShadow: '0 2px 10px var(--accent-glow)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                  }
+                : {
+                    border: '1px solid transparent',
+                    color: 'var(--text-muted)',
+                  }
+            }
           >
             {({ isActive }) => (
               <div className="flex items-center gap-1.5">
-                <Home size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                <Home size={18} strokeWidth={isActive ? 2.5 : 1.9} />
                 {isActive && (
                   <span className="text-xs font-bold tracking-tight animate-fade-in">
                     Home
@@ -1104,10 +1118,10 @@ export default function TopNavPill() {
                 )}
                 {isActive && (
                   <span
-                    className="w-1.5 h-1.5 rounded-full"
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
                     style={{
                       background: 'var(--accent-color)',
-                      boxShadow: '0 0 6px var(--accent-color)',
+                      boxShadow: '0 0 8px var(--accent-color)',
                     }}
                   />
                 )}
@@ -1122,20 +1136,29 @@ export default function TopNavPill() {
             className={({ isActive }) =>
               `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
                 isActive
-                  ? 'px-3.5 py-1.5 font-bold'
-                  : 'p-2.5 opacity-50 hover:opacity-85'
+                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
+                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
               }`
             }
-            style={({ isActive }) => ({
-              background: isActive ? 'var(--bg-surface)' : 'transparent',
-              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
-            })}
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                    boxShadow: '0 2px 10px var(--accent-glow)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                  }
+                : {
+                    border: '1px solid transparent',
+                    color: 'var(--text-muted)',
+                  }
+            }
           >
             {({ isActive }) => (
               <div className="flex items-center gap-1.5">
-                <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.9} />
                 {isActive && (
                   <span className="text-xs font-bold tracking-tight animate-fade-in">
                     Tasks
@@ -1143,10 +1166,10 @@ export default function TopNavPill() {
                 )}
                 {isActive && (
                   <span
-                    className="w-1.5 h-1.5 rounded-full"
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
                     style={{
                       background: 'var(--accent-color)',
-                      boxShadow: '0 0 6px var(--accent-color)',
+                      boxShadow: '0 0 8px var(--accent-color)',
                     }}
                   />
                 )}
@@ -1154,26 +1177,38 @@ export default function TopNavPill() {
             )}
           </NavLink>
 
-          {/* 3. Center Hero Action Button (Fun Zone FAB) */}
-          <div className="flex items-center justify-center shrink-0 px-0.5">
+          {/* 3. Center Liquid Fluid Bubble FAB (Fun Zone) */}
+          <div className="flex items-center justify-center shrink-0 px-1 relative">
+            {/* Subtle Ambient Aura */}
+            <div
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{
+                background: 'var(--accent-gradient)',
+                filter: 'blur(6px)',
+                opacity: 0.2,
+                transform: 'scale(1.05)',
+              }}
+            />
+
             <button
               type="button"
               onClick={() => {
                 if (playChime) playChime('pop');
                 navigate('/fun-zone');
               }}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer border shadow-lg group relative"
+              className="w-11 h-11 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer relative overflow-hidden group"
               style={{
                 background: 'var(--accent-gradient)',
-                borderColor: 'rgba(255,255,255,0.25)',
-                boxShadow: '0 4px 16px var(--accent-glow)',
+                border: '1.5px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 2px 8px var(--accent-glow)',
               }}
               aria-label="Fun Zone"
               title="Fun Zone"
             >
               <Gamepad2
-                size={19}
+                size={20}
                 strokeWidth={2.4}
+                className="relative z-10 transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
               />
             </button>
           </div>
@@ -1185,20 +1220,29 @@ export default function TopNavPill() {
             className={({ isActive }) =>
               `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
                 isActive
-                  ? 'px-3.5 py-1.5 font-bold'
-                  : 'p-2.5 opacity-50 hover:opacity-85'
+                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
+                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
               }`
             }
-            style={({ isActive }) => ({
-              background: isActive ? 'var(--bg-surface)' : 'transparent',
-              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
-            })}
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                    boxShadow: '0 2px 10px var(--accent-glow)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                  }
+                : {
+                    border: '1px solid transparent',
+                    color: 'var(--text-muted)',
+                  }
+            }
           >
             {({ isActive }) => (
               <div className="flex items-center gap-1.5">
-                <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.9} />
                 {isActive && (
                   <span className="text-xs font-bold tracking-tight animate-fade-in">
                     Notes
@@ -1206,10 +1250,10 @@ export default function TopNavPill() {
                 )}
                 {isActive && (
                   <span
-                    className="w-1.5 h-1.5 rounded-full"
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
                     style={{
                       background: 'var(--accent-color)',
-                      boxShadow: '0 0 6px var(--accent-color)',
+                      boxShadow: '0 0 8px var(--accent-color)',
                     }}
                   />
                 )}
@@ -1224,20 +1268,29 @@ export default function TopNavPill() {
             className={({ isActive }) =>
               `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
                 isActive
-                  ? 'px-3.5 py-1.5 font-bold'
-                  : 'p-2.5 opacity-50 hover:opacity-85'
+                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
+                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
               }`
             }
-            style={({ isActive }) => ({
-              background: isActive ? 'var(--bg-surface)' : 'transparent',
-              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-              boxShadow: isActive ? '0 0 14px var(--accent-glow)' : 'none',
-            })}
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                    boxShadow: '0 2px 10px var(--accent-glow)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                  }
+                : {
+                    border: '1px solid transparent',
+                    color: 'var(--text-muted)',
+                  }
+            }
           >
             {({ isActive }) => (
               <div className="flex items-center gap-1.5">
-                <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.9} />
                 {isActive && (
                   <span className="text-xs font-bold tracking-tight animate-fade-in">
                     Schedule
@@ -1245,10 +1298,10 @@ export default function TopNavPill() {
                 )}
                 {isActive && (
                   <span
-                    className="w-1.5 h-1.5 rounded-full"
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
                     style={{
                       background: 'var(--accent-color)',
-                      boxShadow: '0 0 6px var(--accent-color)',
+                      boxShadow: '0 0 8px var(--accent-color)',
                     }}
                   />
                 )}
@@ -1265,8 +1318,8 @@ export default function TopNavPill() {
         <div className="md:hidden fixed inset-0 z-50 flex items-end justify-center">
           {/* Blurred Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 transition-opacity"
-            style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
+            className="fixed inset-0 bg-black/40 transition-opacity"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
             onClick={() => setMobileQuickSheetOpen(false)}
           />
 
@@ -1278,7 +1331,7 @@ export default function TopNavPill() {
               borderColor: 'var(--border-card)',
               backdropFilter: 'blur(40px)',
               WebkitBackdropFilter: 'blur(40px)',
-              boxShadow: '0 -20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.15)',
+              boxShadow: '0 -16px 40px var(--accent-glow), 0 -8px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
               paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
             }}
           >
