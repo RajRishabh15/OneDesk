@@ -17,6 +17,8 @@ import {
   Radio,
   Calendar,
   CheckCircle2,
+  KeyRound,
+  Send,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme, THEMES } from '../context/ThemeContext';
@@ -34,10 +36,18 @@ export const THEME_FIBER_COLORS = {
 };
 
 export default function Login() {
-  const { login, authError } = useAuth();
+  const { login, authError, resetPassword } = useAuth();
+  const { playChime } = useSettings();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Forgot password modal states
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetLoading, setIsResetLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetError, setResetError] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -47,61 +57,104 @@ export default function Login() {
     if (ok) navigate('/');
   }
 
-  return (
-    <AuthShell activeTab="login">
-      <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
-        <Field
-          label="Email Address"
-          icon={Mail}
-          type="email"
-          placeholder="name@gmail.com"
-          required
-          autoComplete="email"
-          value={form.email}
-          onChange={(v) => setForm((f) => ({ ...f, email: v }))}
-        />
-        <Field
-          label="Password"
-          icon={Lock}
-          type="password"
-          placeholder="Enter your password"
-          required
-          autoComplete="current-password"
-          value={form.password}
-          onChange={(v) => setForm((f) => ({ ...f, password: v }))}
-        />
+  function handleOpenForgotModal() {
+    setResetEmail(form.email || '');
+    setResetSuccess(false);
+    setResetError('');
+    setShowForgotModal(true);
+    if (playChime) playChime('pop');
+  }
 
-        {authError && (
-          <div
-            className="p-2 sm:p-2.5 rounded-xl border text-xs font-medium animate-fade-in flex items-start gap-2"
+  async function handleSendResetEmail(e) {
+    e.preventDefault();
+    if (!resetEmail.trim()) return;
+    setIsResetLoading(true);
+    setResetError('');
+    const res = await resetPassword(resetEmail);
+    setIsResetLoading(false);
+    if (res.success) {
+      setResetSuccess(true);
+      if (playChime) playChime('chime');
+    } else {
+      setResetError(res.error || 'Failed to send reset email. Please try again.');
+    }
+  }
+
+  return (
+    <>
+      <AuthShell activeTab="login">
+        <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
+          <Field
+            label="Email Address"
+            icon={Mail}
+            type="email"
+            placeholder="name@gmail.com"
+            required
+            autoComplete="email"
+            value={form.email}
+            onChange={(v) => setForm((f) => ({ ...f, email: v }))}
+          />
+          <Field
+            label="Password"
+            actionLabel="Forgot password?"
+            onAction={handleOpenForgotModal}
+            icon={Lock}
+            type="password"
+            placeholder="Enter your password"
+            required
+            autoComplete="current-password"
+            value={form.password}
+            onChange={(v) => setForm((f) => ({ ...f, password: v }))}
+          />
+
+          {authError && (
+            <div
+              className="p-2 sm:p-2.5 rounded-xl border text-xs font-medium animate-fade-in flex items-start gap-2"
+              style={{
+                background: 'rgba(244,63,94,0.1)',
+                borderColor: 'rgba(244,63,94,0.25)',
+                color: '#fb7185',
+              }}
+            >
+              <span>{authError}</span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl text-white py-2.5 text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-1"
             style={{
-              background: 'rgba(244,63,94,0.1)',
-              borderColor: 'rgba(244,63,94,0.25)',
-              color: '#fb7185',
+              background: 'var(--accent-gradient)',
+              boxShadow: '0 6px 20px var(--accent-glow)',
             }}
           >
-            <span>{authError}</span>
-          </div>
-        )}
+            {isLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+            <span>{isLoading ? 'Signing in to OneDesk…' : 'Sign in to workspace'}</span>
+            {!isLoading && <ArrowRight size={14} />}
+          </button>
+        </form>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl text-white py-2.5 text-sm font-bold transition-all shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer mt-1"
-          style={{
-            background: 'var(--accent-gradient)',
-            boxShadow: '0 6px 20px var(--accent-glow)',
+        {/* Google Login Option (Coming Soon) */}
+        <GoogleAuthButton mode="login" />
+      </AuthShell>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <ForgotPasswordModal
+          email={resetEmail}
+          setEmail={setResetEmail}
+          isLoading={isResetLoading}
+          isSuccess={resetSuccess}
+          error={resetError}
+          onSubmit={handleSendResetEmail}
+          onClose={() => {
+            setShowForgotModal(false);
+            if (playChime) playChime('pop');
           }}
-        >
-          {isLoading ? <Loader2 size={16} className="animate-spin" /> : null}
-          <span>{isLoading ? 'Signing in to OneDesk…' : 'Sign in to workspace'}</span>
-          {!isLoading && <ArrowRight size={14} />}
-        </button>
-      </form>
-
-      {/* Google Login Option (Coming Soon) */}
-      <GoogleAuthButton mode="login" />
-    </AuthShell>
+        />
+      )}
+    </>
   );
 }
 
@@ -457,7 +510,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
   );
 }
 
-export function Field({ icon: Icon, type = 'text', placeholder, value, onChange, required, label, ...rest }) {
+export function Field({ icon: Icon, type = 'text', placeholder, value, onChange, required, label, actionLabel, onAction, ...rest }) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
   const effectiveType = isPassword ? (showPassword ? 'text' : 'password') : type;
@@ -465,9 +518,27 @@ export function Field({ icon: Icon, type = 'text', placeholder, value, onChange,
   return (
     <div className="space-y-1">
       {label && (
-        <label className="block text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--text-muted)' }}>
-          {label}
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="block text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--text-muted)' }}>
+            {label}
+          </label>
+          {actionLabel && (
+            <button
+              type="button"
+              onClick={onAction}
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-[10px] sm:text-[11px] font-bold tracking-tight transition-all duration-200 shadow-sm hover:brightness-110 hover:scale-105 active:scale-95 cursor-pointer select-none"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--accent-color)',
+                boxShadow: '0 2px 8px -2px var(--accent-glow)',
+              }}
+            >
+              <KeyRound size={11} strokeWidth={2.4} />
+              <span>{actionLabel}</span>
+            </button>
+          )}
+        </div>
       )}
       <div className="relative flex items-center">
         {Icon && (
@@ -799,6 +870,198 @@ export function SystemInfoButton() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+export function ForgotPasswordModal({
+  email,
+  setEmail,
+  isLoading,
+  isSuccess,
+  error,
+  onSubmit,
+  onClose,
+}) {
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Blurred Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/60 transition-opacity animate-fade-in"
+        style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+        onClick={onClose}
+      />
+
+      {/* Modal Dialog Card */}
+      <div
+        ref={modalRef}
+        className="relative w-full max-w-[390px] rounded-[24px] border p-5 sm:p-6 backdrop-blur-2xl shadow-2xl overflow-hidden animate-sheet-bounce z-10 select-none"
+        style={{
+          background: 'var(--bg-card-solid)',
+          borderColor: 'var(--border-card)',
+          boxShadow: '0 25px 60px -12px var(--accent-glow), 0 12px 30px rgba(0,0,0,0.5)',
+        }}
+      >
+        {/* Top Specular Line Highlight */}
+        <div
+          className="absolute top-0 inset-x-8 h-px"
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+          }}
+        />
+
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-10 h-10 rounded-xl border flex items-center justify-center shadow-md shrink-0"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card)',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <KeyRound size={20} />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold tracking-tight font-display" style={{ color: 'var(--text-primary)' }}>
+                Reset Password
+              </h3>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Recover access to your workspace
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-lg border transition-all hover:bg-white/5 active:scale-95 cursor-pointer"
+            style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+            title="Close"
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Body */}
+        {isSuccess ? (
+          <div className="space-y-4 py-2 animate-fade-in text-center">
+            <div
+              className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center border shadow-lg"
+              style={{
+                background: 'rgba(16, 185, 129, 0.12)',
+                borderColor: 'rgba(16, 185, 129, 0.3)',
+                color: '#34d399',
+              }}
+            >
+              <CheckCircle2 size={32} />
+            </div>
+
+            <div className="space-y-1.5">
+              <h4 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                Password Reset Link Sent!
+              </h4>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                We've sent a password reset link to <strong style={{ color: 'var(--text-primary)' }}>{email}</strong>. Please check your inbox and spam/junk folder.
+              </p>
+            </div>
+
+            <div
+              className="p-2.5 rounded-xl border text-[11px] text-left flex items-start gap-2"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              <Info size={14} className="shrink-0 mt-0.5" style={{ color: 'var(--accent-color)' }} />
+              <span>Click the reset link in your email (check Spam if not in Inbox) to set a new password, then sign in.</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full py-2.5 rounded-xl sm:rounded-2xl text-white text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer mt-2"
+              style={{
+                background: 'var(--accent-gradient)',
+                boxShadow: '0 4px 16px var(--accent-glow)',
+              }}
+            >
+              Back to Sign in
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={onSubmit} className="space-y-3">
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              Enter your registered email address below and we'll send you an official password reset link. <span className="font-semibold" style={{ color: 'var(--accent-color)' }}>(Please check your spam/junk mail folder too!)</span>
+            </p>
+
+            <Field
+              label="Email Address"
+              icon={Mail}
+              type="email"
+              placeholder="name@gmail.com"
+              required
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={setEmail}
+            />
+
+            {error && (
+              <div
+                className="p-2 sm:p-2.5 rounded-xl border text-xs font-medium animate-fade-in flex items-start gap-2"
+                style={{
+                  background: 'rgba(244,63,94,0.1)',
+                  borderColor: 'rgba(244,63,94,0.25)',
+                  color: '#fb7185',
+                }}
+              >
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isLoading}
+                className="flex-1 py-2.5 rounded-xl sm:rounded-2xl border text-xs font-bold transition-all hover:bg-white/5 active:scale-95 cursor-pointer"
+                style={{
+                  borderColor: 'var(--border-card)',
+                  color: 'var(--text-muted)',
+                  background: 'var(--bg-surface)',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading || !email.trim()}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl sm:rounded-2xl text-white text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                style={{
+                  background: 'var(--accent-gradient)',
+                  boxShadow: '0 4px 16px var(--accent-glow)',
+                }}
+              >
+                {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Send size={13} />}
+                <span>{isLoading ? 'Sending…' : 'Send reset link'}</span>
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

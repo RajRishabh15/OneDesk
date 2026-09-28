@@ -9,6 +9,7 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider,
   updatePassword as fbUpdatePassword,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -350,8 +351,25 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function resetPassword(email) {
+    setAuthError('');
+    const validation = validateGenuineEmail(email);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+
+    try {
+      const cleanEmail = validation.email;
+      await sendPasswordResetEmail(auth, cleanEmail);
+      return { success: true };
+    } catch (err) {
+      const msg = friendlyError(err.code);
+      return { success: false, error: msg };
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile, deleteAccount, changePassword }}>
+    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile, deleteAccount, changePassword, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
@@ -373,6 +391,7 @@ function friendlyError(code) {
     case 'auth/weak-password':
       return 'Password must be at least 6 characters.';
     case 'auth/user-not-found':
+      return 'No account found with this email address.';
     case 'auth/wrong-password':
     case 'auth/invalid-credential':
       return 'Email or password is incorrect.';

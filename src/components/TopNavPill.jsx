@@ -1042,7 +1042,7 @@ export default function TopNavPill() {
       ════════════════════════════════════════════ */}
       {/* ════════════════════════════════════════════
           MOBILE BOTTOM BAR  (< md)
-          Liquid Blur Floating Island Dock
+          Apple-style Liquid Glass Island Dock
       ════════════════════════════════════════════ */}
       {/* Bottom Soft Dissolve Fade — smoothly blends page content beneath the dock */}
       <div
@@ -1052,7 +1052,7 @@ export default function TopNavPill() {
         }}
       />
 
-      {/* Floating Island Dock with Liquid Blur Aesthetics */}
+      {/* Floating Island Dock with Apple Liquid Glass Aesthetics */}
       <nav
         className="md:hidden fixed bottom-3 inset-x-3 max-w-[410px] mx-auto z-40 select-none"
         style={{
@@ -1064,20 +1064,20 @@ export default function TopNavPill() {
           className="absolute -inset-1 rounded-full pointer-events-none z-0"
           style={{
             background: 'radial-gradient(ellipse at 50% 50%, var(--accent-glow) 0%, transparent 70%)',
-            filter: 'blur(20px)',
-            opacity: 0.5,
+            filter: 'blur(14px)',
+            opacity: 0.35,
           }}
         />
 
-        {/* Liquid Blur Capsule Hull */}
+        {/* Liquid Glass Capsule Hull */}
         <div
           className="h-[60px] px-2 rounded-full flex items-center justify-between relative overflow-hidden transition-all duration-300 z-10"
           style={{
-            background: 'var(--bg-overlay)',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%), var(--bg-overlay)',
             border: '1px solid var(--border-card)',
-            backdropFilter: 'blur(28px) saturate(190%) contrast(105%)',
-            WebkitBackdropFilter: 'blur(28px) saturate(190%) contrast(105%)',
-            boxShadow: '0 10px 30px -4px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 0 16px rgba(255, 255, 255, 0.04)',
+            backdropFilter: 'blur(14px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+            boxShadow: '0 8px 28px -4px var(--accent-glow), 0 2px 10px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
           }}
         >
           {/* 1. Home */}
@@ -1098,9 +1098,9 @@ export default function TopNavPill() {
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-subtle)',
                     color: 'var(--accent-color)',
-                    boxShadow: '0 2px 10px var(--accent-glow)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
+                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
                   }
                 : {
                     border: '1px solid transparent',
@@ -1146,9 +1146,9 @@ export default function TopNavPill() {
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-subtle)',
                     color: 'var(--accent-color)',
-                    boxShadow: '0 2px 10px var(--accent-glow)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
+                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
                   }
                 : {
                     border: '1px solid transparent',
@@ -1230,9 +1230,9 @@ export default function TopNavPill() {
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-subtle)',
                     color: 'var(--accent-color)',
-                    boxShadow: '0 2px 10px var(--accent-glow)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
+                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
                   }
                 : {
                     border: '1px solid transparent',
@@ -1278,9 +1278,9 @@ export default function TopNavPill() {
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-subtle)',
                     color: 'var(--accent-color)',
-                    boxShadow: '0 2px 10px var(--accent-glow)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
+                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
                   }
                 : {
                     border: '1px solid transparent',
