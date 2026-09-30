@@ -42,24 +42,50 @@ export default function Notes() {
 
   return (
     <div className="max-w-2xl mx-auto pt-4 sm:pt-14 pb-28 sm:pb-20 px-3.5 sm:px-4 select-none animate-fade-in">
-      {/* ── Outer Card Wrapper with Moving Green Light Beam ── */}
-      <div className="relative p-[2px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_0_35px_rgba(52,211,153,0.16)] transition-all">
-        {/* Continuous Traveling Green Light Perimeter */}
-        <div
-          className="absolute -inset-[150%] animate-moving-green-light pointer-events-none"
-          style={{
-            background:
-              'conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 270deg, rgba(16, 185, 129, 0.45) 315deg, #10b981 338deg, #34d399 352deg, #a7f3d0 360deg)',
-          }}
-        />
-
-        {/* Inner Card Container */}
-        <div
-          className="relative rounded-[14px] sm:rounded-[22px] p-6 sm:p-10 md:p-12 text-center backdrop-blur-2xl z-10"
-          style={{
-            background: 'var(--bg-card)',
-          }}
+      {/* ── Main Box with Continuous Progressive Moving Green Light Border ── */}
+      <div
+        className="relative rounded-2xl sm:rounded-3xl border p-6 sm:p-10 md:p-12 text-center backdrop-blur-2xl shadow-xl transition-all overflow-hidden"
+        style={{
+          background: 'var(--bg-card)',
+          borderColor: 'var(--border-card)',
+        }}
+      >
+        {/* SVG Perimeter Moving Green Light Beam */}
+        <svg
+          className="pointer-events-none absolute inset-0 w-full h-full overflow-visible rounded-2xl sm:rounded-3xl z-20"
+          xmlns="http://www.w3.org/2000/svg"
         >
+          <defs>
+            <linearGradient id="movingGreenBeam" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+              <stop offset="40%" stopColor="#10b981" stopOpacity="0.8" />
+              <stop offset="70%" stopColor="#34d399" stopOpacity="1" />
+              <stop offset="100%" stopColor="#a7f3d0" stopOpacity="0.95" />
+            </linearGradient>
+            <filter id="greenLightGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            rx="24"
+            ry="24"
+            fill="none"
+            stroke="url(#movingGreenBeam)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            pathLength="100"
+            className="animate-border-beam"
+            filter="url(#greenLightGlow)"
+          />
+        </svg>
           {/* Simple Note Icon */}
           <div className="flex justify-center mb-4 sm:mb-5">
             <div
@@ -153,7 +179,6 @@ export default function Notes() {
             </button>
           </div>
         </div>
-      </div>
     </div>
   );
 }
