@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { StickyNote, ShieldCheck, ArrowRight } from 'lucide-react';
+import { StickyNote, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
 export function LabeledInput({ label, value, onChange, placeholder = '', type = 'text', required = false, ...rest }) {
@@ -42,94 +42,114 @@ export default function Notes() {
 
   return (
     <div className="max-w-2xl mx-auto pt-6 sm:pt-14 pb-28 sm:pb-20 px-4 select-none animate-fade-in">
-      <div
-        className="rounded-3xl border p-8 sm:p-12 text-center backdrop-blur-xl shadow-lg relative overflow-hidden"
-        style={{
-          background: 'var(--bg-card)',
-          borderColor: 'var(--border-card)',
-        }}
-      >
-        {/* Simple Note Icon */}
-        <div className="flex justify-center mb-5">
+      {/* ── Outer Card Wrapper with Moving Green Light Beam ── */}
+      <div className="relative p-[2px] rounded-3xl overflow-hidden shadow-[0_0_35px_rgba(52,211,153,0.18)] transition-all">
+        {/* Continuous Traveling Green Light Perimeter */}
+        <div
+          className="absolute -inset-[150%] animate-moving-green-light pointer-events-none"
+          style={{
+            background:
+              'conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 270deg, rgba(16, 185, 129, 0.45) 315deg, #10b981 338deg, #34d399 352deg, #a7f3d0 360deg)',
+          }}
+        />
+
+        {/* Inner Card Container */}
+        <div
+          className="relative rounded-[22px] p-8 sm:p-12 text-center backdrop-blur-2xl z-10"
+          style={{
+            background: 'var(--bg-card)',
+          }}
+        >
+          {/* Simple Note Icon */}
+          <div className="flex justify-center mb-5">
+            <div
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border flex items-center justify-center shadow-sm"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <StickyNote size={28} />
+            </div>
+          </div>
+
+          {/* Clean Status Tag */}
           <div
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border flex items-center justify-center shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-semibold mb-4"
             style={{
               background: 'var(--bg-surface)',
               borderColor: 'var(--border-subtle)',
-              color: 'var(--accent-color)',
+              color: 'var(--text-muted)',
             }}
           >
-            <StickyNote size={28} />
+            <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+            <span>Under Redesign</span>
           </div>
-        </div>
 
-        {/* Clean Status Tag */}
-        <div
-          className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-semibold mb-4"
-          style={{
-            background: 'var(--bg-surface)',
-            borderColor: 'var(--border-subtle)',
-            color: 'var(--text-muted)',
-          }}
-        >
-          <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
-          <span>Under Redesign</span>
-        </div>
-
-        {/* Heading */}
-        <h1
-          className="text-xl sm:text-2xl md:text-3xl font-bold font-display tracking-tight"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          Notes Redesign in Progress
-        </h1>
-
-        {/* Simple Description */}
-        <p
-          className="mt-3 text-xs sm:text-sm max-w-md mx-auto leading-relaxed"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          We’re refreshing the Notes page with a cleaner look and smoother workflow. Coming alive soon — coming back very soon!
-        </p>
-
-        <div className="mt-2.5">
-          <span
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold tracking-wide"
-            style={{ color: 'var(--accent-color)' }}
+          {/* Heading */}
+          <h1
+            className="text-xl sm:text-2xl md:text-3xl font-bold font-display tracking-tight"
+            style={{ color: 'var(--text-primary)' }}
           >
-            Coming back very soon ✨
-          </span>
-        </div>
+            Notes Redesign in Progress
+          </h1>
 
-        {/* Data Safe & Synced Badge */}
-        <div
-          className="mt-6 inline-flex items-center gap-2.5 px-4 py-2 rounded-xl border text-xs"
-          style={{
-            background: 'var(--bg-surface)',
-            borderColor: 'var(--border-subtle)',
-          }}
-        >
-          <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
-          <span className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
-            All your existing notes and data remain completely safe and synced.
-          </span>
-        </div>
+          {/* Simple Description */}
+          <p
+            className="mt-3 text-xs sm:text-sm max-w-md mx-auto leading-relaxed"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            We’re refreshing the Notes page with a cleaner look and smoother workflow.
+          </p>
 
-        {/* Simple Navigation Action */}
-        <div className="mt-8 flex justify-center">
-          <button
-            type="button"
-            onClick={() => handleNavigate('/')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
+          {/* Round Bubble for Coming Back Very Soon */}
+          <div className="mt-5 flex justify-center">
+            <div
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-full border shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(52, 211, 153, 0.08))',
+                borderColor: 'rgba(52, 211, 153, 0.4)',
+                boxShadow: '0 0 18px rgba(52, 211, 153, 0.2)',
+              }}
+            >
+              <Sparkles size={14} className="text-emerald-400 animate-pulse shrink-0" />
+              <span className="text-xs sm:text-sm font-bold tracking-wide text-emerald-300 font-display">
+                Coming back very soon ✨
+              </span>
+            </div>
+          </div>
+
+          {/* Data Safe & Synced Badge */}
+          <div
+            className="mt-6 inline-flex items-center gap-2.5 px-4 py-2 rounded-xl border text-xs"
             style={{
-              background: 'var(--accent-color)',
-              borderColor: 'transparent',
-              color: '#ffffff',
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
             }}
           >
-            <span>Back to Dashboard</span>
-            <ArrowRight size={14} />
-          </button>
+            <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+            <span className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
+              All your existing notes and data remain completely safe and synced.
+            </span>
+          </div>
+
+          {/* Simple Navigation Action */}
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={() => handleNavigate('/')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
+              style={{
+                background: 'var(--accent-color)',
+                borderColor: 'transparent',
+                color: '#ffffff',
+              }}
+            >
+              <span>Back to Dashboard</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -638,3 +638,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .theme-light input[type="time"]::-webkit-calendar-picker-indicator {
   filter: none;
 }
+
+/* ─── Moving Border Light Animation ──────────────────────── */
+@keyframes spinBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-moving-green-light {
+  animation: spinBorder 4.5s linear infinite;
+}
+
