@@ -89,8 +89,17 @@ export default function Notes() {
           className="mt-3 text-xs sm:text-sm max-w-md mx-auto leading-relaxed"
           style={{ color: 'var(--text-muted)' }}
         >
-          We’re refreshing the Notes page with a cleaner look and smoother workflow. Coming alive soon!
+          We’re refreshing the Notes page with a cleaner look and smoother workflow. Coming alive soon — coming back very soon!
         </p>
+
+        <div className="mt-2.5">
+          <span
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold tracking-wide"
+            style={{ color: 'var(--accent-color)' }}
+          >
+            Coming back very soon ✨
+          </span>
+        </div>
 
         {/* Data Safe & Synced Badge */}
         <div
