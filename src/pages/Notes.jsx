@@ -41,9 +41,9 @@ export default function Notes() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto pt-6 sm:pt-14 pb-28 sm:pb-20 px-4 select-none animate-fade-in">
+    <div className="max-w-2xl mx-auto pt-4 sm:pt-14 pb-28 sm:pb-20 px-3.5 sm:px-4 select-none animate-fade-in">
       {/* ── Outer Card Wrapper with Moving Green Light Beam ── */}
-      <div className="relative p-[2px] rounded-3xl overflow-hidden shadow-[0_0_35px_rgba(52,211,153,0.18)] transition-all">
+      <div className="relative p-[2px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[0_0_35px_rgba(52,211,153,0.16)] transition-all">
         {/* Continuous Traveling Green Light Perimeter */}
         <div
           className="absolute -inset-[150%] animate-moving-green-light pointer-events-none"
@@ -55,41 +55,41 @@ export default function Notes() {
 
         {/* Inner Card Container */}
         <div
-          className="relative rounded-[22px] p-8 sm:p-12 text-center backdrop-blur-2xl z-10"
+          className="relative rounded-[14px] sm:rounded-[22px] p-6 sm:p-10 md:p-12 text-center backdrop-blur-2xl z-10"
           style={{
             background: 'var(--bg-card)',
           }}
         >
           {/* Simple Note Icon */}
-          <div className="flex justify-center mb-5">
+          <div className="flex justify-center mb-4 sm:mb-5">
             <div
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border flex items-center justify-center shadow-sm"
+              className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl border flex items-center justify-center shadow-sm"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-subtle)',
                 color: 'var(--accent-color)',
               }}
             >
-              <StickyNote size={28} />
+              <StickyNote size={24} className="sm:w-7 sm:h-7" />
             </div>
           </div>
 
           {/* Clean Status Tag */}
           <div
-            className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border text-[11px] font-semibold mb-4"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full border text-[10px] sm:text-[11px] font-semibold mb-3 sm:mb-4"
             style={{
               background: 'var(--bg-surface)',
               borderColor: 'var(--border-subtle)',
               color: 'var(--text-muted)',
             }}
           >
-            <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
             <span>Under Redesign</span>
           </div>
 
           {/* Heading */}
           <h1
-            className="text-xl sm:text-2xl md:text-3xl font-bold font-display tracking-tight"
+            className="text-lg sm:text-2xl md:text-3xl font-bold font-display tracking-tight leading-snug"
             style={{ color: 'var(--text-primary)' }}
           >
             Notes Redesign in Progress
@@ -97,49 +97,51 @@ export default function Notes() {
 
           {/* Simple Description */}
           <p
-            className="mt-3 text-xs sm:text-sm max-w-md mx-auto leading-relaxed"
+            className="mt-2 sm:mt-3 text-xs sm:text-sm max-w-md mx-auto leading-relaxed"
             style={{ color: 'var(--text-muted)' }}
           >
             We’re refreshing the Notes page with a cleaner look and smoother workflow.
           </p>
 
           {/* Round Bubble for Coming Back Very Soon */}
-          <div className="mt-5 flex justify-center">
+          <div className="mt-4 sm:mt-5 flex justify-center">
             <div
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-full border shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border shadow-md backdrop-blur-md transition-all duration-300 hover:scale-105 max-w-full"
               style={{
                 background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(52, 211, 153, 0.08))',
                 borderColor: 'rgba(52, 211, 153, 0.4)',
                 boxShadow: '0 0 18px rgba(52, 211, 153, 0.2)',
               }}
             >
-              <Sparkles size={14} className="text-emerald-400 animate-pulse shrink-0" />
-              <span className="text-xs sm:text-sm font-bold tracking-wide text-emerald-300 font-display">
+              <Sparkles size={13} className="text-emerald-400 animate-pulse shrink-0 sm:w-3.5 sm:h-3.5" />
+              <span className="text-[11px] sm:text-sm font-bold tracking-wide text-emerald-300 font-display truncate">
                 Coming back very soon ✨
               </span>
             </div>
           </div>
 
           {/* Data Safe & Synced Badge */}
-          <div
-            className="mt-6 inline-flex items-center gap-2.5 px-4 py-2 rounded-xl border text-xs"
-            style={{
-              background: 'var(--bg-surface)',
-              borderColor: 'var(--border-subtle)',
-            }}
-          >
-            <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
-            <span className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
-              All your existing notes and data remain completely safe and synced.
-            </span>
+          <div className="mt-5 sm:mt-6 flex justify-center">
+            <div
+              className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border text-xs max-w-md text-left"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+              <span className="text-[10px] sm:text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                All your existing notes and data remain completely safe and synced.
+              </span>
+            </div>
           </div>
 
           {/* Simple Navigation Action */}
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 sm:mt-8 flex justify-center">
             <button
               type="button"
               onClick={() => handleNavigate('/')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
               style={{
                 background: 'var(--accent-color)',
                 borderColor: 'transparent',
