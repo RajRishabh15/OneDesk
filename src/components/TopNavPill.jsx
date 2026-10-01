@@ -133,7 +133,7 @@ export default function TopNavPill() {
     try {
       await logout();
     } finally {
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     }
   }
 

@@ -420,7 +420,7 @@ export default function Settings() {
 
       if (playChime) playChime('pop');
       setDeleteModalOpen(false);
-      navigate('/login');
+      navigate('/');
     } catch (err) {
       setDeleteError(err.message || 'An unexpected error occurred while deleting account.');
       setDeleting(false);
@@ -514,7 +514,7 @@ export default function Settings() {
 
   async function handleLogout() {
     await logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   }
 
   function handleExport() {

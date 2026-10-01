@@ -16,6 +16,7 @@ import CalendarPage from './pages/Calendar';
 import Settings from './pages/Settings';
 import Appearance from './pages/Appearance';
 import FunZone from './pages/FunZone';
+import Landing from './pages/Landing';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <AuthProvider>
           <BrowserRouter>
             <Routes>
+            <Route path="/landing" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route
