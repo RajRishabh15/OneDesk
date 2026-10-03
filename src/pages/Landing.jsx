@@ -346,7 +346,7 @@ export default function Landing() {
                               completedDemoTask ? 'line-through text-[#a8a29e] decoration-rose-500 decoration-2' : 'text-[#1c1917]'
                             }`}
                           >
-                            Ship OneDesk v2.0 Production Release
+                            Ship OneDesk v3.0 Production Release
                           </span>
                         </div>
                         <span className="shrink-0 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-300">
@@ -412,7 +412,7 @@ export default function Landing() {
 
                       <div className="p-2.5 rounded-lg border border-[#e5ddcf] bg-[#faf7f0] flex flex-col xs:flex-row items-start xs:items-center justify-between gap-1 text-xs text-[#57534e]">
                         <span className="font-handwriting text-base xs:text-lg text-emerald-800">⚡ everything autosaves in real time</span>
-                        <span className="font-mono text-[9px] xs:text-[10px] font-bold text-[#1c1917] shrink-0">v2.0 Notebook Engine</span>
+                        <span className="font-mono text-[9px] xs:text-[10px] font-bold text-[#1c1917] shrink-0">v3.0 Notebook Engine</span>
                       </div>
 
                       {/* Notebook styled "onedesk" doodle watermark */}

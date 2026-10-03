@@ -311,7 +311,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
               color: 'var(--accent-color)',
             }}
           >
-            OS v2.0
+            OS v3.0
           </span>
         </div>
       </div>
@@ -828,7 +828,7 @@ export function SystemInfoButton() {
                   color: 'var(--text-primary)',
                 }}
               >
-                v2.9.26
+                v3.10.26
               </span>
             </div>
 
