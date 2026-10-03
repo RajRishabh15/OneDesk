@@ -4,6 +4,7 @@ import TopNavPill from './TopNavPill';
 import GhostFibers from './GhostFibers';
 import LoadingScreen from './LoadingScreen';
 import FunZoneAnnouncement from './FunZoneAnnouncement';
+import NotebookAnnouncement from './NotebookAnnouncement';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
 import { useData } from '../context/DataContext';
@@ -116,7 +117,8 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      {/* Fun Zone coming-soon announcement — shows once per session */}
+      {/* Announcements — Notebook Theme & Fun Zone */}
+      <NotebookAnnouncement />
       <FunZoneAnnouncement />
     </div>
   );
