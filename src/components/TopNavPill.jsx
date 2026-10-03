@@ -24,6 +24,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
+import { useTheme } from '../context/ThemeContext';
 import OneDeskLogo from './OneDeskLogo';
 
 const navLinks = [
@@ -70,7 +71,9 @@ export default function TopNavPill() {
   const { user, logout } = useAuth();
   const { tasks, notes, events, addTask } = useData();
   const { settings, playChime } = useSettings();
+  const { theme } = useTheme();
   const navigate = useNavigate();
+  const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
 
   const [query, setQuery]                       = useState('');
   const [searchOpen, setSearchOpen]             = useState(false);
@@ -220,14 +223,16 @@ export default function TopNavPill() {
       ════════════════════════════════════════════ */}
       <header className="hidden md:flex fixed top-4 sm:top-5 inset-x-0 z-40 justify-center px-6 pointer-events-none">
         <div
-          className="pointer-events-auto relative flex items-center gap-3 px-4 sm:px-5 py-2.5 transition-all duration-300"
+          className={`pointer-events-auto relative flex items-center gap-3 px-4 sm:px-5 py-2.5 transition-all duration-300${isNotebook ? ' nb-bookmark-pill' : ''}`}
           style={{
             background:     'var(--bg-card-solid)',
             borderRadius:   '24px',
             border:         '1px solid var(--border-card)',
             backdropFilter: 'blur(32px)',
             WebkitBackdropFilter: 'blur(32px)',
-            boxShadow:      '0 12px 45px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset',
+            boxShadow:      isNotebook
+              ? '0 6px 28px rgba(120,80,30,0.18), 0 1px 0 rgba(255,255,255,0.06) inset'
+              : '0 12px 45px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset',
             width:          'fit-content',
             maxWidth:       'min(1100px, calc(100vw - 48px))',
           }}

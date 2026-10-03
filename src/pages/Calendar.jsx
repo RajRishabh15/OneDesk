@@ -12,8 +12,7 @@ import {
   Layers,
   ListTodo,
   Tag,
-  AlertCircle,
-  X
+  AlertCircle
 } from 'lucide-react';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
@@ -22,6 +21,7 @@ import Toggle from '../components/Toggle';
 import CustomDatePicker from '../components/CustomDatePicker';
 import CustomTimePicker from '../components/CustomTimePicker';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../context/ThemeContext';
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -92,6 +92,8 @@ const inputStyle = {
 /* ── Main Schedule Page ─────────────────────────────────── */
 export default function CalendarPage() {
   const { events, tasks, addEvent, updateEvent, deleteEvent } = useData();
+  const { theme } = useTheme();
+  const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
   const [view, setView] = useState('planner'); // 'planner' | 'agenda' | 'week' | 'month'
   const [cursor, setCursor] = useState(new Date());
   const [filterType, setFilterType] = useState('all'); // 'all' | 'events' | 'tasks'
@@ -227,16 +229,21 @@ export default function CalendarPage() {
       {/* ── Page Header ────────────────────────────────────────── */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 pb-4"
-        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+        style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)' }}
       >
         <div>
+          {isNotebook && (
+            <div className="text-xs font-semibold mb-1 tracking-wider uppercase nb-hand text-[var(--accent-color)]">
+              ✎ Daily Agenda &amp; Planner · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
               Schedule &amp; Planner
             </h1>
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border"
-              style={{
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border${isNotebook ? ' nb-stamp nb-stamp-memo' : ''}`}
+              style={isNotebook ? {} : {
                 color: 'var(--accent-color)',
                 borderColor: 'var(--border-card)',
                 background: 'var(--bg-surface)',
@@ -268,9 +275,19 @@ export default function CalendarPage() {
         
         {/* TOP LEFT (5 cols): Interactive Calendar & Date Navigator */}
         <div className="lg:col-span-5 flex flex-col">
-          <Card className="p-4 sm:p-5 flex-1 flex flex-col justify-between" hover={false}>
+          <Card className={`p-4 sm:p-5 flex-1 flex flex-col justify-between${isNotebook ? ' nb-brass-corner' : ''}`} hover={false}>
+            {isNotebook && (
+              <div className="nb-wire-binder -mt-2 -mx-2 mb-3">
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+              </div>
+            )}
             <div>
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5" style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center gap-2.5">
                   <div
                     className="flex h-8 w-8 items-center justify-center rounded-xl"
@@ -407,9 +424,11 @@ export default function CalendarPage() {
 
         {/* TOP RIGHT (7 cols): Important Items & Deadlines */}
         <div className="lg:col-span-7 flex flex-col">
-          <Card className="p-4 sm:p-5 flex-1 flex flex-col justify-between" hover={false}>
+          <Card className={`p-4 sm:p-5 flex-1 flex flex-col justify-between relative overflow-hidden${isNotebook ? ' nb-brass-corner' : ''}`} hover={false}>
+            {isNotebook && <div className="nb-ribbon-bookmark" />}
+            {isNotebook && <div className="nb-paperclip" />}
             <div>
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5 pb-2.5" style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center gap-2.5">
                   <div
                     className="flex h-8 w-8 items-center justify-center rounded-xl"
@@ -635,6 +654,7 @@ export default function CalendarPage() {
             itemsOn={itemsOn}
             onSlotClick={(time) => openNew(localISO(cursor), time)}
             onItemClick={openEdit}
+            isNotebook={isNotebook}
           />
         )}
 
@@ -644,6 +664,7 @@ export default function CalendarPage() {
             today={today}
             onItemClick={openEdit}
             onNewClick={openNew}
+            isNotebook={isNotebook}
           />
         )}
 
@@ -654,6 +675,7 @@ export default function CalendarPage() {
             itemsOn={itemsOn}
             onDayClick={(iso) => openNew(iso)}
             onItemClick={openEdit}
+            isNotebook={isNotebook}
           />
         )}
 
@@ -664,6 +686,7 @@ export default function CalendarPage() {
             itemsOn={itemsOn}
             onDayClick={(iso) => openNew(iso)}
             onItemClick={openEdit}
+            isNotebook={isNotebook}
           />
         )}
       </div>
@@ -824,7 +847,7 @@ export default function CalendarPage() {
 }
 
 /* ── VIEW 1: Hourly Planner / Timeline View ──────────────── */
-function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
+function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick, isNotebook }) {
   const iso = localISO(cursor);
   const dayItems = itemsOn(iso);
   const isToday = iso === today;
@@ -863,12 +886,33 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
 
   return (
     <div className="space-y-4">
+      {/* Notebook Diary Header Bar */}
+      {isNotebook && (
+        <div
+          className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 rounded-2xl border text-xs"
+          style={{
+            background: 'var(--bg-surface)',
+            borderColor: 'var(--nb-rule-color)',
+            boxShadow: 'var(--nb-shadow)',
+          }}
+        >
+          <span className="nb-hand text-base font-bold text-[var(--accent-color)]">
+            ✎ Daily Diary &amp; Schedule · {new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+          </span>
+          <div className="flex items-center gap-3 text-[11px] font-mono opacity-80">
+            <span>Weather: ☀️ ⛅ 🌧️ ❄️</span>
+            <span>·</span>
+            <span>Mood: ⚡ ☕ 🎯 📖</span>
+          </div>
+        </div>
+      )}
+
       {/* Top Banner for All-day / Unscheduled items */}
       {allDayItems.length > 0 && (
-        <Card className="p-3.5" hover={false}>
+        <Card className={`p-3.5${isNotebook ? ' nb-ruled nb-dog-ear' : ''}`} hover={false}>
           <div className="flex items-center gap-2 mb-2">
             <Tag size={12} style={{ color: '#818cf8' }} />
-            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider${isNotebook ? ' nb-stamp nb-stamp-memo' : ''}`} style={isNotebook ? {} : { color: 'var(--text-muted)' }}>
               All-Day &amp; Due Deadlines ({allDayItems.length})
             </span>
           </div>
@@ -877,7 +921,7 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
               <div
                 key={item.id}
                 onClick={() => onItemClick(item)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium cursor-pointer transition-all hover:brightness-125"
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium cursor-pointer transition-all hover:brightness-125${isNotebook ? ' nb-dog-ear' : ''}`}
                 style={{
                   background: item.isTask ? 'rgba(251,191,36,0.12)' : 'rgba(99,102,241,0.12)',
                   borderColor: item.isTask ? 'rgba(251,191,36,0.3)' : 'rgba(99,102,241,0.3)',
@@ -887,7 +931,7 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
                 <span>{item.isTask ? '☑' : '📅'}</span>
                 <span className="font-semibold">{item.title}</span>
                 {item.priority && (
-                  <span className="text-[9px] uppercase px-1.5 py-0.2 rounded-full border opacity-80">
+                  <span className={`text-[9px] uppercase px-1.5 py-0.2 rounded-full border opacity-80${isNotebook ? ' nb-stamp' : ''}`}>
                     {item.priority}
                   </span>
                 )}
@@ -898,7 +942,20 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
       )}
 
       {/* Hourly Timeline Grid */}
-      <Card className="p-4 sm:p-5 relative overflow-hidden" hover={false}>
+      <Card className={`p-4 sm:p-5 relative overflow-hidden${isNotebook ? ' nb-ruled nb-margin nb-brass-corner' : ''}`} hover={false}>
+        {isNotebook && (
+          <div className="nb-wire-binder -mt-2 -mx-2 mb-3">
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+          </div>
+        )}
+
         {/* Current Time Bar Indicator */}
         {currentMinutePercent !== null && (
           <div
@@ -928,7 +985,7 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
               >
                 {/* Time label */}
                 <div className="w-14 sm:w-16 shrink-0 pt-0.5 text-right pr-3 sm:pr-4">
-                  <span className="font-mono text-xs font-bold" style={{ color: 'var(--text-muted)' }}>
+                  <span className={`font-mono text-xs font-bold${isNotebook ? ' nb-hand text-sm' : ''}`} style={{ color: 'var(--text-muted)' }}>
                     {hourSlot}
                   </span>
                 </div>
@@ -940,7 +997,7 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
                       <div
                         key={item.id}
                         onClick={() => onItemClick(item)}
-                        className="group/item flex items-center justify-between gap-3 px-3 py-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all hover:scale-[1.01] hover:brightness-110 shadow-sm"
+                        className={`group/item flex items-center justify-between gap-3 px-3 py-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all hover:scale-[1.01] hover:brightness-110 shadow-sm${isNotebook ? ' nb-dog-ear' : ''}`}
                         style={{
                           background: item.isTask ? 'rgba(251,191,36,0.12)' : 'rgba(99,102,241,0.14)',
                           borderColor: item.isTask ? 'rgba(251,191,36,0.3)' : 'rgba(99,102,241,0.3)',
@@ -949,15 +1006,15 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <span
-                            className="font-mono text-[10px] px-1.5 py-0.5 rounded-md font-bold"
-                            style={{
+                            className={`font-mono text-[10px] px-1.5 py-0.5 rounded-md font-bold${isNotebook ? ' nb-stamp' : ''}`}
+                            style={isNotebook ? {} : {
                               background: item.isTask ? 'rgba(251,191,36,0.2)' : 'rgba(99,102,241,0.2)',
                               color: item.isTask ? '#fbbf24' : '#818cf8',
                             }}
                           >
                             {item.time}
                           </span>
-                          <span className="truncate">{item.title}</span>
+                          <span className={`truncate${isNotebook ? ' nb-hand text-sm font-bold' : ''}`}>{item.title}</span>
                         </div>
                         {item.description && (
                           <span className="hidden md:inline text-[11px] truncate max-w-[200px]" style={{ color: 'var(--text-muted)' }}>
@@ -991,7 +1048,7 @@ function PlannerView({ cursor, today, itemsOn, onSlotClick, onItemClick }) {
 }
 
 /* ── VIEW 2: Chronological Agenda Stream ──────────────────── */
-function AgendaView({ allItems, today, onItemClick, onNewClick }) {
+function AgendaView({ allItems, today, onItemClick, onNewClick, isNotebook }) {
   const tomorrow = localISO(new Date(Date.now() + 86400000));
   const weekLater = localISO(new Date(Date.now() + 7 * 86400000));
 
@@ -1012,7 +1069,7 @@ function AgendaView({ allItems, today, onItemClick, onNewClick }) {
 
   if (totalActive === 0) {
     return (
-      <Card className="p-8 text-center" hover={false}>
+      <Card className={`p-8 text-center${isNotebook ? ' nb-ruled' : ''}`} hover={false}>
         <EmptyState
           icon={CalendarDays}
           title="No upcoming events or deadlines"
@@ -1025,18 +1082,18 @@ function AgendaView({ allItems, today, onItemClick, onNewClick }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6${isNotebook ? ' nb-margin' : ''}`}>
       {sections.map((sec) => {
         if (sec.items.length === 0) return null;
         return (
           <div key={sec.id} className="space-y-3">
-            <div className="flex items-center justify-between pb-1" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <div className="flex items-center justify-between pb-1" style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)' }}>
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full" style={{ background: sec.accent }} />
-                <h3 className="text-sm font-bold font-display" style={{ color: 'var(--text-primary)' }}>
+                <h3 className={`text-sm font-bold font-display${isNotebook ? ' nb-hand text-base' : ''}`} style={{ color: 'var(--text-primary)' }}>
                   {sec.title}
                 </h3>
-                <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                <span className={`text-[11px]${isNotebook ? ' nb-stamp nb-stamp-memo' : ''}`} style={{ color: 'var(--text-muted)' }}>
                   ({sec.items.length})
                 </span>
               </div>
@@ -1050,15 +1107,15 @@ function AgendaView({ allItems, today, onItemClick, onNewClick }) {
                 <div
                   key={item.id}
                   onClick={() => onItemClick(item)}
-                  className="flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all hover:brightness-110 glass-card"
+                  className={`flex items-center gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all hover:brightness-110 glass-card${isNotebook ? ' nb-dog-ear nb-ruled' : ''}`}
                   style={{
                     borderColor: 'var(--border-card)',
                   }}
                 >
                   {/* Date badge */}
                   <div
-                    className="flex flex-col items-center justify-center w-12 h-12 rounded-xl border shrink-0 text-center"
-                    style={{
+                    className={`flex flex-col items-center justify-center w-12 h-12 rounded-xl border shrink-0 text-center${isNotebook ? ' nb-stamp' : ''}`}
+                    style={isNotebook ? {} : {
                       background: item.isTask ? 'rgba(251,191,36,0.1)' : 'rgba(99,102,241,0.1)',
                       borderColor: item.isTask ? 'rgba(251,191,36,0.25)' : 'rgba(99,102,241,0.25)',
                       color: item.isTask ? '#fbbf24' : '#818cf8',
@@ -1075,13 +1132,13 @@ function AgendaView({ allItems, today, onItemClick, onNewClick }) {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                      <p className={`text-sm font-semibold truncate${isNotebook ? ' nb-hand text-base font-bold' : ''}`} style={{ color: 'var(--text-primary)' }}>
                         {item.title}
                       </p>
                       {item.isTask && (
                         <span
-                          className="shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full border"
-                          style={{
+                          className={`shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full border${isNotebook ? ' nb-stamp nb-stamp-high' : ''}`}
+                          style={isNotebook ? {} : {
                             background: 'rgba(251,191,36,0.15)',
                             borderColor: 'rgba(251,191,36,0.3)',
                             color: '#fbbf24',
@@ -1099,8 +1156,8 @@ function AgendaView({ allItems, today, onItemClick, onNewClick }) {
 
                   {/* Status chip */}
                   <span
-                    className="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-xl border"
-                    style={{
+                    className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-xl border${isNotebook ? ' nb-stamp' : ''}`}
+                    style={isNotebook ? {} : {
                       background: 'var(--bg-surface)',
                       borderColor: 'var(--border-subtle)',
                       color: 'var(--text-muted)',
@@ -1119,7 +1176,7 @@ function AgendaView({ allItems, today, onItemClick, onNewClick }) {
 }
 
 /* ── VIEW 3: 7-Day Horizon Week View ─────────────────────── */
-function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
+function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick, isNotebook }) {
   const start = startOfWeek(cursor);
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(start);
@@ -1137,20 +1194,20 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
         return (
           <div
             key={iso}
-            className="rounded-[26px] p-3.5 min-h-[110px] sm:min-h-[220px] flex flex-col border glass-card transition-all"
+            className={`rounded-[26px] p-3.5 min-h-[110px] sm:min-h-[220px] flex flex-col border glass-card transition-all${isNotebook ? ' nb-dog-ear nb-ruled' : ''}`}
             style={{
-              borderColor: isToday ? 'rgba(99,102,241,0.5)' : 'var(--border-card)',
+              borderColor: isToday ? (isNotebook ? 'var(--accent-color)' : 'rgba(99,102,241,0.5)') : 'var(--border-card)',
               boxShadow: isToday ? '0 0 16px rgba(99,102,241,0.15)' : 'none',
             }}
           >
             {/* Day Header */}
-            <div className="flex items-center justify-between pb-2 mb-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <div className="flex items-center justify-between pb-2 mb-2" style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)' }}>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: isToday ? '#818cf8' : 'var(--text-muted)' }}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider block${isNotebook ? ' nb-hand text-xs' : ''}`} style={{ color: isToday ? '#818cf8' : 'var(--text-muted)' }}>
                   {d.toLocaleDateString(undefined, { weekday: 'short' })}
                 </span>
                 <span
-                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-black mt-0.5"
+                  className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-black mt-0.5${isNotebook && isToday ? ' nb-stamp' : ''}`}
                   style={{
                     background: isToday ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'transparent',
                     color: isToday ? '#ffffff' : 'var(--text-primary)',
@@ -1181,7 +1238,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
                   <div
                     key={item.id}
                     onClick={() => onItemClick(item)}
-                    className="p-2.5 rounded-2xl text-xs font-semibold cursor-pointer transition-all hover:scale-[1.02] border"
+                    className={`p-2.5 rounded-2xl text-xs font-semibold cursor-pointer transition-all hover:scale-[1.02] border${isNotebook ? ' nb-dog-ear' : ''}`}
                     style={{
                       background: item.isTask ? 'rgba(251,191,36,0.1)' : 'rgba(99,102,241,0.12)',
                       borderColor: item.isTask ? 'rgba(251,191,36,0.25)' : 'rgba(99,102,241,0.25)',
@@ -1193,7 +1250,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
                         {item.time}
                       </span>
                     )}
-                    <span className="block truncate text-[11px]" style={{ color: 'var(--text-primary)' }}>
+                    <span className={`block truncate text-[11px]${isNotebook ? ' nb-hand text-xs font-bold' : ''}`} style={{ color: 'var(--text-primary)' }}>
                       {item.isTask ? '☑ ' : ''}{item.title}
                     </span>
                   </div>
@@ -1208,7 +1265,7 @@ function WeekView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
 }
 
 /* ── VIEW 4: Panoramic Month Matrix ──────────────────────── */
-function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
+function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick, isNotebook }) {
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
   const gridStart = startOfWeek(new Date(year, month, 1));
@@ -1219,11 +1276,11 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
   });
 
   return (
-    <Card className="p-2 sm:p-4 md:p-5 overflow-hidden" hover={false}>
+    <Card className={`p-2 sm:p-4 md:p-5 overflow-hidden${isNotebook ? ' nb-brass-corner nb-ruled' : ''}`} hover={false}>
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center text-[10px] font-bold uppercase tracking-widest mb-2 sm:mb-3" style={{ color: 'var(--text-muted)' }}>
         {WEEKDAYS.map((d) => (
-          <div key={d} className="py-1">
+          <div key={d} className={`py-1${isNotebook ? ' nb-hand text-xs' : ''}`}>
             <span className="hidden sm:inline">{d}</span>
             <span className="sm:hidden">{d[0]}</span>
           </div>
@@ -1242,7 +1299,7 @@ function MonthView({ cursor, today, itemsOn, onDayClick, onItemClick }) {
             <button
               key={iso}
               onClick={() => onDayClick(iso)}
-              className="min-h-[52px] sm:min-h-[92px] rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 text-left flex flex-col transition-all duration-150 relative group active:scale-[0.98]"
+              className={`min-h-[52px] sm:min-h-[92px] rounded-xl sm:rounded-2xl p-1.5 sm:p-2.5 text-left flex flex-col transition-all duration-150 relative group active:scale-[0.98]${isNotebook ? ' nb-dog-ear' : ''}`}
               style={{
                 background: isToday
                   ? 'rgba(99,102,241,0.1)'

@@ -27,9 +27,12 @@ import CustomTimePicker from '../components/CustomTimePicker';
 import { LabeledInput } from './Notes';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
   const { tasks, notes, events, setTaskStatus, addTask, deleteTask, addNote, addEvent } = useData();
 
   // Modals & form state
@@ -324,8 +327,8 @@ export default function Dashboard() {
       {/* ══════════════════════════════════════════════════════════════
           2. QUICK UPDATES BAR (GLANCEABLE WORKSPACE INTELLIGENCE)
       ══════════════════════════════════════════════════════════════ */}
-      <div className="rounded-[28px] glass-panel-fluid p-5 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-white/10">
+      <div className={`rounded-[28px] glass-panel-fluid p-5 sm:p-6${isNotebook ? ' nb-stitch' : ''}`}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-[var(--border-subtle)]">
           
           {/* Quick Update 1: Immediate Priority Task */}
           <div className="sm:px-4 first:pl-0 flex flex-col justify-between space-y-1">
@@ -635,10 +638,11 @@ export default function Dashboard() {
         <div className="lg:col-span-5 space-y-6">
           
           {/* Card 1: Today's Schedule */}
-          <div className="rounded-[28px] glass-panel-fluid p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <h3 className="text-sm font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                Today's Schedule
+          <div className={`rounded-[28px] glass-panel-fluid p-6 space-y-4 relative overflow-hidden${isNotebook ? ' nb-brass-corner' : ''}`}>
+            {isNotebook && <div className="nb-paperclip" />}
+            <div className="flex items-center justify-between pb-2 border-b border-white/10" style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : undefined }}>
+              <h3 className={`text-sm font-bold tracking-tight${isNotebook ? ' nb-hand text-base' : ''}`} style={{ color: 'var(--text-primary)' }}>
+                {isNotebook ? '✎ Today\'s Schedule & Log' : 'Today\'s Schedule'}
               </h3>
               <Link to="/calendar" className="text-xs font-semibold flex items-center gap-0.5" style={{ color: 'var(--accent-color, #818cf8)' }}>
                 Calendar <ArrowUpRight size={11} />
@@ -646,7 +650,7 @@ export default function Dashboard() {
             </div>
 
             {todaysEvents.length === 0 ? (
-              <p className="text-xs py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs py-4 text-center font-mono opacity-60" style={{ color: 'var(--text-muted)' }}>
                 No events scheduled for today.
               </p>
             ) : (
@@ -654,18 +658,18 @@ export default function Dashboard() {
                 {todaysEvents.slice(0, 3).map((evt) => (
                   <div
                     key={evt.id}
-                    className="flex items-center justify-between p-3 rounded-2xl border"
+                    className={`flex items-center justify-between p-3 rounded-2xl border${isNotebook ? ' nb-dog-ear' : ''}`}
                     style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                      <p className={`text-xs font-semibold truncate${isNotebook ? ' nb-hand text-sm font-bold' : ''}`} style={{ color: 'var(--text-primary)' }}>
                         {evt.title}
                       </p>
                       <p className="text-[10px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>
                         {evt.time || 'All Day'}
                       </p>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5" style={{ color: 'var(--text-muted)' }}>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5${isNotebook ? ' nb-stamp' : ''}`} style={{ color: 'var(--text-muted)' }}>
                       {evt.category || 'Event'}
                     </span>
                   </div>
@@ -675,8 +679,18 @@ export default function Dashboard() {
           </div>
 
           {/* Card 2: Scratchpad & Quick Notes */}
-          <div className="rounded-[28px] glass-panel-fluid p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+          <div className={`rounded-[28px] glass-panel-fluid p-6 space-y-4 relative overflow-hidden${isNotebook ? ' nb-brass-corner' : ''}`}>
+            {isNotebook && <div className="nb-ribbon-bookmark" />}
+            {isNotebook && (
+              <div className="nb-wire-binder -mt-3 -mx-3 mb-1">
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+                <div className="nb-wire-ring" />
+              </div>
+            )}
+            <div className="flex items-center justify-between pb-2 border-b border-white/10" style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : undefined }}>
               <div className="flex items-center gap-3 text-xs font-bold">
                 <button
                   onClick={() => setSideTab('scratchpad')}
@@ -720,7 +734,9 @@ export default function Dashboard() {
                   onChange={(e) => setScratchpadText(e.target.value)}
                   placeholder="Jot down quick thoughts... (auto-saved)"
                   rows={4}
-                  className="w-full rounded-2xl p-3.5 text-xs bg-transparent outline-none border resize-none focus:border-indigo-400/50 transition-all leading-relaxed"
+                  className={`w-full rounded-2xl p-3.5 text-xs bg-transparent outline-none border resize-none focus:border-indigo-400/50 transition-all leading-relaxed${
+                    isNotebook ? ' nb-ruled nb-hand text-sm' : ''
+                  }`}
                   style={{
                     background: 'var(--bg-surface)',
                     borderColor: 'var(--border-subtle)',

@@ -18,6 +18,7 @@ import CustomSelect from '../components/CustomSelect';
 import CustomDatePicker from '../components/CustomDatePicker';
 import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
+import { useTheme } from '../context/ThemeContext';
 
 const columns = ['Todo', 'In Progress', 'Completed'];
 
@@ -38,6 +39,8 @@ function localToday() {
 export default function Tasks() {
   const { tasks, addTask, updateTask, deleteTask, setTaskStatus } = useData();
   const { playChime } = useSettings();
+  const { theme } = useTheme();
+  const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
   const [view, setView] = useState('list');
   const [filter, setFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');
@@ -178,16 +181,22 @@ export default function Tasks() {
       {/* ── Page Header ────────────────────────────────────────── */}
       <div
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4"
-        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+        style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)' }}
       >
         <div className="min-w-0">
+          {/* Notebook: journal-date entry header */}
+          {isNotebook && (
+            <div className="nb-journal-date mb-1">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} ✦ Task Journal
+            </div>
+          )}
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
               Tasks &amp; Execution
             </h1>
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border shrink-0"
-              style={{
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border shrink-0${isNotebook ? ' nb-stamp nb-stamp-done' : ''}`}
+              style={isNotebook ? {} : {
                 color: 'var(--accent-color)',
                 borderColor: 'var(--border-card)',
                 background: 'var(--bg-surface)',
@@ -197,7 +206,9 @@ export default function Tasks() {
             </span>
           </div>
           <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Track your action items, sprints, and priorities with live progress tracking.
+            {isNotebook
+              ? 'Track your action items and priorities — one line at a time.'
+              : 'Track your action items, sprints, and priorities with live progress tracking.'}
           </p>
         </div>
 
@@ -554,7 +565,7 @@ export default function Tasks() {
             />
           </Card>
         ) : (
-          <div className="space-y-2.5">
+          <div className={`space-y-2.5${isNotebook ? ' nb-margin nb-ruled' : ''}`}>
             {filtered.map((task) => (
               <TaskCard
                 key={task.id}
@@ -562,6 +573,7 @@ export default function Tasks() {
                 onToggleComplete={toggleComplete}
                 onEdit={openEdit}
                 onDelete={deleteTask}
+                isNotebook={isNotebook}
               />
             ))}
           </div>
