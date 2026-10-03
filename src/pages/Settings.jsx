@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Download,
@@ -15,19 +15,14 @@ import {
   Loader2,
   Key,
   Bell,
-  Volume2,
   Database,
   User,
   Mail,
-  CheckCircle2,
-  Zap,
-  Sliders,
-  Clock,
-  Heart,
-  Pencil,
   Camera,
   Info,
   ChevronRight,
+  Pencil,
+  Clock,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -152,115 +147,15 @@ function SettingRow({ icon: Icon, label, description, children, onClick, danger 
   );
 }
 
-/* ─── Clean Theme Card ─────────────────────────────────────── */
-
-function ThemeOptionCard({ t, active, onClick }) {
-  const [bg, surface, accent] = t.preview;
-  const isWhite = t.id === 'light';
-  const isLocked = Boolean(t.comingSoon);
-
-  return (
-    <button
-      type="button"
-      onClick={isLocked ? undefined : onClick}
-      disabled={isLocked}
-      aria-disabled={isLocked}
-      className={`group relative flex flex-col justify-between p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all duration-150 ${
-        isLocked
-          ? 'opacity-85 cursor-not-allowed border-dashed hover:border-amber-500/40'
-          : active
-          ? 'ring-2 ring-[var(--accent-color)] shadow-md cursor-pointer'
-          : 'hover:border-[var(--border-card)] cursor-pointer'
-      }`}
-      style={{
-        background: active ? 'var(--bg-surface)' : 'var(--bg-card-solid)',
-        borderColor: active
-          ? 'var(--accent-color)'
-          : isLocked
-          ? 'rgba(245, 158, 11, 0.35)'
-          : 'var(--border-subtle)',
-      }}
-    >
-      {/* Palette Preview */}
-      <div
-        className="w-full h-8 sm:h-11 rounded-lg mb-2 relative overflow-hidden border shadow-inner flex items-end p-1 sm:p-1.5"
-        style={{
-          background: bg,
-          borderColor: isWhite ? '#e5e7eb' : 'rgba(255,255,255,0.1)',
-        }}
-      >
-        <div
-          className="absolute inset-x-1 sm:inset-x-1.5 bottom-1 sm:bottom-1.5 h-2.5 sm:h-3.5 rounded-md shadow-xs opacity-80"
-          style={{ background: surface }}
-        />
-        <div
-          className="absolute top-1 sm:top-1.5 right-1 sm:right-1.5 w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full border border-white/20 shadow-xs"
-          style={{ background: accent }}
-        />
-
-        {/* Coming Soon Glass Overlay */}
-        {isLocked && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-[1.5px] transition-all group-hover:bg-black/50">
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300">
-              <Lock size={9} className="shrink-0 text-amber-400" />
-              <span className="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wide text-amber-200">
-                Coming Soon
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between w-full">
-        <div className="min-w-0 pr-1 flex-1">
-          <div className="flex items-center gap-1">
-            <p className="text-[11px] sm:text-xs font-bold tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
-              {t.name}
-            </p>
-            {isLocked && (
-              <span className="shrink-0 px-1 py-0.2 rounded text-[8px] font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/25 tracking-wide uppercase">
-                Soon
-              </span>
-            )}
-          </div>
-          <p className="text-[9px] sm:text-[10px] truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            {t.description}
-          </p>
-        </div>
-
-        <div
-          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
-            isLocked
-              ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
-              : active
-              ? 'border-transparent text-white'
-              : 'border-[var(--border-subtle)] opacity-20'
-          }`}
-          style={{
-            background: isLocked ? 'rgba(245, 158, 11, 0.12)' : active ? 'var(--accent-gradient)' : 'transparent',
-          }}
-        >
-          {isLocked ? (
-            <Lock size={8} strokeWidth={2.5} />
-          ) : (
-            active && <Check size={9} strokeWidth={3} />
-          )}
-        </div>
-      </div>
-    </button>
-  );
-}
-
 /* ─── Main Settings Component ─────────────────────────────── */
 
 export default function Settings() {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   const { user, updateProfile, logout, deleteAccount, changePassword } = useAuth();
   const { notes, tasks, events, clearAll, addNote, addTask, addEvent } = useData();
   const {
     settings,
     updateSetting,
-    toggleSetting,
     playChime,
     sendPushNotification,
     requestNotificationPermission,
@@ -302,16 +197,6 @@ export default function Settings() {
 
   // Latest Updates Modal State
   const [changelogModalOpen, setChangelogModalOpen] = useState(false);
-
-  // Mobile toast feedback
-  const [mobileToast, setMobileToast] = useState(null);
-  const mobileToastTimeoutRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
-    };
-  }, []);
 
   function handleOpenEditProfile() {
     setEditName(user?.name || user?.displayName || '');
@@ -470,47 +355,6 @@ export default function Settings() {
   }
 
   const initials = (user?.name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
-
-  function handleThemeSelect(t) {
-    if (t.comingSoon) {
-      if (playChime) playChime('warning');
-      return;
-    }
-    setTheme(t.id);
-    if (playChime) playChime('pop');
-
-    if (window.innerWidth < 640) {
-      setMobileToast({
-        id: Date.now(),
-        type: 'theme',
-        text: `Theme: ${t.name}`,
-        color: t.preview[2],
-        isWhite: t.id === 'light',
-      });
-      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
-      mobileToastTimeoutRef.current = setTimeout(() => {
-        setMobileToast(null);
-      }, 2200);
-    }
-  }
-
-  function handleToggleFibers() {
-    const nextVal = settings?.ghostFibers === false;
-    toggleSetting('ghostFibers');
-
-    if (window.innerWidth < 640) {
-      setMobileToast({
-        id: Date.now(),
-        type: 'fibers',
-        text: nextVal ? 'Ambient waves enabled' : 'Ambient waves disabled',
-        enabled: nextVal,
-      });
-      if (mobileToastTimeoutRef.current) clearTimeout(mobileToastTimeoutRef.current);
-      mobileToastTimeoutRef.current = setTimeout(() => {
-        setMobileToast(null);
-      }, 2200);
-    }
-  }
 
   async function handleLogout() {
     await logout();
@@ -689,137 +533,69 @@ export default function Settings() {
         </div>
       </SettingCard>
 
-      {/* ── 2. Appearance & Themes (Mobile Nav Link + Desktop Inline) ── */}
-      {/* Mobile: Clean compact row navigating to dedicated Appearance page */}
-      <div className="md:hidden">
-        <SettingCard>
-          <div
-            onClick={() => {
-              if (playChime) playChime('pop');
-              navigate('/settings/appearance');
-            }}
-            className="flex items-center justify-between gap-3 cursor-pointer select-none group active:scale-[0.99] transition-all"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div
-                className="w-9 h-9 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--accent-color)',
-                }}
-              >
-                <Palette size={17} />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-sm font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                    Appearance & Theme
-                  </h2>
-                  <span
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
-                    style={{
-                      background: 'var(--bg-surface)',
-                      borderColor: 'var(--border-subtle)',
-                      color: 'var(--accent-color)',
-                    }}
-                  >
-                    {THEMES.find((t) => t.id === theme)?.name || theme}
-                  </span>
-                </div>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  Workspace color schemes, background waves & visuals
-                </p>
-              </div>
+      {/* ── 2. Appearance & Interaction (Dedicated Page Link for all screens) ── */}
+      <SettingCard>
+        <div
+          onClick={() => {
+            if (playChime) playChime('pop');
+            navigate('/settings/appearance');
+          }}
+          className="flex items-center justify-between gap-3 cursor-pointer select-none group active:scale-[0.99] transition-all p-0.5"
+        >
+          <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+            <div
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover:scale-105"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <Palette size={18} />
             </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span
-                className="w-3.5 h-3.5 rounded-full border border-white/20 shadow-xs"
-                style={{
-                  background: THEMES.find((t) => t.id === theme)?.preview?.[2] || 'var(--accent-color)',
-                }}
-              />
-              <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-base font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                  Appearance &amp; Interaction
+                </h2>
+                <span
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                  }}
+                >
+                  {THEMES.find((t) => t.id === theme)?.name || theme}
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Workspace themes, notebook styles, ambient canvas waves &amp; tactile sensory feedback
+              </p>
             </div>
           </div>
-        </SettingCard>
-      </div>
 
-      {/* Desktop (md+): Full inline appearance section */}
-      <div className="hidden md:block">
-        <SettingCard>
-          <SectionHeader
-            icon={Palette}
-            title="Appearance & Theme"
-            description="Select your preferred workspace palette and background effects."
-            action={
-              <button
-                type="button"
-                onClick={() => {
-                  if (playChime) playChime('pop');
-                  navigate('/settings/appearance');
-                }}
-                className="text-[11px] font-semibold flex items-center gap-1 hover:underline cursor-pointer py-1 px-2 rounded-lg hover:bg-white/5 transition-all"
-                style={{ color: 'var(--accent-color)' }}
-              >
-                <span>Full Page</span>
-                <ChevronRight size={13} />
-              </button>
-            }
-          />
-
-          {/* Themes Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
-            {THEMES.map((t) => (
-              <ThemeOptionCard
-                key={t.id}
-                t={t}
-                active={theme === t.id}
-                onClick={() => handleThemeSelect(t)}
-              />
-            ))}
-          </div>
-
-          {/* Ambient Canvas Switch */}
-          <SettingRow
-            icon={Sparkles}
-            label="Ambient Background Waves"
-            description="Dynamic floating wave fibers that render gently behind your workspace."
-            onClick={handleToggleFibers}
-          >
-            <Toggle
-              on={settings?.ghostFibers !== false}
-              onToggle={handleToggleFibers}
-              label="Toggle ambient background fibers"
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <span
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border border-white/20 shadow-xs"
+              style={{
+                background: THEMES.find((t) => t.id === theme)?.preview?.[2] || 'var(--accent-color)',
+              }}
             />
-          </SettingRow>
-        </SettingCard>
-      </div>
+            <ChevronRight size={17} className="transition-transform group-hover:translate-x-0.5" style={{ color: 'var(--text-muted)' }} />
+          </div>
+        </div>
+      </SettingCard>
 
-      {/* ── 3. Notifications & Sensory Feedback ────────────── */}
+      {/* ── 3. Desktop Notifications & System Alerts ───────── */}
       <SettingCard>
         <SectionHeader
           icon={Bell}
-          title="Notifications & Feedback"
-          description="Control reminders, auditory cues, and interface micro-interactions."
+          title="Notifications &amp; Alerts"
+          description="Control desktop reminder alerts and deadlines for upcoming tasks."
         />
 
         <div className="space-y-3">
-          {/* Due Task Badges */}
-          <SettingRow
-            icon={CheckCircle2}
-            label="Due Task Badges"
-            description="Display badge indicators on the navigation bar when tasks are due today."
-            onClick={() => toggleSetting('dueTaskBadges')}
-          >
-            <Toggle
-              on={settings?.dueTaskBadges}
-              onToggle={() => toggleSetting('dueTaskBadges')}
-              label="Toggle due task badges"
-            />
-          </SettingRow>
-
           {/* Desktop Deadline Reminders */}
           <SettingRow
             icon={Clock}
@@ -871,60 +647,33 @@ export default function Settings() {
             </div>
           </SettingRow>
 
-          {/* Interactive Sound Effects */}
+          {/* Interaction & Sensory Link */}
           <SettingRow
-            icon={Volume2}
-            label="Interactive Audio Chimes"
-            description="Gentle audio chimes on task completion and major workspace actions."
+            icon={Sparkles}
+            label="Sensory & Interaction Dynamics"
+            description="Customize audio chimes, tactile spring physics, due badges, and ambient background waves."
             onClick={() => {
-              toggleSetting('soundEffects');
-              if (!settings?.soundEffects) {
-                setTimeout(() => playChime('success'), 60);
-              }
+              if (playChime) playChime('pop');
+              navigate('/settings/appearance');
             }}
           >
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playChime('pop');
-                }}
-                title="Preview sound chime"
-                className="p-1.5 rounded-lg border transition-all hover:text-[var(--text-primary)] active:scale-90 cursor-pointer"
-                style={{
-                  background: 'var(--bg-card-solid)',
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--text-muted)',
-                }}
-              >
-                <Zap size={13} />
-              </button>
-              <Toggle
-                on={settings?.soundEffects}
-                onToggle={() => {
-                  toggleSetting('soundEffects');
-                  if (!settings?.soundEffects) {
-                    setTimeout(() => playChime('success'), 60);
-                  }
-                }}
-                label="Toggle interactive audio chimes"
-              />
-            </div>
-          </SettingRow>
-
-          {/* Bouncy Spring Micro-Animations */}
-          <SettingRow
-            icon={Zap}
-            label="Tactile Spring Physics"
-            description="Smooth spring physics on buttons and modal transitions."
-            onClick={() => toggleSetting('bouncyAnimations')}
-          >
-            <Toggle
-              on={settings?.bouncyAnimations}
-              onToggle={() => toggleSetting('bouncyAnimations')}
-              label="Toggle spring micro-animations"
-            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (playChime) playChime('pop');
+                navigate('/settings/appearance');
+              }}
+              className="text-[11px] font-semibold flex items-center gap-1 hover:underline cursor-pointer py-1 px-2.5 rounded-lg border transition-all"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <span>Customize</span>
+              <ChevronRight size={13} />
+            </button>
           </SettingRow>
         </div>
       </SettingCard>
@@ -1831,66 +1580,6 @@ export default function Settings() {
           </div>
         </div>
       </Modal>
-
-      {/* Mobile Pop-up Notification (Only for Mobile) */}
-      {mobileToast && (
-        <div
-          key={mobileToast.id}
-          className="sm:hidden fixed bottom-20 inset-x-0 mx-auto w-fit z-50 pointer-events-none animate-fade-in"
-        >
-          <div
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border shadow-2xl backdrop-blur-xl text-xs font-semibold whitespace-nowrap"
-            style={{
-              background: 'var(--bg-card-solid)',
-              borderColor:
-                mobileToast.type === 'theme'
-                  ? (mobileToast.isWhite ? 'var(--border-card)' : mobileToast.color)
-                  : mobileToast.enabled
-                    ? 'var(--accent-color)'
-                    : 'var(--border-card)',
-              color: 'var(--text-primary)',
-              boxShadow:
-                mobileToast.type === 'theme'
-                  ? (mobileToast.isWhite
-                    ? '0 10px 28px -4px rgba(79,70,229,0.25), 0 2px 8px rgba(0,0,0,0.06)'
-                    : `0 8px 24px -4px ${mobileToast.color}66`)
-                  : mobileToast.enabled
-                    ? '0 8px 24px -4px var(--accent-glow)'
-                    : '0 8px 24px -4px rgba(0,0,0,0.6)',
-            }}
-          >
-            {mobileToast.type === 'theme' ? (
-              <Palette
-                size={13}
-                style={{ color: mobileToast.isWhite ? 'var(--accent-color)' : mobileToast.color }}
-              />
-            ) : (
-              <Sparkles
-                size={13}
-                style={{ color: mobileToast.enabled ? 'var(--accent-color)' : 'var(--text-muted)' }}
-              />
-            )}
-            <span>{mobileToast.text}</span>
-            <span
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{
-                background:
-                  mobileToast.type === 'theme'
-                    ? (mobileToast.isWhite ? 'var(--accent-color)' : mobileToast.color)
-                    : mobileToast.enabled
-                      ? '#34d399'
-                      : '#f43f5e',
-                boxShadow:
-                  mobileToast.type === 'theme'
-                    ? (mobileToast.isWhite ? '0 0 8px var(--accent-glow)' : `0 0 8px ${mobileToast.color}bb`)
-                    : mobileToast.enabled
-                      ? '0 0 6px #34d399'
-                      : 'none',
-              }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

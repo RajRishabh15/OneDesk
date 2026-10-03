@@ -19,6 +19,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  Plus,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
@@ -26,13 +27,6 @@ import { useSettings } from '../context/SettingsContext';
 import OneDeskLogo from './OneDeskLogo';
 
 const navLinks = [
-  { to: '/',          label: 'Home',     icon: Home,        end: true },
-  { to: '/tasks',     label: 'Tasks',    icon: CheckSquare },
-  { to: '/notes',     label: 'Notes',    icon: StickyNote },
-  { to: '/calendar',  label: 'Schedule', icon: Calendar },
-];
-
-const mobileLinks = [
   { to: '/',          label: 'Home',     icon: Home,        end: true },
   { to: '/tasks',     label: 'Tasks',    icon: CheckSquare },
   { to: '/notes',     label: 'Notes',    icon: StickyNote },

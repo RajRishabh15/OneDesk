@@ -28,14 +28,16 @@ import OneDeskLogo from '../components/OneDeskLogo';
 
 export const THEME_FIBER_COLORS = {
   dark: { glowLine: '#140E35', glowColor: '#3437A0' },
-  peacock: { glowLine: '#04322e', glowColor: '#0d9488' },
-  lavender: { glowLine: '#24103c', glowColor: '#9333ea' },
-  babypink: { glowLine: '#36102a', glowColor: '#ec4899' },
   light: { glowLine: '#c7d2fe', glowColor: '#818cf8' },
+  'notebook-light': { glowLine: '#fde68a', glowColor: '#d97706' },
+  'notebook-dark': { glowLine: '#451a03', glowColor: '#f59e0b' },
   aurora: { glowLine: '#042a18', glowColor: '#059669' },
   ocean: { glowLine: '#042040', glowColor: '#0284c7' },
   rose: { glowLine: '#3b0a1e', glowColor: '#e11d48' },
   amber: { glowLine: '#3a1c00', glowColor: '#d97706' },
+  peacock: { glowLine: '#04322e', glowColor: '#0d9488' },
+  lavender: { glowLine: '#24103c', glowColor: '#9333ea' },
+  babypink: { glowLine: '#36102a', glowColor: '#ec4899' },
 };
 
 export default function Login() {
@@ -199,8 +201,10 @@ export function AuthShell({ children, activeTab = 'login' }) {
     // Pop up notification strictly on mobile devices (<640px)
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
       const themeName = selectedTheme?.name || newThemeId;
-      const isWhite = newThemeId === 'light';
-      const circleColor = isWhite ? '#ffffff' : (selectedTheme?.color || selectedTheme?.preview?.[2] || '#818cf8');
+      const isWhite = newThemeId === 'light' || newThemeId === 'notebook-light';
+      const circleColor = isWhite
+        ? (newThemeId === 'notebook-light' ? '#f5f0e6' : '#ffffff')
+        : (selectedTheme?.color || selectedTheme?.preview?.[2] || '#818cf8');
 
       setToast({
         id: Date.now(),
@@ -276,7 +280,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
               vignette={0.8}
               grain={0.05}
               dpr={1}
-              lightMode={theme === 'light'}
+              lightMode={theme === 'light' || theme === 'notebook-light'}
               fps={60}
               paused={false}
             />
@@ -313,27 +317,29 @@ export function AuthShell({ children, activeTab = 'login' }) {
       </div>
 
       {/* Floating Theme Customizer Pill — Bottom Centralized on Mobile, Top-Right on Desktop */}
-      <div className="fixed bottom-3.5 sm:bottom-auto sm:top-4 inset-x-0 sm:inset-x-auto sm:right-8 mx-auto sm:mx-0 w-fit z-30 pointer-events-auto">
+      <div className="fixed bottom-3.5 sm:bottom-auto sm:top-4 inset-x-0 sm:inset-x-auto sm:right-8 mx-auto sm:mx-0 w-fit max-w-[calc(100vw-20px)] sm:max-w-none px-1 sm:px-0 z-30 pointer-events-auto">
         <div
-          className="flex items-center gap-1 sm:gap-1.5 p-1 sm:px-3 sm:py-1.5 rounded-full border shadow-2xl backdrop-blur-xl transition-all"
+          className="flex items-center gap-1 sm:gap-1.5 p-1 sm:px-3 sm:py-1.5 rounded-full border shadow-2xl backdrop-blur-xl transition-all max-w-full overflow-hidden"
           style={{
             background: 'var(--bg-card-solid)',
             borderColor: 'var(--border-card)',
           }}
         >
-          <div className="hidden sm:flex items-center gap-1.5 pr-2 border-r border-[var(--border-subtle)]">
+          <div className="hidden sm:flex items-center gap-1.5 pr-2 border-r border-[var(--border-subtle)] shrink-0">
             <Palette size={13} style={{ color: 'var(--accent-color)' }} />
-            <span className="text-[11px] font-bold capitalize" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-[11px] font-bold capitalize whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
               {THEMES.find((t) => t.id === theme)?.name || theme}
             </span>
           </div>
 
-          {/* Quick theme bubbles */}
-          <div className="flex items-center gap-1">
+          {/* Quick theme bubbles with responsive horizontal scrolling on small screens */}
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 px-0.5 max-w-full touch-pan-x">
             {THEMES.map((t) => {
               const active = theme === t.id;
-              const isWhite = t.id === 'light';
-              const circleColor = isWhite ? '#ffffff' : (t.color || t.preview[2] || t.preview[0]);
+              const isWhite = t.id === 'light' || t.id === 'notebook-light';
+              const circleColor = isWhite
+                ? (t.id === 'notebook-light' ? '#f5f0e6' : '#ffffff')
+                : (t.color || t.preview[2] || t.preview[0]);
               const isLocked = Boolean(t.comingSoon);
 
               return (
@@ -342,7 +348,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   type="button"
                   onClick={() => handleThemeChange(t.id)}
                   title={isLocked ? `${t.name} (Coming Soon)` : `${t.name}: ${t.description}`}
-                  className={`group relative flex items-center justify-center p-0.5 sm:p-1 rounded-full transition-all duration-200 ${
+                  className={`shrink-0 group relative flex items-center justify-center p-0.5 sm:p-1 rounded-full transition-all duration-200 ${
                     isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
                   }`}
                   style={{
@@ -358,9 +364,9 @@ export function AuthShell({ children, activeTab = 'login' }) {
                         ? (isWhite ? 'var(--accent-color)' : '#ffffff')
                         : isLocked
                         ? 'rgba(245, 158, 11, 0.45)'
-                        : (isWhite ? 'rgba(0,0,0,0.3)' : 'transparent'),
+                        : (isWhite ? 'rgba(0,0,0,0.25)' : 'transparent'),
                       boxShadow: active
-                        ? (isWhite ? '0 0 10px rgba(255,255,255,0.9)' : `0 0 10px ${circleColor}aa`)
+                        ? (isWhite ? '0 0 10px rgba(180,83,9,0.5)' : `0 0 10px ${circleColor}aa`)
                         : 'none',
                     }}
                   >
@@ -386,7 +392,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
             type="button"
             onClick={handleToggleFibers}
             title={settings?.ghostFibers !== false ? 'Disable animated background' : 'Enable animated background'}
-            className="p-1 sm:p-1.5 rounded-full border transition-all ml-0.5 cursor-pointer"
+            className="shrink-0 p-1 sm:p-1.5 rounded-full border transition-all ml-0.5 cursor-pointer"
             style={{
               background: settings?.ghostFibers !== false ? 'var(--bg-surface)' : 'transparent',
               borderColor: 'var(--border-subtle)',

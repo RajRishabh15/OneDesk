@@ -13,6 +13,7 @@ const SHORTCUT_MAP = { d: '/', n: '/notes', t: '/tasks', c: '/calendar', s: '/se
 export default function AppLayout() {
   const navigate = useNavigate();
   const pendingG = useRef(false);
+  const { theme } = useTheme();
   const { glowLine, glowColor } = useThemeColors();
   const { settings, sendPushNotification } = useSettings();
   const { loading: dataLoading, tasks } = useData();
@@ -93,7 +94,7 @@ export default function AppLayout() {
               vignette={0.8}
               grain={0.05}
               dpr={1}
-              lightMode={false}
+              lightMode={theme === 'light' || theme === 'notebook-light'}
               fps={60}
               paused={false}
             />
@@ -120,12 +121,17 @@ function useThemeColors() {
   const { theme } = useTheme();
   // Map theme → fiber colors (CSS vars can't be read by JS easily, so we map directly)
   const map = {
-    dark:   { glowLine: '#140E35', glowColor: '#3437A0' },
-    light:  { glowLine: '#c7d2fe', glowColor: '#818cf8' },
-    aurora: { glowLine: '#042a18', glowColor: '#059669' },
-    rose:   { glowLine: '#3b0a1e', glowColor: '#e11d48' },
-    ocean:  { glowLine: '#042040', glowColor: '#0284c7' },
-    amber:  { glowLine: '#3a1c00', glowColor: '#d97706' },
+    dark:             { glowLine: '#140E35', glowColor: '#3437A0' },
+    light:            { glowLine: '#c7d2fe', glowColor: '#818cf8' },
+    'notebook-light': { glowLine: '#fde68a', glowColor: '#d97706' },
+    'notebook-dark':  { glowLine: '#451a03', glowColor: '#f59e0b' },
+    aurora:           { glowLine: '#042a18', glowColor: '#059669' },
+    rose:             { glowLine: '#3b0a1e', glowColor: '#e11d48' },
+    ocean:            { glowLine: '#042040', glowColor: '#0284c7' },
+    amber:            { glowLine: '#3a1c00', glowColor: '#d97706' },
+    peacock:          { glowLine: '#04322e', glowColor: '#0d9488' },
+    lavender:         { glowLine: '#24103c', glowColor: '#9333ea' },
+    babypink:         { glowLine: '#36102a', glowColor: '#ec4899' },
   };
   return map[theme] || map.dark;
 }

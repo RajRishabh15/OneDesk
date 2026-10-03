@@ -18,7 +18,7 @@ export default function Analytics() {
   const { tasks, notes } = useData();
   const { theme } = useTheme();
 
-  const isDark = theme === 'dark';
+  const isDark = theme !== 'light' && theme !== 'notebook-light';
   const barColor = isDark ? '#e7e5e4' : '#1c1917';
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(28, 25, 23, 0.06)';
   const tickColor = isDark ? '#78716c' : '#a8a29e';
