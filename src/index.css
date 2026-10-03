@@ -981,6 +981,30 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.20) !important;
 }
 
+/* ── Modal Dialog Panels in Notebook Themes ─────────────────── */
+.theme-notebook-light .nb-modal-panel {
+  background: #faf6ee !important;
+  border: 1.5px dashed var(--nb-stitch-color) !important;
+  box-shadow: 0 30px 80px rgba(120, 80, 30, 0.28), 0 4px 16px rgba(120, 80, 30, 0.12) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-notebook-dark .nb-modal-panel {
+  background: #17141a !important;
+  border: 1.5px dashed var(--nb-stitch-color) !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.90), 0 4px 18px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-notebook-light .nb-modal-header {
+  background: #f5efe2 !important;
+  border-bottom: 2px solid var(--nb-rule-color) !important;
+}
+.theme-notebook-dark .nb-modal-header {
+  background: #1c1820 !important;
+  border-bottom: 2px solid var(--nb-rule-color) !important;
+}
+
 /* ── Top Nav Pill → bookmark-ribbon ────────────────────────── */
 .theme-notebook-light .nb-bookmark-pill,
 .theme-notebook-dark .nb-bookmark-pill {

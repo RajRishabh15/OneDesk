@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Modal({ open, onClose, title, children, wide = false }) {
   const panelRef = useRef(null);
+  const { theme } = useTheme();
+  const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
 
   useEffect(() => {
     function onKey(e) {
@@ -52,8 +55,9 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           'overflow-hidden',
           wide ? 'sm:max-w-2xl' : 'sm:max-w-md',
           'animate-modal-up shadow-2xl',
-        ].join(' ')}
-        style={{
+          isNotebook ? 'nb-modal-panel nb-brass-corner' : '',
+        ].filter(Boolean).join(' ')}
+        style={isNotebook ? {} : {
           background: 'var(--bg-card-solid)',
           border: '1px solid var(--border-card)',
           boxShadow: '0 32px 90px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)',
@@ -61,39 +65,66 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           WebkitBackdropFilter: 'blur(40px)',
         }}
       >
+        {/* Notebook decorative accents */}
+        {isNotebook && <div className="nb-ribbon-bookmark" />}
+
         {/* Thin accent line at the top */}
-        <div
-          className="absolute inset-x-0 top-0 h-[1px] rounded-t-[32px] pointer-events-none z-20"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent, var(--border-card) 40%, rgba(255,255,255,0.18) 50%, var(--border-card) 60%, transparent)',
-          }}
-        />
+        {!isNotebook && (
+          <div
+            className="absolute inset-x-0 top-0 h-[1px] rounded-t-[32px] pointer-events-none z-20"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, var(--border-card) 40%, rgba(255,255,255,0.18) 50%, var(--border-card) 60%, transparent)',
+            }}
+          />
+        )}
 
         {/* Mobile grab handle bar */}
         <div className="w-10 h-1 rounded-full bg-stone-400/40 dark:bg-stone-600/40 mx-auto mt-2.5 sm:hidden shrink-0" />
 
+        {/* Wire Ring Binder Coils Header on Notebook Mode */}
+        {isNotebook && (
+          <div className="nb-wire-binder pt-2 px-6 pb-0">
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+            <div className="nb-wire-ring" />
+          </div>
+        )}
+
         {/* Header - Fixed & pinned, never scrolls away */}
         <div
-          className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 shrink-0 z-10"
+          className={`flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 shrink-0 z-10 ${
+            isNotebook ? 'nb-modal-header' : ''
+          }`}
           style={{
-            borderBottom: '1px solid var(--border-subtle)',
-            background: 'var(--bg-card-solid)',
+            borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)',
+            background: isNotebook ? undefined : 'var(--bg-card-solid)',
           }}
         >
           <h2
-            className="text-base font-bold tracking-tight"
-            style={{ color: 'var(--text-primary)' }}
+            className={`font-bold tracking-tight ${
+              isNotebook
+                ? 'nb-hand text-lg sm:text-xl text-[var(--accent-color)] flex items-center gap-1.5'
+                : 'text-base text-[var(--text-primary)]'
+            }`}
           >
-            {title}
+            {isNotebook && <span>✎</span>}
+            <span>{title}</span>
           </h2>
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="flex h-8 w-8 items-center justify-center rounded-full transition-all hover:bg-white/10 active:scale-95 cursor-pointer"
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95 cursor-pointer ${
+              isNotebook
+                ? 'hover:brightness-125 border border-[var(--nb-rule-color)]'
+                : 'hover:bg-white/10'
+            }`}
             style={{
               background: 'var(--bg-surface)',
-              border: '1px solid var(--border-subtle)',
+              borderColor: 'var(--border-subtle)',
               color: 'var(--text-muted)',
             }}
           >
@@ -101,8 +132,12 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
           </button>
         </div>
 
-        {/* Body - Clean scrollable content with sleek custom scrollbar */}
-        <div className="px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto overscroll-contain flex-1 custom-scrollbar">
+        {/* Body - Clean scrollable content with notebook ruled paper styling */}
+        <div
+          className={`px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto overscroll-contain flex-1 custom-scrollbar ${
+            isNotebook ? 'nb-ruled nb-margin' : ''
+          }`}
+        >
           {children}
         </div>
       </div>
