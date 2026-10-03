@@ -1316,9 +1316,124 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 /* ── Reduce motion ───────────────────────────────────────────── */
+/* ── Reduce motion ───────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .theme-notebook-light .nb-strikethrough::after,
   .theme-notebook-dark .nb-strikethrough::after { animation: none; }
   .theme-notebook-light .nb-spine,
   .theme-notebook-dark .nb-spine { animation: none; }
+}
+
+/* ─── Moving Perimeter Green Light (Border Beam) ─────────── */
+@keyframes borderBeamTravel {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-border-beam {
+  stroke-dasharray: 22 78;
+  animation: borderBeamTravel 4s linear infinite;
+}
+
+/* ─── Mobile Responsiveness Polish for Notebook Elements ───── */
+@media (max-width: 640px) {
+  /* Adjust left red margin line on mobile background */
+  .theme-notebook-light body,
+  .theme-notebook-light .nb-page-bg {
+    background-image:
+      linear-gradient(to right, transparent 24px, rgba(220, 50, 50, 0.30) 24px, rgba(220, 50, 50, 0.30) 25.5px, transparent 25.5px),
+      repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        rgba(150, 110, 65, 0.22) 27px,
+        rgba(150, 110, 65, 0.22) 28px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 27px,
+        rgba(150, 110, 65, 0.10) 27px,
+        rgba(150, 110, 65, 0.10) 28px
+      ),
+      radial-gradient(circle, var(--nb-dot-color) 1px, transparent 1px) !important;
+  }
+
+  .theme-notebook-dark body,
+  .theme-notebook-dark .nb-page-bg {
+    background-image:
+      linear-gradient(to right, transparent 24px, rgba(239, 68, 68, 0.35) 24px, rgba(239, 68, 68, 0.35) 25.5px, transparent 25.5px),
+      repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        rgba(245, 158, 11, 0.22) 27px,
+        rgba(245, 158, 11, 0.22) 28px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 27px,
+        rgba(245, 158, 11, 0.10) 27px,
+        rgba(245, 158, 11, 0.10) 28px
+      ),
+      radial-gradient(circle, rgba(251, 191, 36, 0.20) 1px, transparent 1px) !important;
+  }
+
+  /* Ribbon bookmark mobile scaling & safe placement away from close buttons */
+  .nb-ribbon-bookmark {
+    right: 48px;
+    width: 15px;
+    height: 36px;
+    top: -6px;
+  }
+
+  /* Brass corners scaled for smaller mobile corner radiuses */
+  .nb-brass-corner::before,
+  .nb-brass-corner::after {
+    width: 16px;
+    height: 16px;
+  }
+
+  .theme-notebook-light .nb-brass-corner::before,
+  .theme-notebook-light .nb-brass-corner::after,
+  .theme-notebook-dark .nb-brass-corner::before,
+  .theme-notebook-dark .nb-brass-corner::after {
+    border-width: 2.5px;
+    border-radius: 8px;
+  }
+
+  /* Wire rings scaled for smaller screens */
+  .nb-wire-binder {
+    padding: 4px 8px;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .nb-wire-ring {
+    width: 10px;
+    height: 20px;
+    border-radius: 4px;
+  }
+
+  /* Ruled paper padding on mobile */
+  .theme-notebook-light .nb-margin,
+  .theme-notebook-dark .nb-margin {
+    padding-left: 0.85rem !important;
+  }
+
+  /* Paperclip scaling */
+  .nb-paperclip {
+    right: 48px;
+    width: 11px;
+    height: 26px;
+    top: -8px;
+  }
+
+  /* Spine rail minimal width on mobile */
+  .theme-notebook-light .nb-spine,
+  .theme-notebook-dark .nb-spine {
+    width: 4px;
+  }
 }
