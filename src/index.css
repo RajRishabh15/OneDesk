@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,6 +6,7 @@
   --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-editorial: "Newsreader", Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-handwriting: "Caveat", "Comic Sans MS", cursive, sans-serif;
   --color-accent: #6366f1;
   --color-accent-2: #8b5cf6;
   --color-high: #f43f5e;
@@ -223,6 +224,49 @@
   --accent-glow:     rgba(244,114,182,0.40);
   --fiber-opacity:   1;
 }
+
+/* ── Notebook Light (warm parchment & fountain pen ink) ── */
+.theme-notebook-light {
+  color-scheme:      light;
+  --bg-page:         #f5f0e6;
+  --bg-overlay:      rgba(245, 240, 230, 0.82);
+  --bg-card:         rgba(253, 251, 247, 0.96);
+  --bg-card-solid:   #fdfbf7;
+  --bg-card-hover:   rgba(255, 255, 255, 0.99);
+  --bg-surface:      rgba(180, 83, 9, 0.06);
+  --border-card:     rgba(214, 205, 192, 0.88);
+  --border-subtle:   rgba(229, 221, 207, 0.65);
+  --text-primary:    #1c1917;
+  --text-muted:      rgba(87, 83, 78, 0.70);
+  --glow-line:       #fde68a;
+  --glow-color:      #d97706;
+  --accent-gradient: linear-gradient(135deg, #b45309, #d97706, #f59e0b);
+  --accent-color:    #b45309;
+  --accent-glow:     rgba(217, 119, 6, 0.28);
+  --fiber-opacity:   0.35;
+}
+
+/* ── Notebook Dark (obsidian leather & gilded brass) ───── */
+.theme-notebook-dark {
+  color-scheme:      dark;
+  --bg-page:         #131215;
+  --bg-overlay:      rgba(19, 18, 21, 0.80);
+  --bg-card:         rgba(26, 25, 29, 0.94);
+  --bg-card-solid:   #1a191d;
+  --bg-card-hover:   rgba(35, 33, 39, 0.98);
+  --bg-surface:      rgba(245, 158, 11, 0.08);
+  --border-card:     rgba(251, 191, 36, 0.22);
+  --border-subtle:   rgba(251, 191, 36, 0.10);
+  --text-primary:    #fdf8e8;
+  --text-muted:      rgba(245, 235, 215, 0.55);
+  --glow-line:       #451a03;
+  --glow-color:      #f59e0b;
+  --accent-gradient: linear-gradient(135deg, #d97706, #f59e0b, #fbbf24);
+  --accent-color:    #f59e0b;
+  --accent-glow:     rgba(245, 158, 11, 0.40);
+  --fiber-opacity:   1;
+}
+
 
 /* ─── Base styles ────────────────────────────────────────── */
 html {
@@ -482,7 +526,9 @@ body {
 }
 
 .theme-light,
-.theme-light * {
+.theme-light *,
+.theme-notebook-light,
+.theme-notebook-light * {
   scrollbar-color: rgba(30, 27, 75, 0.20) transparent;
 }
 
@@ -502,10 +548,12 @@ body {
   background: rgba(255, 255, 255, 0.32);
 }
 
-.theme-light ::-webkit-scrollbar-thumb {
+.theme-light ::-webkit-scrollbar-thumb,
+.theme-notebook-light ::-webkit-scrollbar-thumb {
   background: rgba(30, 27, 75, 0.18);
 }
-.theme-light ::-webkit-scrollbar-thumb:hover {
+.theme-light ::-webkit-scrollbar-thumb:hover,
+.theme-notebook-light ::-webkit-scrollbar-thumb:hover {
   background: rgba(30, 27, 75, 0.35);
 }
 
@@ -514,7 +562,8 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
 }
-.theme-light .custom-scrollbar {
+.theme-light .custom-scrollbar,
+.theme-notebook-light .custom-scrollbar {
   scrollbar-color: rgba(30, 27, 75, 0.22) transparent;
 }
 .custom-scrollbar::-webkit-scrollbar {
@@ -531,10 +580,12 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
 }
-.theme-light .custom-scrollbar::-webkit-scrollbar-thumb {
+.theme-light .custom-scrollbar::-webkit-scrollbar-thumb,
+.theme-notebook-light .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(30, 27, 75, 0.22);
 }
-.theme-light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+.theme-light .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.theme-notebook-light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(30, 27, 75, 0.40);
 }
 
@@ -626,7 +677,9 @@ input[type="time"] {
   color-scheme: dark;
 }
 .theme-light input[type="date"],
-.theme-light input[type="time"] {
+.theme-light input[type="time"],
+.theme-notebook-light input[type="date"],
+.theme-notebook-light input[type="time"] {
   color-scheme: light;
 }
 input[type="date"]::-webkit-calendar-picker-indicator,
@@ -635,7 +688,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 .theme-light input[type="date"]::-webkit-calendar-picker-indicator,
-.theme-light input[type="time"]::-webkit-calendar-picker-indicator {
+.theme-light input[type="time"]::-webkit-calendar-picker-indicator,
+.theme-notebook-light input[type="date"]::-webkit-calendar-picker-indicator,
+.theme-notebook-light input[type="time"]::-webkit-calendar-picker-indicator {
   filter: none;
 }
 

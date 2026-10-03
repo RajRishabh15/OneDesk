@@ -23,7 +23,7 @@ export default function Navbar({ onMenuClick }) {
   function handleLogout() {
     setProfileOpen(false);
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   }
 
   useEffect(() => {

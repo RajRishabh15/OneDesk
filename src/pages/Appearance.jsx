@@ -8,10 +8,8 @@ import {
   Volume2,
   VolumeX,
   CheckCircle2,
-  Sliders,
+  Zap,
   Layers,
-  Eye,
-  Info,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
@@ -61,10 +59,10 @@ export default function Appearance() {
         <div className="flex items-center justify-between gap-4 mt-1">
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              Appearance & Themes
+              Appearance &amp; Interaction
             </h1>
             <p className="text-xs sm:text-sm mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              Customize your workspace aesthetics, color schemes, and visual dynamics.
+              Customize workspace themes, notebook designs, ambient background waves, and tactile interaction dynamics.
             </p>
           </div>
 
@@ -118,7 +116,7 @@ export default function Appearance() {
           {THEMES.map((t) => {
             const [bg, surface, accent] = t.preview;
             const active = theme === t.id;
-            const isWhite = t.id === 'light';
+            const isWhite = t.id === 'light' || t.id === 'notebook-light';
             const isLocked = Boolean(t.comingSoon);
 
             return (
@@ -149,7 +147,7 @@ export default function Appearance() {
                   className="w-full h-12 sm:h-16 rounded-xl mb-3 relative overflow-hidden border shadow-inner flex items-end p-1.5 sm:p-2"
                   style={{
                     background: bg,
-                    borderColor: isWhite ? '#e5e7eb' : 'rgba(255,255,255,0.1)',
+                    borderColor: isWhite ? '#d6cdc0' : 'rgba(255,255,255,0.1)',
                   }}
                 >
                   <div
@@ -237,10 +235,10 @@ export default function Appearance() {
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              Visual Effects & Dynamics
+              Interactive &amp; Sensory Dynamics
             </h3>
             <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
-              Background motion and sensory cues.
+              Auditory feedback, tactile spring physics, navigation badges, and ambient waves.
             </p>
           </div>
         </div>
@@ -308,15 +306,70 @@ export default function Appearance() {
                   Interactive Sound Effects
                 </p>
                 <p className="text-[10px] sm:text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                  Subtle chimes for task completions and actions.
+                  Subtle chimes for task completions, chip taps, and major actions.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playChime('pop');
+                }}
+                title="Preview sound chime"
+                className="p-1.5 rounded-lg border transition-all hover:text-[var(--text-primary)] active:scale-90 cursor-pointer"
+                style={{
+                  background: 'var(--bg-card-solid)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <Zap size={13} />
+              </button>
+              <Toggle
+                on={settings?.soundEffects !== false}
+                onToggle={() => handleToggleSetting('soundEffects')}
+                label="Toggle interactive sound effects"
+              />
+            </div>
+          </div>
+
+          {/* Tactile Spring Physics */}
+          <div
+            onClick={() => handleToggleSetting('bouncyAnimations')}
+            className="flex items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer hover:border-[var(--accent-color)] active:scale-[0.99]"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="w-8 h-8 rounded-xl border flex items-center justify-center shrink-0"
+                style={{
+                  background: 'var(--bg-card-solid)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--accent-color)',
+                }}
+              >
+                <Zap size={14} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                  Tactile Spring Physics
+                </p>
+                <p className="text-[10px] sm:text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                  Smooth spring bounce on buttons, popups, and modal transitions.
                 </p>
               </div>
             </div>
 
             <Toggle
-              on={settings?.soundEffects !== false}
-              onToggle={() => handleToggleSetting('soundEffects')}
-              label="Toggle interactive sound effects"
+              on={settings?.bouncyAnimations}
+              onToggle={() => handleToggleSetting('bouncyAnimations')}
+              label="Toggle spring micro-animations"
             />
           </div>
 

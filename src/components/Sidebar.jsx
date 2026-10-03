@@ -18,7 +18,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
   function handleLogout() {
     onClose?.();
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   }
 
   const initials = (user?.name || user?.email || 'U').trim()[0]?.toUpperCase() || 'U';
