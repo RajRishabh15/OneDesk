@@ -791,14 +791,14 @@ export default function Settings() {
                     color: 'var(--accent-color)',
                   }}
                 >
-                  v2.9.26
+                  v3.10.26
                 </span>
                 <span className="text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>
-                  Build #OD-2.09
+                  Build #OD3.10-1
                 </span>
               </div>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Last updated: <span className="font-medium" style={{ color: 'var(--text-primary)' }}>September 27, 2026</span>
+                Last updated: <span className="font-medium" style={{ color: 'var(--text-primary)' }}>October 3, 2026</span>
               </p>
             </div>
           </div>
@@ -1460,7 +1460,7 @@ export default function Settings() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Release v2.9.26
+                  Release v3.10.26
                 </span>
                 <span
                   className="text-[10px] px-2 py-0.5 rounded-full font-bold border"
@@ -1474,7 +1474,7 @@ export default function Settings() {
                 </span>
               </div>
               <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Released on September 27, 2026 • Build #OD-2.09
+                Released on October 3, 2026 • Build #OD3.10-1
               </p>
             </div>
             <div
@@ -1491,6 +1491,7 @@ export default function Settings() {
 
           {/* Changelog Highlights */}
           <div className="space-y-2.5">
+            {/* Point 1: New Redesigned Landing Page (1st point) */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1501,14 +1502,15 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  🎮 Fun Zone Preview &amp; Game Hub
+                  🌟 New Redesigned Landing Page
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Introduced the new Fun Zone teaser portal for quick relaxation, integrated seamless navigation switches, and added animated welcome alerts.
+                Introduced the newly redesigned editorial life notebook landing page featuring interactive feature previews, smooth stationery aesthetics, and seamless authentication workflows.
               </p>
             </div>
 
+            {/* Point 2: Added Notebook Style Theme */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1519,14 +1521,15 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  🎨 Dynamic Themes &amp; Ambient FX
+                  📓 Notebook Styled Themes &amp; Elements
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                6 handcrafted theme palettes, customizable ambient wave fibers toggle, and interactive audio feedback chimes for task interactions.
+                Added handcrafted Notebook themes (Light &amp; Dark) with continuous ruled notebook lines, graph paper grids, wire-ring coils, silk bookmark ribbons, brass corner protectors, washi tape labels, and fountain pen ink accents.
               </p>
             </div>
 
+            {/* Point 3: FunZone Point */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1537,14 +1540,15 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  🔒 Profile Customization &amp; Data Portability
+                  🎮 Fun Zone Hub &amp; Interactive Arcade
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Select from curated Unsplash avatars, upload custom profile pictures, update account passwords, and export or restore full JSON backups.
+                Introduced the new Fun Zone teaser portal and gaming hub for quick relaxation between deep work sessions, complete with streak rewards and interactive mini-game previews.
               </p>
             </div>
 
+            {/* Point 4: Change Password and Forgot Password */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1555,11 +1559,30 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  📱 Mobile Dock &amp; Responsiveness
+                  🔑 Change Password &amp; Forgot Password Recovery
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Redesigned bottom floating dock navigation, optimized toast notifications for mobile screens, and smooth tactile spring physics.
+                Added full self-service account credential management with password updates and secure email reset workflows directly in Settings and Login.
+              </p>
+            </div>
+
+            {/* Point 5: Enhanced Password Security */}
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  🛡️ Enhanced Password &amp; Data Security
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Strengthened authentication encryption, password validation, protected routes, and credential hashing for bulletproof account and data safety.
               </p>
             </div>
           </div>

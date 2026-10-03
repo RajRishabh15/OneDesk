@@ -311,7 +311,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
               color: 'var(--accent-color)',
             }}
           >
-            OS v2.0
+            OS v3.0
           </span>
         </div>
       </div>
@@ -828,7 +828,7 @@ export function SystemInfoButton() {
                   color: 'var(--text-primary)',
                 }}
               >
-                v2.9.26
+                v3.10.26
               </span>
             </div>
 
@@ -885,7 +885,7 @@ export function SystemInfoButton() {
                 <span className="text-[11px] font-medium">Last Updated</span>
               </div>
               <span className="text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                27 Sep 2026
+                3 Oct 2026
               </span>
             </div>
           </div>
