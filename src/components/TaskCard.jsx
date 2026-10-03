@@ -35,11 +35,18 @@ function formatDue(dateStr) {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-export default function TaskCard({ task, onToggleComplete, onEdit, onDelete, draggable, onDragStart }) {
+export default function TaskCard({ task, onToggleComplete, onEdit, onDelete, draggable, onDragStart, isNotebook }) {
   const priority = PRIORITY_THEMES[task.priority] || PRIORITY_THEMES.Medium;
   const due = formatDue(task.dueDate);
   const overdue = task.status !== 'Completed' && due?.includes('overdue');
   const isCompleted = task.status === 'Completed';
+
+  // Notebook washi tape class per priority
+  const washiClass = isNotebook
+    ? task.priority === 'High' ? 'nb-washi nb-washi-rose'
+    : task.priority === 'Low'  ? 'nb-washi nb-washi-green'
+    : 'nb-washi'
+    : '';
 
   return (
     <Card
@@ -47,7 +54,7 @@ export default function TaskCard({ task, onToggleComplete, onEdit, onDelete, dra
         isCompleted
           ? 'opacity-60'
           : 'hover:scale-[1.01]'
-      }`}
+      }${isNotebook ? ` nb-dog-ear mt-6 ${washiClass}` : ''}`}
       draggable={draggable}
       onDragStart={onDragStart}
     >
@@ -59,7 +66,7 @@ export default function TaskCard({ task, onToggleComplete, onEdit, onDelete, dra
           className="mt-0.5 h-4 w-4 shrink-0 rounded-full border flex items-center justify-center transition-all cursor-pointer"
           style={{
             background: isCompleted ? 'var(--accent-gradient)' : 'var(--bg-surface)',
-            borderColor: isCompleted ? 'transparent' : 'var(--border-card)',
+            borderColor: isCompleted ? 'transparent' : isNotebook ? 'var(--nb-stitch-color)' : 'var(--border-card)',
             boxShadow: isCompleted ? '0 0 10px var(--accent-glow)' : 'none',
           }}
         >
@@ -69,11 +76,15 @@ export default function TaskCard({ task, onToggleComplete, onEdit, onDelete, dra
         <div className="min-w-0 flex-1">
           <p
             className={`text-xs sm:text-sm font-semibold tracking-tight transition-all ${
-              isCompleted ? 'line-through opacity-50' : ''
+              isCompleted && !isNotebook ? 'line-through opacity-50' : ''
             }`}
             style={{ color: 'var(--text-primary)' }}
           >
-            {task.title}
+            {/* Notebook ink strikethrough for completed tasks */}
+            {isCompleted && isNotebook
+              ? <span className="nb-strikethrough">{task.title}</span>
+              : task.title
+            }
           </p>
 
           {task.description && (
@@ -86,18 +97,28 @@ export default function TaskCard({ task, onToggleComplete, onEdit, onDelete, dra
           )}
 
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-            {/* Priority Badge */}
-            <span
-              className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-bold border"
-              style={{
-                background: priority.bg,
-                borderColor: priority.border,
-                color: priority.color,
-              }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: priority.color }} />
-              {priority.label}
-            </span>
+            {/* Priority Badge — ink stamp in notebook mode */}
+            {isNotebook ? (
+              <span
+                className={`nb-stamp ${
+                  task.priority === 'High' ? 'nb-stamp-high' : ''
+                }`}
+              >
+                {priority.label}
+              </span>
+            ) : (
+              <span
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[10px] font-bold border"
+                style={{
+                  background: priority.bg,
+                  borderColor: priority.border,
+                  color: priority.color,
+                }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: priority.color }} />
+                {priority.label}
+              </span>
+            )}
 
             {/* Due Date Badge */}
             {due && (

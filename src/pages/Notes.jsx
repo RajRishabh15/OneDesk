@@ -18,6 +18,7 @@ import NoteCard from '../components/NoteCard';
 import EmptyState from '../components/EmptyState';
 import Card from '../components/Card';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../context/ThemeContext';
 
 const NOTE_COLORS = [
   { id: 'violet', label: 'Violet', hex: '#8b5cf6' },
@@ -39,6 +40,8 @@ const emptyForm = {
 
 export default function Notes() {
   const { notes, addNote, updateNote, deleteNote, togglePinNote } = useData();
+  const { theme } = useTheme();
+  const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [modalOpen, setModalOpen] = useState(false);
@@ -146,16 +149,21 @@ export default function Notes() {
       {/* ── Header ───────────────────────────────────────────── */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 pb-4"
-        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+        style={{ borderBottom: isNotebook ? '2px solid var(--nb-rule-color)' : '1px solid var(--border-subtle)' }}
       >
         <div>
+          {isNotebook && (
+            <div className="text-xs font-semibold mb-1 tracking-wider uppercase nb-hand text-[var(--accent-color)]">
+              ✎ Journal &amp; Memo Entries · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
               Notes &amp; Ideas
             </h1>
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border"
-              style={{
+              className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border${isNotebook ? ' nb-stamp nb-stamp-memo' : ''}`}
+              style={isNotebook ? {} : {
                 color: 'var(--accent-color)',
                 borderColor: 'var(--border-card)',
                 background: 'var(--bg-surface)',
@@ -165,8 +173,8 @@ export default function Notes() {
             </span>
             {pinnedCount > 0 && (
               <span
-                className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border text-amber-400"
-                style={{
+                className={`hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border text-amber-400${isNotebook ? ' nb-stamp' : ''}`}
+                style={isNotebook ? { borderColor: 'rgba(251,191,36,0.5)', color: '#fbbf24' } : {
                   background: 'rgba(251,191,36,0.1)',
                   borderColor: 'rgba(251,191,36,0.25)',
                 }}
@@ -425,6 +433,7 @@ export default function Notes() {
               onEdit={openEdit}
               onDelete={deleteNote}
               onTogglePin={togglePinNote}
+              isNotebook={isNotebook}
             />
           ))}
         </div>

@@ -693,3 +693,608 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .theme-notebook-light input[type="time"]::-webkit-calendar-picker-indicator {
   filter: none;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   📓 NOTEBOOK THEME DESIGN SYSTEM
+   All utility classes below only take effect inside
+   .theme-notebook-light and .theme-notebook-dark.
+════════════════════════════════════════════════════════════════ */
+
+/* ── Theme-level custom tokens ─────────────────────────────── */
+.theme-notebook-light {
+  --nb-dot-color:    rgba(160,125,75,0.25);
+  --nb-rule-color:   rgba(150,110,65,0.26);
+  --nb-margin-color: rgba(220, 50, 50, 0.40);
+  --nb-stitch-color: rgba(180, 83, 9, 0.38);
+  --nb-ink-color:    #1c1917;
+  --nb-hand-color:   #92400e;
+  --nb-washi-1:      rgba(245, 158, 11, 0.45);
+  --nb-washi-2:      rgba(134, 239, 172, 0.45);
+  --nb-washi-3:      rgba(251, 113, 133, 0.45);
+  --nb-stamp-border: rgba(185, 28, 28, 0.65);
+  --nb-stamp-bg:     rgba(255, 245, 245, 0.85);
+  --nb-highlight:    rgba(253, 224, 71, 0.55);
+  --nb-clip-color:   #78716c;
+  --nb-shadow:       0 3px 18px rgba(120,80,30,0.14), 0 1px 4px rgba(120,80,30,0.08);
+}
+.theme-notebook-dark {
+  --nb-dot-color:    rgba(251, 191, 36, 0.16);
+  --nb-rule-color:   rgba(245, 158, 11, 0.22);
+  --nb-margin-color: rgba(239, 68, 68, 0.38);
+  --nb-stitch-color: rgba(245, 158, 11, 0.36);
+  --nb-ink-color:    #fdf8e8;
+  --nb-hand-color:   #fbbf24;
+  --nb-washi-1:      rgba(245, 158, 11, 0.35);
+  --nb-washi-2:      rgba(134, 239, 172, 0.28);
+  --nb-washi-3:      rgba(251, 113, 133, 0.28);
+  --nb-stamp-border: rgba(239, 68, 68, 0.65);
+  --nb-stamp-bg:     rgba(28, 18, 8, 0.90);
+  --nb-highlight:    rgba(251, 191, 36, 0.30);
+  --nb-clip-color:   #d97706;
+  --nb-shadow:       0 3px 18px rgba(0,0,0,0.50), 0 1px 4px rgba(0,0,0,0.30);
+}
+
+/* ── Full-screen Notebook Paper Background Layer ────────────── */
+.nb-page-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Notebook Paper Background (Ruled Lines & Graph Grid) ───── */
+.theme-notebook-light body,
+.theme-notebook-light .nb-page-bg {
+  background-color: #f5f0e6 !important;
+  background-image:
+    /* Left Margin Rule (red ink) */
+    linear-gradient(to right, transparent 56px, rgba(220, 50, 50, 0.35) 56px, rgba(220, 50, 50, 0.35) 58px, transparent 58px),
+    /* Horizontal Ruled Notebook Lines */
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(150, 110, 65, 0.24) 27px,
+      rgba(150, 110, 65, 0.24) 28px
+    ),
+    /* Vertical Graph Grid Lines */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 27px,
+      rgba(150, 110, 65, 0.12) 27px,
+      rgba(150, 110, 65, 0.12) 28px
+    ),
+    /* Dot Grid Accents */
+    radial-gradient(circle, var(--nb-dot-color) 1.2px, transparent 1.2px) !important;
+  background-size: 100% 100%, 100% 28px, 28px 100%, 28px 28px !important;
+}
+
+.theme-notebook-dark body,
+.theme-notebook-dark .nb-page-bg {
+  background-color: #131216 !important;
+  background-image:
+    /* Left Margin Rule (red ink) */
+    linear-gradient(to right, transparent 56px, rgba(239, 68, 68, 0.40) 56px, rgba(239, 68, 68, 0.40) 58px, transparent 58px),
+    /* Horizontal Ruled Notebook Lines (warm amber ink) */
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(245, 158, 11, 0.24) 27px,
+      rgba(245, 158, 11, 0.24) 28px
+    ),
+    /* Vertical Graph Grid Lines */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 27px,
+      rgba(245, 158, 11, 0.12) 27px,
+      rgba(245, 158, 11, 0.12) 28px
+    ),
+    /* Dot Grid Accents */
+    radial-gradient(circle, rgba(251, 191, 36, 0.22) 1.2px, transparent 1.2px) !important;
+  background-size: 100% 100%, 100% 28px, 28px 100%, 28px 28px !important;
+}
+
+/* ── Ruled lines (horizontal lined paper) ─────────────────────── */
+.theme-notebook-light .nb-ruled,
+.theme-notebook-light .nb-ruled-paper {
+  background-image: repeating-linear-gradient(
+    transparent, transparent 27px,
+    rgba(150, 110, 65, 0.24) 27px, rgba(150, 110, 65, 0.24) 28px
+  ) !important;
+  background-size: 100% 28px !important;
+  line-height: 28px !important;
+}
+.theme-notebook-dark .nb-ruled,
+.theme-notebook-dark .nb-ruled-paper {
+  background-image: repeating-linear-gradient(
+    transparent, transparent 27px,
+    rgba(245, 158, 11, 0.24) 27px, rgba(245, 158, 11, 0.24) 28px
+  ) !important;
+  background-size: 100% 28px !important;
+  line-height: 28px !important;
+}
+
+/* Ruled paper applied to textareas */
+.theme-notebook-light textarea.nb-ruled,
+.theme-notebook-dark textarea.nb-ruled {
+  background-attachment: local !important;
+}
+
+/* ── Red margin rule (left vertical notebook line) ───────────── */
+.theme-notebook-light .nb-margin,
+.theme-notebook-dark .nb-margin {
+  border-left: 2.5px solid var(--nb-margin-color) !important;
+  padding-left: 1.25rem !important;
+}
+
+/* ── Bookbinder stitch border ────────────────────────────────── */
+.theme-notebook-light .nb-stitch,
+.theme-notebook-dark .nb-stitch {
+  border: 1.5px dashed var(--nb-stitch-color) !important;
+  border-radius: 14px !important;
+}
+
+/* ── Washi tape strip (top edge pseudo) ─────────────────────── */
+.theme-notebook-light .nb-washi,
+.theme-notebook-dark .nb-washi {
+  position: relative;
+}
+.theme-notebook-light .nb-washi::before,
+.theme-notebook-dark .nb-washi::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 14px;
+  right: 14px;
+  height: 14px;
+  background: var(--nb-washi-1);
+  border-radius: 2px;
+  transform: rotate(-0.4deg);
+  z-index: 2;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    90deg, transparent, transparent 8px,
+    rgba(255,255,255,0.14) 8px, rgba(255,255,255,0.14) 9px
+  );
+}
+.theme-notebook-light .nb-washi-green::before,
+.theme-notebook-dark .nb-washi-green::before  { background: var(--nb-washi-2) !important; }
+.theme-notebook-light .nb-washi-rose::before,
+.theme-notebook-dark .nb-washi-rose::before   { background: var(--nb-washi-3) !important; }
+
+/* ── Highlighter wash ────────────────────────────────────────── */
+.theme-notebook-light .nb-highlight,
+.theme-notebook-dark .nb-highlight {
+  background: linear-gradient(
+    180deg,
+    transparent 55%, var(--nb-highlight) 55%,
+    var(--nb-highlight) 94%, transparent 94%
+  );
+  display: inline;
+  padding: 0 3px;
+  border-radius: 2px;
+}
+
+/* ── Ink stamp badge ─────────────────────────────────────────── */
+.theme-notebook-light .nb-stamp,
+.theme-notebook-dark .nb-stamp {
+  font-family: var(--font-mono) !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  border: 2px solid var(--nb-stamp-border) !important;
+  background: var(--nb-stamp-bg) !important;
+  color: var(--nb-stamp-border) !important;
+  border-radius: 4px !important;
+  padding: 1px 7px !important;
+  transform: rotate(-1.8deg);
+  display: inline-block;
+  opacity: 0.88;
+  box-shadow: inset 0 0 0 1px var(--nb-stamp-border);
+  user-select: none;
+}
+.theme-notebook-light .nb-stamp-done { border-color: rgba(21,128,61,0.60) !important; background: rgba(240,253,244,0.80) !important; color: rgba(21,128,61,0.85) !important; }
+.theme-notebook-dark .nb-stamp-done  { border-color: rgba(21,128,61,0.55) !important; background: rgba(10,30,15,0.85) !important;  color: rgba(74,222,128,0.85) !important; }
+.theme-notebook-light .nb-stamp-high { border-color: rgba(185,28,28,0.65) !important; background: rgba(255,245,245,0.80) !important; color: rgba(185,28,28,0.80) !important; }
+.theme-notebook-dark .nb-stamp-high  { border-color: rgba(239,68,68,0.60) !important;  background: rgba(30,10,10,0.85) !important;  color: rgba(252,165,165,0.90) !important; }
+.theme-notebook-light .nb-stamp-memo { border-color: rgba(37,99,235,0.55) !important;  background: rgba(239,246,255,0.80) !important; color: rgba(37,99,235,0.80) !important; }
+.theme-notebook-dark .nb-stamp-memo  { border-color: rgba(96,165,250,0.55) !important;  background: rgba(10,15,40,0.85) !important;  color: rgba(147,197,253,0.90) !important; }
+
+/* ── Handwriting font ────────────────────────────────────────── */
+.theme-notebook-light .nb-hand,
+.theme-notebook-dark .nb-hand {
+  font-family: var(--font-handwriting) !important;
+  color: var(--nb-hand-color);
+  letter-spacing: 0.01em;
+}
+
+/* ── Glass cards → paper cards in notebook mode ─────────────── */
+.theme-notebook-light .glass-card,
+.theme-notebook-light .glass-panel-fluid {
+  background: rgba(253,251,247,0.97) !important;
+  border-color: rgba(214,205,192,0.80) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: var(--nb-shadow) !important;
+}
+.theme-notebook-dark .glass-card,
+.theme-notebook-dark .glass-panel-fluid,
+.theme-notebook-dark .card-glass {
+  background: rgba(26, 23, 29, 0.96) !important;
+  border-color: rgba(251, 191, 36, 0.22) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(251, 191, 36, 0.08) !important;
+}
+
+/* ── Chip glass → ink label chips ───────────────────────────── */
+.theme-notebook-light .chip-glass {
+  background: rgba(240,234,222,0.90) !important;
+  border-color: rgba(200,185,165,0.70) !important;
+  backdrop-filter: none !important;
+}
+.theme-notebook-light .chip-glass-active {
+  background: rgba(180,83,9,0.12) !important;
+  border-color: rgba(180,83,9,0.35) !important;
+  color: #7c2d12 !important;
+  box-shadow: none !important;
+}
+.theme-notebook-dark .chip-glass {
+  background: rgba(34, 29, 38, 0.90) !important;
+  border-color: rgba(251, 191, 36, 0.24) !important;
+  color: #fdf8e8 !important;
+  backdrop-filter: none !important;
+}
+.theme-notebook-dark .chip-glass-active {
+  background: rgba(245, 158, 11, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.60) !important;
+  color: #fbbf24 !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.20) !important;
+}
+.theme-notebook-dark .btn-glass {
+  background: rgba(35, 30, 39, 0.85) !important;
+  border-color: rgba(251, 191, 36, 0.24) !important;
+  color: #fdf8e8 !important;
+}
+.theme-notebook-dark .btn-glass:hover {
+  background: rgba(45, 39, 50, 0.95) !important;
+  border-color: rgba(251, 191, 36, 0.45) !important;
+  color: #fbbf24 !important;
+}
+
+/* ── Inputs & Dialogs in Notebook Dark ───────────────────────── */
+.theme-notebook-dark input:not([type="checkbox"]):not([type="radio"]),
+.theme-notebook-dark textarea,
+.theme-notebook-dark select {
+  background-color: rgba(22, 19, 25, 0.92) !important;
+  border-color: rgba(251, 191, 36, 0.24) !important;
+  color: #fdf8e8 !important;
+}
+.theme-notebook-dark input:focus,
+.theme-notebook-dark textarea:focus,
+.theme-notebook-dark select:focus {
+  border-color: rgba(245, 158, 11, 0.60) !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.20) !important;
+}
+
+/* ── Top Nav Pill → bookmark-ribbon ────────────────────────── */
+.theme-notebook-light .nb-bookmark-pill,
+.theme-notebook-dark .nb-bookmark-pill {
+  border: 1.5px dashed var(--nb-stitch-color) !important;
+}
+
+/* ── Dog-ear fold (hoverable corner) ────────────────────────── */
+.theme-notebook-light .nb-dog-ear,
+.theme-notebook-dark .nb-dog-ear {
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
+}
+.theme-notebook-light .nb-dog-ear::after,
+.theme-notebook-dark .nb-dog-ear::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+.theme-notebook-light .nb-dog-ear::after {
+  background: linear-gradient(225deg, #ede5d8 50%, transparent 50%);
+  box-shadow: -2px -2px 5px rgba(100,70,30,0.14);
+}
+.theme-notebook-dark .nb-dog-ear::after {
+  background: linear-gradient(225deg, #1a1916 50%, transparent 50%);
+  box-shadow: -2px -2px 5px rgba(0,0,0,0.30);
+}
+.theme-notebook-light .nb-dog-ear:hover { box-shadow: 3px 5px 20px rgba(120,80,30,0.18) !important; transform: translateY(-2px) rotate(-0.15deg); }
+.theme-notebook-dark .nb-dog-ear:hover  { box-shadow: 3px 5px 20px rgba(0,0,0,0.45) !important; transform: translateY(-2px) rotate(-0.15deg); }
+.theme-notebook-light .nb-dog-ear:hover::after,
+.theme-notebook-dark .nb-dog-ear:hover::after { width: 30px; height: 30px; }
+
+/* ── Ink strikethrough animation ────────────────────────────── */
+@keyframes nb-strikethrough {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+.theme-notebook-light .nb-strikethrough,
+.theme-notebook-dark .nb-strikethrough {
+  position: relative;
+  display: inline-block;
+  text-decoration: none !important;
+}
+.theme-notebook-light .nb-strikethrough::after,
+.theme-notebook-dark .nb-strikethrough::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 52%;
+  height: 1.5px;
+  width: 100%;
+  border-radius: 1px;
+  animation: nb-strikethrough 0.45s cubic-bezier(0.22,1,0.36,1) both;
+}
+.theme-notebook-light .nb-strikethrough::after { background: rgba(120,83,9,0.50); }
+.theme-notebook-dark .nb-strikethrough::after  { background: rgba(245,158,11,0.55); }
+
+/* ── Journal date header ─────────────────────────────────────── */
+.theme-notebook-light .nb-journal-date,
+.theme-notebook-dark .nb-journal-date {
+  font-family: var(--font-handwriting) !important;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-bottom: 1.5px solid var(--nb-rule-color);
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  color: var(--nb-hand-color);
+}
+
+/* ── Spine / bookbinder left rail ────────────────────────────── */
+@keyframes nb-spine-in {
+  from { opacity: 0; transform: scaleY(0.92); }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+.theme-notebook-light .nb-spine,
+.theme-notebook-dark .nb-spine {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  z-index: 31;
+  pointer-events: none;
+  animation: nb-spine-in 0.4s ease both;
+}
+.theme-notebook-light .nb-spine {
+  background: linear-gradient(180deg, #d4a96a 0%, #c49458 45%, #b5813e 100%);
+  box-shadow: 2px 0 8px rgba(120,70,20,0.22);
+}
+.theme-notebook-dark .nb-spine {
+  background: linear-gradient(180deg, #78350f 0%, #92400e 45%, #78350f 100%);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.55);
+}
+.theme-notebook-light .nb-spine::after,
+.theme-notebook-dark .nb-spine::after {
+  content: '';
+  position: absolute;
+  left: 2px; top: 0; bottom: 0;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom, transparent, transparent 10px,
+    rgba(255,255,255,0.35) 10px, rgba(255,255,255,0.35) 16px
+  );
+}
+
+/* ── Spiral binding holes ────────────────────────────────────── */
+.nb-spiral-holes { display: none; }
+.theme-notebook-light .nb-spiral-holes,
+.theme-notebook-dark .nb-spiral-holes {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  pointer-events: none;
+}
+.theme-notebook-light .nb-spiral-holes span,
+.theme-notebook-dark .nb-spiral-holes span {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.theme-notebook-light .nb-spiral-holes span {
+  background: #f5f0e6;
+  border: 1.5px solid rgba(180,140,90,0.45);
+  box-shadow: inset 0 1px 3px rgba(120,80,30,0.14);
+}
+.theme-notebook-dark .nb-spiral-holes span {
+  background: #131215;
+  border: 1.5px solid rgba(245,158,11,0.32);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.35);
+}
+
+/* ── Scrollbars — sepia / brass in notebook dark ────────────── */
+.theme-notebook-dark *,
+.theme-notebook-dark .custom-scrollbar {
+  scrollbar-color: rgba(245,158,11,0.22) transparent;
+}
+.theme-notebook-dark ::-webkit-scrollbar-thumb {
+  background: rgba(245,158,11,0.22);
+}
+.theme-notebook-dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(245,158,11,0.44);
+}
+
+/* ── BOOK & DIARY STYLED ELEMENTS ────────────────────────────── */
+
+/* 1. Silk Bookmark Ribbon */
+.nb-ribbon-bookmark {
+  position: absolute;
+  top: -8px;
+  right: 24px;
+  width: 20px;
+  height: 48px;
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 60%, #9f1239 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.30);
+  z-index: 12;
+  pointer-events: none;
+  transition: transform 0.25s ease, height 0.25s ease;
+}
+.theme-notebook-dark .nb-ribbon-bookmark {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 60%, #b45309 100%);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.55);
+}
+.nb-ribbon-bookmark:hover {
+  transform: translateY(4px);
+}
+
+/* 2. Brass Corner Protectors */
+.nb-brass-corner {
+  position: relative;
+}
+.nb-brass-corner::before,
+.nb-brass-corner::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 4;
+}
+.theme-notebook-light .nb-brass-corner::before {
+  top: 0; left: 0;
+  border-top: 3.5px solid #b45309;
+  border-left: 3.5px solid #b45309;
+  border-top-left-radius: 12px;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6);
+}
+.theme-notebook-light .nb-brass-corner::after {
+  top: 0; right: 0;
+  border-top: 3.5px solid #b45309;
+  border-right: 3.5px solid #b45309;
+  border-top-right-radius: 12px;
+  box-shadow: inset -1px 1px 0 rgba(255,255,255,0.6);
+}
+.theme-notebook-dark .nb-brass-corner::before {
+  top: 0; left: 0;
+  border-top: 3.5px solid #f59e0b;
+  border-left: 3.5px solid #f59e0b;
+  border-top-left-radius: 12px;
+  box-shadow: inset 1px 1px 0 rgba(251,191,36,0.5);
+}
+.theme-notebook-dark .nb-brass-corner::after {
+  top: 0; right: 0;
+  border-top: 3.5px solid #f59e0b;
+  border-right: 3.5px solid #f59e0b;
+  border-top-right-radius: 12px;
+  box-shadow: inset -1px 1px 0 rgba(251,191,36,0.5);
+}
+
+/* 3. Wire-O Spiral Binder & Ring Coils */
+.nb-wire-binder {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 16px;
+  position: relative;
+  z-index: 10;
+}
+.nb-wire-ring {
+  width: 14px;
+  height: 26px;
+  border-radius: 6px;
+  position: relative;
+  flex-shrink: 0;
+}
+.theme-notebook-light .nb-wire-ring {
+  background: linear-gradient(90deg, #9ca3af 0%, #ffffff 40%, #6b7280 100%);
+  box-shadow: 0 3px 6px rgba(100,70,30,0.22), inset 0 1px 2px rgba(255,255,255,0.9);
+  border: 1px solid rgba(120,80,30,0.2);
+}
+.theme-notebook-dark .nb-wire-ring {
+  background: linear-gradient(90deg, #78350f 0%, #fbbf24 45%, #451a03 100%);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(251,191,36,0.8);
+  border: 1px solid rgba(245,158,11,0.3);
+}
+
+/* 4. Leather Desk Planner & Open Book Spread Container */
+.theme-notebook-light .nb-diary-spread,
+.theme-notebook-light .nb-book-container {
+  background: #faf6ee !important;
+  border: 1.5px dashed var(--nb-stitch-color) !important;
+  box-shadow: 0 10px 30px -5px rgba(120,80,30,0.16), 0 2px 6px rgba(120,80,30,0.08) !important;
+  position: relative;
+}
+.theme-notebook-dark .nb-diary-spread,
+.theme-notebook-dark .nb-book-container {
+  background: #17130e !important;
+  border: 1.5px dashed var(--nb-stitch-color) !important;
+  box-shadow: 0 10px 35px -5px rgba(0,0,0,0.65), 0 2px 6px rgba(0,0,0,0.4) !important;
+  position: relative;
+}
+
+/* 5. Paperclip Graphic */
+.nb-paperclip {
+  position: absolute;
+  top: -12px;
+  right: 28px;
+  width: 14px;
+  height: 34px;
+  border: 2.5px solid #a8a29e;
+  border-radius: 7px 7px 0 0;
+  border-bottom: none;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.20);
+}
+.theme-notebook-dark .nb-paperclip {
+  border-color: #f59e0b;
+}
+
+/* 6. Colored Sticky Post-It Notes */
+.nb-sticky-note {
+  position: relative;
+  padding: 12px 14px;
+  border-radius: 4px;
+  box-shadow: 2px 4px 12px rgba(0,0,0,0.12);
+  transform: rotate(-0.5deg);
+  font-family: var(--font-handwriting);
+}
+.theme-notebook-light .nb-sticky-yellow {
+  background: #fef08a !important;
+  color: #713f12 !important;
+  border: 1px solid rgba(234,179,8,0.4) !important;
+}
+.theme-notebook-dark .nb-sticky-yellow {
+  background: #422006 !important;
+  color: #fef08a !important;
+  border: 1px solid rgba(245,158,11,0.4) !important;
+}
+
+/* 7. Planner Divider Index Tabs */
+.theme-notebook-light .nb-tab-active {
+  background: #faf6ee !important;
+  color: #92400e !important;
+  border-color: #b45309 !important;
+  box-shadow: 0 2px 6px rgba(180,83,9,0.18) !important;
+}
+.theme-notebook-dark .nb-tab-active {
+  background: #17130e !important;
+  color: #fbbf24 !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+}
+
+/* ── Reduce motion ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .theme-notebook-light .nb-strikethrough::after,
+  .theme-notebook-dark .nb-strikethrough::after { animation: none; }
+  .theme-notebook-light .nb-spine,
+  .theme-notebook-dark .nb-spine { animation: none; }
+}

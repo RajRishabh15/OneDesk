@@ -52,9 +52,16 @@ function relativeDate(iso) {
   return `${diffDays}d ago`;
 }
 
-export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
+export default function NoteCard({ note, onEdit, onDelete, onTogglePin, isNotebook }) {
   const [copied, setCopied] = useState(false);
   const accent = COLOR_ACCENTS[note.color] || COLOR_ACCENTS.violet;
+
+  // Notebook washi color per note color
+  const nbWashiClass = isNotebook
+    ? note.color === 'rose'  ? 'nb-washi nb-washi-rose'
+    : note.color === 'green' ? 'nb-washi nb-washi-green'
+    : 'nb-washi'
+    : '';
 
   function handleCopy(e) {
     e.stopPropagation();
@@ -79,20 +86,22 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
 
   return (
     <Card
-      className="relative flex flex-col justify-between overflow-hidden p-4 sm:p-5 transition-all duration-200 group hover:scale-[1.01]"
+      className={`relative flex flex-col justify-between overflow-hidden p-4 sm:p-5 transition-all duration-200 group hover:scale-[1.01]${isNotebook ? ` nb-dog-ear${note.pinned ? ` ${nbWashiClass} mt-5` : ''}` : ''}`}
       style={{
-        borderColor: note.pinned ? accent.border : 'var(--border-card)',
-        boxShadow: note.pinned ? `0 4px 24px ${accent.glow}` : undefined,
+        borderColor: isNotebook ? 'var(--nb-stitch-color)' : note.pinned ? accent.border : 'var(--border-card)',
+        boxShadow: note.pinned && !isNotebook ? `0 4px 24px ${accent.glow}` : undefined,
       }}
     >
-      {/* Accent strip */}
-      <div
-        className="absolute top-0 inset-x-0 h-1 transition-opacity"
-        style={{
-          background: accent.bar,
-          opacity: note.pinned ? 1 : 0.65,
-        }}
-      />
+      {/* Accent strip — hidden in notebook mode, replaced by washi tape */}
+      {!isNotebook && (
+        <div
+          className="absolute top-0 inset-x-0 h-1 transition-opacity"
+          style={{
+            background: accent.bar,
+            opacity: note.pinned ? 1 : 0.65,
+          }}
+        />
+      )}
 
       {/* Top Header */}
       <div>
@@ -100,8 +109,8 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
           <div className="min-w-0 flex-1">
             {note.category && (
               <span
-                className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1.5 border"
-                style={{
+                className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1.5 border${isNotebook ? ' nb-stamp nb-stamp-memo' : ''}`}
+                style={isNotebook ? {} : {
                   background: accent.badgeBg,
                   color: accent.badgeText,
                   borderColor: accent.border,
@@ -111,7 +120,7 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
               </span>
             )}
             <h3
-              className="font-display text-sm sm:text-base font-bold tracking-tight leading-snug truncate"
+              className={`font-display text-sm sm:text-base font-bold tracking-tight leading-snug truncate${isNotebook ? ' nb-hand' : ''}`}
               style={{ color: 'var(--text-primary)' }}
             >
               {note.title}
@@ -136,7 +145,7 @@ export default function NoteCard({ note, onEdit, onDelete, onTogglePin }) {
 
         {/* Note Body */}
         <p
-          className="whitespace-pre-line text-xs sm:text-sm line-clamp-4 leading-relaxed font-sans mt-2"
+          className={`whitespace-pre-line text-xs sm:text-sm line-clamp-4 leading-relaxed font-sans mt-2${isNotebook ? ' nb-ruled px-1 pt-1' : ''}`}
           style={{ color: 'var(--text-muted)' }}
         >
           {note.description || <span className="italic opacity-50">Empty note…</span>}

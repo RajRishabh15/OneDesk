@@ -60,13 +60,19 @@ export default function AppLayout() {
     return <LoadingScreen message="Syncing workspace…" />;
   }
 
+  const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
+
   return (
     <div
       className="relative min-h-screen overflow-x-hidden selection:bg-indigo-500/30 selection:text-white"
       style={{ background: 'var(--bg-page)', color: 'var(--text-primary)' }}
     >
+      {/* ── Full-screen edge-to-edge notebook background (ruled lines & graph grid) ── */}
+      {isNotebook && <div className="fixed inset-0 pointer-events-none z-0 nb-page-bg" aria-hidden="true" />}
+      {/* ── Notebook bookbinder leather spine rail ── */}
+      {isNotebook && <div className="nb-spine" aria-hidden="true" />}
       {/* Animated background fibers — opacity controlled per theme via CSS var */}
-      {settings.ghostFibers && (
+      {settings.ghostFibers && !isNotebook && (
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden fiber-canvas">
           <div style={{ width: '100%', height: '100%', position: 'relative' }}>
             <GhostFibers
