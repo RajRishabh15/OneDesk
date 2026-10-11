@@ -11,13 +11,15 @@
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
+    "animejs": "^4.5.0",
     "firebase": "^12.19.0",
     "lucide-react": "^1.45.0",
     "ogl": "^1.0.11",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.3",
-    "recharts": "^3.10.1"
+    "recharts": "^3.10.1",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

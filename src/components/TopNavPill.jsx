@@ -20,12 +20,74 @@ import {
   ArrowLeft,
   Check,
   Plus,
+  Palette,
+  Key,
+  Database,
+  Trash2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
 import OneDeskLogo from './OneDeskLogo';
+
+/* ── Searchable settings registry ──────────────────────── */
+const SETTINGS_ITEMS = [
+  {
+    id: 'profile',
+    label: 'Profile & Account',
+    description: 'Edit display name, avatar, email',
+    keywords: ['profile', 'name', 'avatar', 'photo', 'picture', 'account', 'user', 'display'],
+    icon: UserIcon,
+    path: '/settings',
+    color: '#818cf8',
+  },
+  {
+    id: 'password',
+    label: 'Change Password',
+    description: 'Update password and security settings',
+    keywords: ['password', 'security', 'login', 'change password', 'reset', 'credentials', 'auth'],
+    icon: Key,
+    path: '/settings',
+    color: '#f59e0b',
+  },
+  {
+    id: 'appearance',
+    label: 'Appearance & Themes',
+    description: 'Themes, notebook styles, dark mode, canvas waves',
+    keywords: ['theme', 'dark', 'light', 'appearance', 'color', 'notebook', 'style', 'palette', 'mode', 'background', 'wave'],
+    icon: Palette,
+    path: '/settings/appearance',
+    color: '#34d399',
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications & Alerts',
+    description: 'Desktop reminders and deadline notifications',
+    keywords: ['notification', 'alert', 'reminder', 'deadline', 'bell', 'push', 'desktop'],
+    icon: Bell,
+    path: '/settings',
+    color: '#f472b6',
+  },
+  {
+    id: 'data',
+    label: 'Data & Backups',
+    description: 'Export, import or restore workspace data',
+    keywords: ['data', 'backup', 'export', 'import', 'restore', 'download', 'json', 'sync'],
+    icon: Database,
+    path: '/settings',
+    color: '#60a5fa',
+  },
+  {
+    id: 'danger',
+    label: 'Delete Account',
+    description: 'Permanently delete account and all data',
+    keywords: ['delete', 'account', 'remove', 'danger', 'terminate', 'deactivate', 'wipe'],
+    icon: Trash2,
+    path: '/settings',
+    color: '#f87171',
+  },
+];
 
 const navLinks = [
   { to: '/',          label: 'Home',     icon: Home,        end: true },
@@ -189,12 +251,18 @@ export default function TopNavPill() {
   }, []);
 
   const results = useMemo(() => {
-    if (!query.trim()) return { notes: [], tasks: [], events: [] };
+    if (!query.trim()) return { notes: [], tasks: [], events: [], settings: [] };
     const q = query.toLowerCase();
     return {
       notes:  notes.filter(n  => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q)),
       tasks:  tasks.filter(t  => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)),
       events: events.filter(ev => ev.title.toLowerCase().includes(q) || ev.description?.toLowerCase().includes(q)),
+      settings: SETTINGS_ITEMS.filter(
+        s =>
+          s.label.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q) ||
+          s.keywords.some(k => k.includes(q))
+      ),
     };
   }, [query, notes, tasks, events]);
 
@@ -424,14 +492,20 @@ export default function TopNavPill() {
               {/* Search Results Dropdown */}
               {searchOpen && query.trim() && (
                 <div
-                  className="absolute right-0 top-full mt-2.5 w-80 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50"
+                  className="absolute right-0 top-full mt-2.5 w-80 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50 max-h-[70vh] overflow-y-auto"
                   style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
+                  {results.settings.length > 0 && (
+                    <SettingsSearchGroup
+                      items={results.settings}
+                      onSelect={(item) => { setSearchOpen(false); setQuery(''); navigate(item.path); }}
+                    />
+                  )}
                   <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
                   <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
                   <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
-                  {results.notes.length + results.tasks.length + results.events.length === 0 && (
-                    <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
+                  {results.notes.length + results.tasks.length + results.events.length + results.settings.length === 0 && (
+                    <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for &ldquo;{query}&rdquo;.</p>
                   )}
                 </div>
               )}
@@ -936,7 +1010,7 @@ export default function TopNavPill() {
         {searchOpen && query.trim() && (
           <div
             ref={mobileSearchDropdownRef}
-            className="fixed inset-x-3.5 top-[62px] max-w-sm mx-auto rounded-2xl border shadow-2xl p-4 space-y-3 animate-menu-pop z-50 overflow-hidden"
+            className="fixed inset-x-3.5 top-[62px] max-w-sm mx-auto rounded-2xl border shadow-2xl p-4 space-y-3 animate-menu-pop z-50 overflow-y-auto max-h-[70vh]"
             style={{
               background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
@@ -951,11 +1025,17 @@ export default function TopNavPill() {
                 background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
               }}
             />
+            {results.settings.length > 0 && (
+              <SettingsSearchGroup
+                items={results.settings}
+                onSelect={(item) => { if (playChime) playChime('pop'); setSearchOpen(false); setQuery(''); navigate(item.path); }}
+              />
+            )}
             <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/tasks'); }} />
             <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/notes'); }} />
             <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/calendar'); }} />
-            {results.notes.length + results.tasks.length + results.events.length === 0 && (
-              <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>No results for "{query}".</p>
+            {results.notes.length + results.tasks.length + results.events.length + results.settings.length === 0 && (
+              <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>No results for &ldquo;{query}&rdquo;.</p>
             )}
           </div>
         )}
@@ -1483,6 +1563,50 @@ function SearchGroup({ label, count, items, onSee }) {
             {t}
           </li>
         ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ── Settings search result group ── */
+function SettingsSearchGroup({ items, onSelect }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Settings size={10} style={{ color: 'var(--text-muted)' }} />
+        <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          Settings <span className="opacity-60">({items.length})</span>
+        </p>
+      </div>
+      <ul className="space-y-0.5">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <li
+              key={item.id}
+              onClick={() => onSelect(item)}
+              className="flex items-center gap-2.5 text-xs py-1.5 px-2 rounded-xl cursor-pointer group transition-colors"
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <div
+                className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border"
+                style={{
+                  background: `${item.color}1a`,
+                  borderColor: `${item.color}40`,
+                  color: item.color,
+                }}
+              >
+                <Icon size={12} strokeWidth={2.3} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold truncate" style={{ color: 'var(--text-primary)', fontSize: '11px' }}>{item.label}</div>
+                <div className="truncate" style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{item.description}</div>
+              </div>
+              <ArrowRight size={11} className="shrink-0 opacity-30 group-hover:opacity-70 transition-opacity" style={{ color: 'var(--accent-color)' }} />
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

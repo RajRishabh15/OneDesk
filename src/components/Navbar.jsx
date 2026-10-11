@@ -1,8 +1,67 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Menu, LogOut, User as UserIcon, Plus, CheckSquare, FileText, CalendarPlus, X, Sparkles, ArrowRight } from 'lucide-react';
+import { Search, Bell, Menu, LogOut, User as UserIcon, Plus, CheckSquare, FileText, CalendarPlus, X, Sparkles, ArrowRight, Settings as SettingsIcon, Palette, Key, Database, Bell as BellIcon, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+
+/* ── Static searchable settings registry ─────────────────── */
+const SETTINGS_ITEMS = [
+  {
+    id: 'profile',
+    label: 'Profile & Account',
+    description: 'Edit your display name, avatar, email address',
+    keywords: ['profile', 'name', 'avatar', 'photo', 'picture', 'account', 'user', 'display'],
+    icon: UserIcon,
+    path: '/settings',
+    color: '#818cf8',
+  },
+  {
+    id: 'password',
+    label: 'Change Password',
+    description: 'Update your password and security settings',
+    keywords: ['password', 'security', 'login', 'change password', 'reset', 'credentials', 'auth'],
+    icon: Key,
+    path: '/settings',
+    action: 'openPasswordModal',
+    color: '#f59e0b',
+  },
+  {
+    id: 'appearance',
+    label: 'Appearance & Themes',
+    description: 'Switch themes, notebook styles, dark mode, canvas waves',
+    keywords: ['theme', 'dark', 'light', 'appearance', 'color', 'notebook', 'style', 'palette', 'mode', 'background', 'wave'],
+    icon: Palette,
+    path: '/settings/appearance',
+    color: '#34d399',
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications & Alerts',
+    description: 'Desktop reminder alerts and deadline notifications',
+    keywords: ['notification', 'alert', 'reminder', 'deadline', 'bell', 'push', 'desktop'],
+    icon: BellIcon,
+    path: '/settings',
+    color: '#f472b6',
+  },
+  {
+    id: 'data',
+    label: 'Data & Backups',
+    description: 'Export, import or restore your workspace data',
+    keywords: ['data', 'backup', 'export', 'import', 'restore', 'download', 'json', 'sync'],
+    icon: Database,
+    path: '/settings',
+    color: '#60a5fa',
+  },
+  {
+    id: 'danger',
+    label: 'Delete Account',
+    description: 'Permanently delete your account and all data',
+    keywords: ['delete', 'account', 'remove', 'danger', 'terminate', 'deactivate', 'wipe'],
+    icon: Trash2,
+    path: '/settings',
+    color: '#f87171',
+  },
+];
 
 export default function Navbar({ onMenuClick }) {
   const { user, logout } = useAuth();
@@ -59,12 +118,18 @@ export default function Navbar({ onMenuClick }) {
   }, []);
 
   const results = useMemo(() => {
-    if (!query.trim()) return { notes: [], tasks: [], events: [] };
+    if (!query.trim()) return { notes: [], tasks: [], events: [], settings: [] };
     const q = query.toLowerCase();
     return {
       notes: notes.filter((n) => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q)),
       tasks: tasks.filter((t) => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)),
       events: events.filter((e) => e.title.toLowerCase().includes(q) || e.description?.toLowerCase().includes(q)),
+      settings: SETTINGS_ITEMS.filter(
+        (s) =>
+          s.label.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q) ||
+          s.keywords.some((k) => k.includes(q))
+      ),
     };
   }, [query, notes, tasks, events]);
 
@@ -104,7 +169,17 @@ export default function Navbar({ onMenuClick }) {
           )}
 
           {showResults && query.trim() && (
-            <div className="absolute mt-1.5 w-full rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1c1c1a] shadow-xl p-3 space-y-3 animate-fade-up z-50">
+            <div className="absolute mt-1.5 w-full rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1c1c1a] shadow-xl p-3 space-y-3 animate-fade-up z-50 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              {results.settings.length > 0 && (
+                <SettingsSearchGroup
+                  items={results.settings}
+                  onSelect={(item) => {
+                    setShowResults(false);
+                    setQuery('');
+                    navigate(item.path);
+                  }}
+                />
+              )}
               <SearchGroup
                 label="Tasks"
                 count={results.tasks.length}
@@ -123,8 +198,8 @@ export default function Navbar({ onMenuClick }) {
                 items={results.events.map((e) => e.title)}
                 onSee={() => { setShowResults(false); navigate('/calendar'); }}
               />
-              {results.notes.length + results.tasks.length + results.events.length === 0 && (
-                <p className="text-xs text-stone-400 py-1">No matches for "{query}".</p>
+              {results.notes.length + results.tasks.length + results.events.length + results.settings.length === 0 && (
+                <p className="text-xs text-stone-400 py-1">No matches for &ldquo;{query}&rdquo;.</p>
               )}
             </div>
           )}
@@ -355,31 +430,69 @@ export default function Navbar({ onMenuClick }) {
 }
 
 function SearchGroup({ label, count, items, onSee }) {
+  if (count === 0) return null;
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
         <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
           {label} ({count})
         </p>
-        {count > 0 && (
-          <button onClick={onSee} className="text-[11px] font-semibold text-stone-900 dark:text-stone-100 hover:underline">
-            View all
-          </button>
-        )}
+        <button onClick={onSee} className="text-[11px] font-semibold text-stone-900 dark:text-stone-100 hover:underline">
+          View all
+        </button>
       </div>
-      {count > 0 && (
-        <ul className="space-y-1">
-          {items.slice(0, 3).map((t, i) => (
+      <ul className="space-y-1">
+        {items.slice(0, 3).map((t, i) => (
+          <li
+            key={i}
+            onClick={onSee}
+            className="truncate text-xs text-slate-700 dark:text-slate-300 py-1 px-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          >
+            {t}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SettingsSearchGroup({ items, onSelect }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <SettingsIcon size={11} className="text-stone-400" />
+        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          Settings ({items.length})
+        </p>
+      </div>
+      <ul className="space-y-1">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
             <li
-              key={i}
-              onClick={onSee}
-              className="truncate text-xs text-slate-700 dark:text-slate-300 py-1 px-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              key={item.id}
+              onClick={() => onSelect(item)}
+              className="flex items-center gap-2.5 text-xs py-1.5 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer group transition-colors"
             >
-              {t}
+              <div
+                className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border"
+                style={{
+                  background: `${item.color}18`,
+                  borderColor: `${item.color}35`,
+                  color: item.color,
+                }}
+              >
+                <Icon size={12} strokeWidth={2.3} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-stone-800 dark:text-stone-200 truncate">{item.label}</div>
+                <div className="text-[10px] text-stone-400 truncate">{item.description}</div>
+              </div>
+              <ArrowRight size={11} className="text-stone-300 group-hover:text-stone-500 shrink-0 transition-colors" />
             </li>
-          ))}
-        </ul>
-      )}
+          );
+        })}
+      </ul>
     </div>
   );
 }
