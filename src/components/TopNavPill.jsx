@@ -28,7 +28,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, THEMES } from '../context/ThemeContext';
 import OneDeskLogo from './OneDeskLogo';
 
 /* ── Searchable settings registry ──────────────────────── */
@@ -40,6 +40,7 @@ const SETTINGS_ITEMS = [
     keywords: ['profile', 'name', 'avatar', 'photo', 'picture', 'account', 'user', 'display'],
     icon: UserIcon,
     path: '/settings',
+    navState: { openModal: 'editProfile' },
     color: '#818cf8',
   },
   {
@@ -49,6 +50,7 @@ const SETTINGS_ITEMS = [
     keywords: ['password', 'security', 'login', 'change password', 'reset', 'credentials', 'auth'],
     icon: Key,
     path: '/settings',
+    navState: { openModal: 'changePassword' },
     color: '#f59e0b',
   },
   {
@@ -88,6 +90,21 @@ const SETTINGS_ITEMS = [
     color: '#f87171',
   },
 ];
+
+/* ── Searchable theme keywords ─────────────────────────── */
+const THEME_SEARCH_KEYWORDS = {
+  dark: ['dark', 'midnight', 'indigo', 'night', 'deep', 'black', 'dark mode'],
+  light: ['light', 'daylight', 'day', 'stone', 'white', 'bright', 'light mode'],
+  'notebook-light': ['notebook', 'notebook light', 'journal', 'parchment', 'paper', 'writer', 'book', 'sepia'],
+  'notebook-dark': ['notebook', 'notebook dark', 'journal', 'obsidian', 'brass', 'leather', 'dark notebook'],
+  aurora: ['aurora', 'green', 'emerald', 'mint', 'northern lights'],
+  ocean: ['ocean', 'blue', 'cyan', 'sea', 'water', 'aqua', 'marine'],
+  rose: ['rose', 'rosé', 'pink', 'blush', 'red', 'cream', 'pastel'],
+  amber: ['amber', 'ember', 'gold', 'orange', 'warm', 'honey', 'sunset'],
+  peacock: ['peacock', 'teal', 'turquoise', 'cyan', 'green', 'blue', 'sea'],
+  lavender: ['lavender', 'violet', 'purple', 'lilac', 'plum'],
+  babypink: ['baby pink', 'babypink', 'pink', 'pastel', 'cotton candy', 'sakura'],
+};
 
 const navLinks = [
   { to: '/',          label: 'Home',     icon: Home,        end: true },
@@ -133,7 +150,7 @@ export default function TopNavPill() {
   const { user, logout } = useAuth();
   const { tasks, notes, events, addTask } = useData();
   const { settings, playChime } = useSettings();
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
 
@@ -251,9 +268,27 @@ export default function TopNavPill() {
   }, []);
 
   const results = useMemo(() => {
-    if (!query.trim()) return { notes: [], tasks: [], events: [], settings: [] };
-    const q = query.toLowerCase();
+    if (!query.trim()) return { notes: [], tasks: [], events: [], settings: [], themes: [] };
+    const q = query.toLowerCase().trim();
+    const isGenericThemeSearch = ['theme', 'themes', 'palette', 'palettes'].includes(q);
     return {
+      themes: THEMES.filter(t => {
+        if (t.comingSoon) return false;
+        if (isGenericThemeSearch) return true;
+        const kw = THEME_SEARCH_KEYWORDS[t.id] || [];
+        const nameNorm = t.name.toLowerCase();
+        const descNorm = t.description?.toLowerCase() || '';
+        const idNorm = t.id.toLowerCase();
+        const modeNorm = t.mode?.toLowerCase() || '';
+
+        return (
+          nameNorm.includes(q) ||
+          idNorm.includes(q) ||
+          descNorm.includes(q) ||
+          modeNorm === q ||
+          kw.some(k => k.includes(q) || q.includes(k))
+        );
+      }),
       notes:  notes.filter(n  => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q)),
       tasks:  tasks.filter(t  => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)),
       events: events.filter(ev => ev.title.toLowerCase().includes(q) || ev.description?.toLowerCase().includes(q)),
@@ -495,16 +530,32 @@ export default function TopNavPill() {
                   className="absolute right-0 top-full mt-2.5 w-80 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50 max-h-[70vh] overflow-y-auto"
                   style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
+                  {results.themes.length > 0 && (
+                    <ThemeSearchGroup
+                      items={results.themes}
+                      currentTheme={theme}
+                      onSelect={(themeId) => {
+                        setTheme(themeId);
+                        if (playChime) playChime('success');
+                        setSearchOpen(false);
+                        setQuery('');
+                      }}
+                    />
+                  )}
                   {results.settings.length > 0 && (
                     <SettingsSearchGroup
                       items={results.settings}
-                      onSelect={(item) => { setSearchOpen(false); setQuery(''); navigate(item.path); }}
+                      onSelect={(item) => {
+                        setSearchOpen(false);
+                        setQuery('');
+                        navigate(item.path, { state: item.navState || {} });
+                      }}
                     />
                   )}
                   <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
                   <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
                   <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
-                  {results.notes.length + results.tasks.length + results.events.length + results.settings.length === 0 && (
+                  {results.notes.length + results.tasks.length + results.events.length + results.settings.length + results.themes.length === 0 && (
                     <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for &ldquo;{query}&rdquo;.</p>
                   )}
                 </div>
@@ -1025,16 +1076,28 @@ export default function TopNavPill() {
                 background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
               }}
             />
+            {results.themes.length > 0 && (
+              <ThemeSearchGroup
+                items={results.themes}
+                currentTheme={theme}
+                onSelect={(themeId) => {
+                  setTheme(themeId);
+                  if (playChime) playChime('success');
+                  setSearchOpen(false);
+                  setQuery('');
+                }}
+              />
+            )}
             {results.settings.length > 0 && (
               <SettingsSearchGroup
                 items={results.settings}
-                onSelect={(item) => { if (playChime) playChime('pop'); setSearchOpen(false); setQuery(''); navigate(item.path); }}
+                onSelect={(item) => { if (playChime) playChime('pop'); setSearchOpen(false); setQuery(''); navigate(item.path, { state: item.navState || {} }); }}
               />
             )}
             <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/tasks'); }} />
             <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/notes'); }} />
             <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { if (playChime) playChime('pop'); setSearchOpen(false); navigate('/calendar'); }} />
-            {results.notes.length + results.tasks.length + results.events.length + results.settings.length === 0 && (
+            {results.notes.length + results.tasks.length + results.events.length + results.settings.length + results.themes.length === 0 && (
               <p className="text-xs py-3 text-center" style={{ color: 'var(--text-muted)' }}>No results for &ldquo;{query}&rdquo;.</p>
             )}
           </div>
@@ -1604,6 +1667,119 @@ function SettingsSearchGroup({ items, onSelect }) {
                 <div className="truncate" style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{item.description}</div>
               </div>
               <ArrowRight size={11} className="shrink-0 opacity-30 group-hover:opacity-70 transition-opacity" style={{ color: 'var(--accent-color)' }} />
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/* ── Theme search result group ── */
+function ThemeSearchGroup({ items, currentTheme, onSelect }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Palette size={10} style={{ color: 'var(--accent-color)' }} />
+        <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          Themes <span className="opacity-60">({items.length})</span>
+        </p>
+      </div>
+      <ul className="space-y-1">
+        {items.map((t) => {
+          const isActive = currentTheme === t.id;
+          const [bg, surface, accent] = t.preview || ['#000', '#222', '#6366f1'];
+          const isWhite = t.id === 'light' || t.id === 'notebook-light';
+
+          return (
+            <li
+              key={t.id}
+              onClick={() => onSelect(t.id)}
+              className="flex items-center gap-2.5 text-xs py-1.5 px-2 rounded-xl cursor-pointer group transition-all"
+              style={{
+                background: isActive ? 'var(--bg-surface)' : 'transparent',
+                border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
+              }}
+              onMouseEnter={e => {
+                if (!isActive) e.currentTarget.style.background = 'var(--bg-surface)';
+              }}
+              onMouseLeave={e => {
+                if (!isActive) e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              {/* Mini color swatch preview */}
+              <div
+                className="w-7 h-5 rounded-md shrink-0 border relative overflow-hidden flex items-end p-0.5 shadow-xs transition-transform group-hover:scale-105"
+                style={{
+                  background: bg,
+                  borderColor: isWhite ? '#d6cdc0' : 'rgba(255,255,255,0.18)',
+                }}
+              >
+                <div
+                  className="w-full h-1.5 rounded-sm opacity-80"
+                  style={{ background: surface }}
+                />
+                <div
+                  className="absolute top-1 right-1 w-2 h-2 rounded-full border border-white/20 shadow-xs"
+                  style={{ background: accent }}
+                />
+              </div>
+
+              {/* Theme title & description */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="font-semibold truncate text-[11px]"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {t.name}
+                  </span>
+                  {isActive && (
+                    <span
+                      className="text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0"
+                      style={{
+                        background: 'var(--accent-glow)',
+                        color: 'var(--accent-color)',
+                      }}
+                    >
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div
+                  className="truncate text-[10px]"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {t.description}
+                </div>
+              </div>
+
+              {/* Action */}
+              {isActive ? (
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: 'var(--accent-color)', color: '#fff' }}
+                  title="Currently active"
+                >
+                  <Check size={11} strokeWidth={2.8} />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0 transition-all opacity-85 group-hover:opacity-100 group-hover:scale-105 active:scale-95"
+                  style={{
+                    background: 'var(--accent-gradient)',
+                    color: '#ffffff',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(t.id);
+                  }}
+                >
+                  Apply
+                </button>
+              )}
             </li>
           );
         })}

@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Download,
   Upload,
@@ -197,6 +197,30 @@ export default function Settings() {
 
   // Latest Updates Modal State
   const [changelogModalOpen, setChangelogModalOpen] = useState(false);
+
+  const location = useLocation();
+
+  // Auto-open modal when navigated from global search with state
+  useEffect(() => {
+    const modal = location.state?.openModal;
+    if (!modal) return;
+    // Clear state so refresh doesn't re-open
+    window.history.replaceState({}, '');
+    if (modal === 'editProfile') {
+      // Small delay so the page has rendered
+      setTimeout(() => handleOpenEditProfile(), 80);
+    } else if (modal === 'changePassword') {
+      setTimeout(() => {
+        setPasswordError('');
+        setPasswordSuccess(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setPasswordModalOpen(true);
+      }, 80);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleOpenEditProfile() {
     setEditName(user?.name || user?.displayName || '');
