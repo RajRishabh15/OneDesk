@@ -76,7 +76,6 @@ export const THEMES = [
     description: 'Teal blue-green blend',
     preview: ['#021616', '#04322e', '#14b8a6'],
     color: '#2dd4bf',
-    comingSoon: true,
     mode: 'dark',
   },
   {
@@ -85,7 +84,6 @@ export const THEMES = [
     description: 'Ethereal violet & lilac',
     preview: ['#0e0719', '#24103c', '#c084fc'],
     color: '#c084fc',
-    comingSoon: true,
     mode: 'dark',
   },
   {
@@ -94,7 +92,6 @@ export const THEMES = [
     description: 'Pastel cotton candy & sakura',
     preview: ['#150610', '#36102a', '#f472b6'],
     color: '#f472b6',
-    comingSoon: true,
     mode: 'dark',
   },
 ];
