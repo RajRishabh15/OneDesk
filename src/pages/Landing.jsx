@@ -18,9 +18,12 @@ import {
   BookOpen,
   Paperclip,
   CheckCircle2,
+  Palette,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
+import { useTheme, THEMES } from '../context/ThemeContext';
 import OneDeskLogo from '../components/OneDeskLogo';
 
 function NotebookWatermark({ subtitle = 'your life, organized on paper ✦' }) {
@@ -53,10 +56,13 @@ function NotebookWatermark({ subtitle = 'your life, organized on paper ✦' }) {
 export default function Landing() {
   const { user } = useAuth();
   const { playChime } = useSettings();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('tasks');
   const [completedDemoTask, setCompletedDemoTask] = useState(false);
+
+  const activeThemeObj = THEMES.find((t) => t.id === theme) || THEMES[0];
 
   function handleAction(path) {
     if (playChime) playChime('pop');
@@ -66,6 +72,11 @@ export default function Landing() {
   function handleTabClick(tabKey) {
     if (playChime) playChime('pop');
     setActiveTab(tabKey);
+  }
+
+  function handleThemeChange(newThemeId) {
+    if (playChime) playChime('pop');
+    setTheme(newThemeId);
   }
 
   return (
@@ -79,7 +90,7 @@ export default function Landing() {
     >
       {/* ── Top Leather/Stationery Header ─────────────────────── */}
       <header className="relative z-30 w-full max-w-7xl mx-auto px-2.5 xs:px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4">
-        <nav className="flex items-center justify-between px-2.5 xs:px-4 sm:px-6 py-2 sm:py-2.5 rounded-2xl sm:rounded-full border border-[#dcd4c5] shadow-xs backdrop-blur-md bg-[#faf7f0]/90">
+        <nav className="flex items-center justify-between gap-2 sm:gap-4 px-2.5 xs:px-4 sm:px-6 py-2 sm:py-2.5 rounded-2xl sm:rounded-full border border-[#dcd4c5] shadow-xs backdrop-blur-md bg-[#faf7f0]/90">
           {/* Brand Logo & Notebook Edition Pill */}
           <Link
             to="/"
@@ -94,6 +105,83 @@ export default function Landing() {
               Personal Edition
             </span>
           </Link>
+
+          {/* Quick Theme Switcher Pill in Header (Desktop / Tablet) */}
+          <div
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-xs backdrop-blur-md transition-all"
+            style={{
+              background: 'rgba(250, 247, 240, 0.95)',
+              borderColor: '#dcd4c5',
+            }}
+          >
+            <div className="flex items-center gap-1.5 pr-2.5 border-r border-[#ded7cb] shrink-0">
+              <div className="w-5 h-5 rounded-full border border-[#d6cebf] bg-[#f2ede4] flex items-center justify-center shrink-0 shadow-2xs">
+                <Palette size={11} className="text-[#57534e]" strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-bold text-[#1c1917] capitalize whitespace-nowrap">
+                {activeThemeObj?.name || theme}
+              </span>
+            </div>
+
+            {/* Quick theme bubbles */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
+              {THEMES.map((t) => {
+                const active = theme === t.id;
+                const isWhite = t.id === 'light' || t.id === 'notebook-light';
+                const circleColor = isWhite
+                  ? (t.id === 'notebook-light' ? '#f5f0e6' : '#ffffff')
+                  : (t.color || t.preview[2] || t.preview[0]);
+                const isLocked = Boolean(t.comingSoon);
+
+                const circleBorder = active
+                  ? '2px solid #1c1917'
+                  : isLocked
+                  ? '1.5px solid rgba(245, 158, 11, 0.6)'
+                  : isWhite
+                  ? '1.5px solid rgba(0, 0, 0, 0.35)'
+                  : '1.5px solid rgba(0, 0, 0, 0.22)';
+
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => handleThemeChange(t.id)}
+                    title={isLocked ? `${t.name} (Coming Soon)` : `Switch to ${t.name}: ${t.description}`}
+                    className={`shrink-0 group relative flex items-center justify-center p-0.5 rounded-full transition-all duration-200 ${
+                      isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:scale-115 active:scale-95'
+                    }`}
+                    style={{
+                      outline: 'none',
+                      transform: active ? 'scale(1.22)' : undefined,
+                    }}
+                  >
+                    <span
+                      className="w-4.5 h-4.5 rounded-full flex items-center justify-center transition-all shadow-xs relative overflow-hidden group-hover:border-stone-800"
+                      style={{
+                        background: circleColor,
+                        border: circleBorder,
+                        boxShadow: active
+                          ? `0 0 8px ${circleColor}cc, 0 1px 3px rgba(0,0,0,0.2)`
+                          : '0 1px 2px rgba(0,0,0,0.08)',
+                      }}
+                    >
+                      {isLocked ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[0.5px]">
+                          <Lock size={8} className="text-amber-300 drop-shadow-sm" strokeWidth={2.5} />
+                        </div>
+                      ) : active ? (
+                        <Check
+                          size={9}
+                          className={isWhite ? 'text-stone-900' : 'text-white drop-shadow'}
+                          strokeWidth={3}
+                        />
+                      ) : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-1 xs:gap-2 sm:gap-3 shrink-0">
@@ -128,6 +216,84 @@ export default function Landing() {
             )}
           </div>
         </nav>
+
+        {/* Quick Theme Switcher for Mobile / Tablet (<lg) */}
+        <div className="lg:hidden mt-2 flex justify-center px-1">
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-xs backdrop-blur-md max-w-full overflow-hidden"
+            style={{
+              background: 'rgba(250, 247, 240, 0.95)',
+              borderColor: '#dcd4c5',
+            }}
+          >
+            <div className="flex items-center gap-1.5 pr-2 border-r border-[#ded7cb] shrink-0">
+              <div className="w-5 h-5 rounded-full border border-[#d6cebf] bg-[#f2ede4] flex items-center justify-center shrink-0 shadow-2xs">
+                <Palette size={10} className="text-[#57534e]" strokeWidth={2.2} />
+              </div>
+              <span className="text-[10px] font-bold text-[#1c1917] capitalize whitespace-nowrap">
+                {activeThemeObj?.name || theme}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 max-w-full touch-pan-x">
+              {THEMES.map((t) => {
+                const active = theme === t.id;
+                const isWhite = t.id === 'light' || t.id === 'notebook-light';
+                const circleColor = isWhite
+                  ? (t.id === 'notebook-light' ? '#f5f0e6' : '#ffffff')
+                  : (t.color || t.preview[2] || t.preview[0]);
+                const isLocked = Boolean(t.comingSoon);
+
+                const circleBorder = active
+                  ? '2px solid #1c1917'
+                  : isLocked
+                  ? '1.5px solid rgba(245, 158, 11, 0.6)'
+                  : isWhite
+                  ? '1.5px solid rgba(0, 0, 0, 0.35)'
+                  : '1.5px solid rgba(0, 0, 0, 0.22)';
+
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => handleThemeChange(t.id)}
+                    title={isLocked ? `${t.name} (Coming Soon)` : `${t.name}: ${t.description}`}
+                    className={`shrink-0 group relative flex items-center justify-center p-0.5 rounded-full transition-all duration-200 ${
+                      isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:scale-115 active:scale-95'
+                    }`}
+                    style={{
+                      outline: 'none',
+                      transform: active ? 'scale(1.2)' : undefined,
+                    }}
+                  >
+                    <span
+                      className="w-4.5 h-4.5 rounded-full flex items-center justify-center transition-all shadow-xs relative overflow-hidden group-hover:border-stone-800"
+                      style={{
+                        background: circleColor,
+                        border: circleBorder,
+                        boxShadow: active
+                          ? `0 0 8px ${circleColor}cc, 0 1px 3px rgba(0,0,0,0.2)`
+                          : '0 1px 2px rgba(0,0,0,0.08)',
+                      }}
+                    >
+                      {isLocked ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[0.5px]">
+                          <Lock size={8} className="text-amber-300 drop-shadow-sm" strokeWidth={2.5} />
+                        </div>
+                      ) : active ? (
+                        <Check
+                          size={9}
+                          className={isWhite ? 'text-stone-900' : 'text-white drop-shadow'}
+                          strokeWidth={3}
+                        />
+                      ) : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* ── Main Notebook Canvas ──────────────────────────────── */}

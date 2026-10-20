@@ -1437,3 +1437,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     width: 4px;
   }
 }
+
+/* ─── Scrollbar Utility ────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

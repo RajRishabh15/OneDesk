@@ -289,22 +289,34 @@ export function AuthShell({ children, activeTab = 'login' }) {
         </div>
       )}
 
-      {/* Brand Pill — Top Centralized on Mobile, Top-Left on Desktop */}
+      {/* Brand Pill — Top Centralized on Mobile, Top-Left on Desktop — Clickable Link to Landing Page */}
       <div className="fixed top-3 sm:top-4 inset-x-0 sm:inset-x-auto sm:left-8 mx-auto sm:mx-0 w-fit z-30 pointer-events-auto">
-        <div
-          className="flex items-center gap-2 sm:gap-2.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full border shadow-lg backdrop-blur-xl transition-all"
+        <Link
+          to="/landing"
+          onClick={() => playChime && playChime('pop')}
+          title="Back to Landing Page"
+          className="group flex items-center gap-2 sm:gap-2.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full border shadow-lg backdrop-blur-xl transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
           style={{
             background: 'var(--bg-card-solid)',
             borderColor: 'var(--border-card)',
             color: 'var(--text-primary)',
           }}
         >
-          <OneDeskLogo size={20} className="shrink-0 sm:w-[22px] sm:h-[22px]" />
-          <span className="font-display font-bold text-xs sm:text-sm tracking-tight">
+          {/* OneDesk Bar Circle Badge */}
+          <div
+            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center shrink-0 shadow-xs transition-all duration-200 group-hover:scale-110 group-hover:rotate-[-6deg] group-hover:border-[var(--accent-color)]"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <OneDeskLogo size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
+          </div>
+          <span className="font-display font-bold text-xs sm:text-sm tracking-tight group-hover:text-[var(--accent-color)] transition-colors">
             OneDesk
           </span>
           <span
-            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-colors"
             style={{
               background: 'var(--bg-surface)',
               borderColor: 'var(--border-subtle)',
@@ -313,34 +325,61 @@ export function AuthShell({ children, activeTab = 'login' }) {
           >
             OS v3.0
           </span>
-        </div>
+        </Link>
       </div>
 
       {/* Floating Theme Customizer Pill — Bottom Centralized on Mobile, Top-Right on Desktop */}
       <div className="fixed bottom-3.5 sm:bottom-auto sm:top-4 inset-x-0 sm:inset-x-auto sm:right-8 mx-auto sm:mx-0 w-fit max-w-[calc(100vw-20px)] sm:max-w-none px-1 sm:px-0 z-30 pointer-events-auto">
         <div
-          className="flex items-center gap-1 sm:gap-1.5 p-1 sm:px-3 sm:py-1.5 rounded-full border shadow-2xl backdrop-blur-xl transition-all max-w-full overflow-hidden"
+          className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-full border shadow-2xl backdrop-blur-xl transition-all max-w-full overflow-hidden"
           style={{
             background: 'var(--bg-card-solid)',
-            borderColor: 'var(--border-card)',
+            borderColor: 'var(--border-card, rgba(255,255,255,0.18))',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12)',
           }}
         >
-          <div className="hidden sm:flex items-center gap-1.5 pr-2 border-r border-[var(--border-subtle)] shrink-0">
-            <Palette size={13} style={{ color: 'var(--accent-color)' }} />
-            <span className="text-[11px] font-bold capitalize whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
+          {/* Palette label badge with circular icon border (icon always visible, text on sm+) */}
+          <div
+            className="flex items-center gap-1.5 pr-2 sm:pr-2.5 shrink-0 border-r"
+            style={{
+              borderColor: 'var(--border-card, rgba(255,255,255,0.18))',
+            }}
+          >
+            <div
+              className="w-5.5 h-5.5 sm:w-6 sm:h-6 rounded-full border flex items-center justify-center shrink-0 shadow-xs transition-transform duration-200 hover:rotate-12"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-card, rgba(255,255,255,0.28))',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <Palette size={12} strokeWidth={2.4} />
+            </div>
+            <span className="hidden sm:inline text-[11px] font-bold capitalize whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
               {THEMES.find((t) => t.id === theme)?.name || theme}
             </span>
           </div>
 
           {/* Quick theme bubbles with responsive horizontal scrolling on small screens */}
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 px-0.5 max-w-full touch-pan-x">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 max-w-full touch-pan-x">
             {THEMES.map((t) => {
               const active = theme === t.id;
               const isWhite = t.id === 'light' || t.id === 'notebook-light';
+              const isDarkPage = theme !== 'light' && theme !== 'notebook-light';
               const circleColor = isWhite
                 ? (t.id === 'notebook-light' ? '#f5f0e6' : '#ffffff')
                 : (t.color || t.preview[2] || t.preview[0]);
               const isLocked = Boolean(t.comingSoon);
+
+              const circleBorder = active
+                ? (isWhite ? '2px solid var(--accent-color)' : '2px solid #ffffff')
+                : isLocked
+                ? '1.5px solid rgba(245, 158, 11, 0.6)'
+                : isWhite
+                ? '1.5px solid rgba(0, 0, 0, 0.35)'
+                : isDarkPage
+                ? '1.5px solid rgba(255, 255, 255, 0.38)'
+                : '1.5px solid rgba(0, 0, 0, 0.25)';
 
               return (
                 <button
@@ -348,8 +387,8 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   type="button"
                   onClick={() => handleThemeChange(t.id)}
                   title={isLocked ? `${t.name} (Coming Soon)` : `${t.name}: ${t.description}`}
-                  className={`shrink-0 group relative flex items-center justify-center p-0.5 sm:p-1 rounded-full transition-all duration-200 ${
-                    isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+                  className={`shrink-0 group relative flex items-center justify-center p-0.5 rounded-full transition-all duration-200 ${
+                    isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:scale-115 active:scale-95'
                   }`}
                   style={{
                     outline: 'none',
@@ -357,17 +396,13 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   }}
                 >
                   <span
-                    className="w-5 h-5 rounded-full flex items-center justify-center transition-all border shadow-sm relative overflow-hidden"
+                    className="w-5 h-5 rounded-full flex items-center justify-center transition-all shadow-sm relative overflow-hidden group-hover:shadow-[0_0_8px_rgba(255,255,255,0.35)]"
                     style={{
                       background: circleColor,
-                      borderColor: active
-                        ? (isWhite ? 'var(--accent-color)' : '#ffffff')
-                        : isLocked
-                        ? 'rgba(245, 158, 11, 0.45)'
-                        : (isWhite ? 'rgba(0,0,0,0.25)' : 'transparent'),
+                      border: circleBorder,
                       boxShadow: active
-                        ? (isWhite ? '0 0 10px rgba(180,83,9,0.5)' : `0 0 10px ${circleColor}aa`)
-                        : 'none',
+                        ? (isWhite ? '0 0 10px rgba(180,83,9,0.5)' : `0 0 12px ${circleColor}cc, 0 1px 3px rgba(0,0,0,0.3)`)
+                        : '0 1px 2px rgba(0,0,0,0.15)',
                     }}
                   >
                     {isLocked ? (
@@ -488,18 +523,25 @@ export function AuthShell({ children, activeTab = 'login' }) {
 
           {/* Header Branding */}
           <div className="flex flex-col items-center text-center mb-2.5 sm:mb-3">
-            <div
-              className="p-1.5 sm:p-2 rounded-xl border shadow-md mb-1.5 transition-transform hover:scale-105 duration-200"
-              style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-card)',
-              }}
+            <Link
+              to="/landing"
+              onClick={() => playChime && playChime('pop')}
+              title="Go to OneDesk Landing Page"
+              className="group flex flex-col items-center cursor-pointer focus:outline-none"
             >
-              <OneDeskLogo size={28} className="sm:w-[30px] sm:h-[30px]" />
-            </div>
-            <h2 className="font-display text-lg sm:text-xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              OneDesk
-            </h2>
+              <div
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border shadow-md mb-1.5 flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-hover:border-[var(--accent-color)] active:scale-95"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                }}
+              >
+                <OneDeskLogo size={24} className="sm:w-7 sm:h-7 transition-transform duration-200 group-hover:rotate-[-6deg]" />
+              </div>
+              <h2 className="font-display text-lg sm:text-xl font-bold tracking-tight group-hover:text-[var(--accent-color)] transition-colors" style={{ color: 'var(--text-primary)' }}>
+                OneDesk
+              </h2>
+            </Link>
             <p className="text-[10px] sm:text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
               Personal workspace &amp; productivity system
             </p>
