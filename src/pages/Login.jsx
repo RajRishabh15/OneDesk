@@ -401,9 +401,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
                       background: circleColor,
                       border: circleBorder,
                       backgroundClip: 'padding-box',
-                      boxShadow: active
-                        ? '0 1px 3px rgba(0,0,0,0.45)'
-                        : '0 1px 2px rgba(0,0,0,0.15)',
+                      boxShadow: 'none',
                     }}
                   >
                     {isLocked ? (

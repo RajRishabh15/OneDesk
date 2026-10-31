@@ -35,7 +35,6 @@ import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import OneDeskLogo from './OneDeskLogo';
-import GlassSurface from './GlassSurface';
 
 /* ── Searchable settings registry ──────────────────────── */
 const SETTINGS_ITEMS = [
@@ -1187,341 +1186,388 @@ export default function TopNavPill() {
 
       {/* ════════════════════════════════════════════
           MOBILE BOTTOM BAR  (< md)
-          Fluid Color-Adaptive Liquid Lens Dock (Matches Reference + Theme System)
+          Fluid Theme-Adaptive Native Squircle Dock (Matches Reference App)
       ════════════════════════════════════════════ */}
-      {/* Floating Color-Adaptive Liquid Lens Dock Bar */}
       <nav
         className="md:hidden fixed bottom-3.5 inset-x-3.5 max-w-[420px] mx-auto z-40 select-none"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        {/* Color-Adaptive Liquid Ambient Aura */}
+        {/* Soft Theme Ambient Aura */}
         <div
-          className="absolute -inset-1 rounded-full pointer-events-none z-0 transition-all duration-500"
+          className="absolute -inset-1 rounded-[30px] pointer-events-none z-0 transition-all duration-500"
           style={{
             background: 'radial-gradient(ellipse at 50% 50%, var(--accent-glow) 0%, transparent 72%)',
-            filter: 'blur(22px)',
-            opacity: isLight ? 0.3 : 0.45,
+            filter: 'blur(20px)',
+            opacity: isLight ? 0.25 : 0.45,
           }}
         />
 
-        {/* React Bits GlassSurface Liquid Dock Hull */}
-        <GlassSurface
-          width="100%"
-          height={66}
-          borderRadius={33}
-          distortionScale={-180}
-          displace={0.5}
-          backgroundOpacity={isLight ? 0.22 : 0.12}
-          borderWidth={0.07}
-          brightness={isLight ? 100 : 50}
-          opacity={0.96}
-          blur={14}
-          saturation={1.8}
-          redOffset={0}
-          greenOffset={10}
-          blueOffset={20}
-          refraction
-          renderer="auto"
-          className="w-full z-10"
+        {/* Squircle Dock Shell — Matching Reference "The Campus Web" */}
+        <div
+          className="relative w-full h-[68px] rounded-[26px] border px-2 grid grid-cols-5 items-center justify-items-center transition-all duration-300 z-10 overflow-hidden"
+          style={{
+            background: isNotebook
+              ? 'linear-gradient(180deg, rgba(255, 252, 245, 0.45) 0%, rgba(245, 240, 230, 0.1) 100%), rgba(245, 240, 230, 0.94)'
+              : isLight
+              ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.15) 100%), rgba(255, 255, 255, 0.92)'
+              : 'linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 0, 0, 0.22) 100%), var(--bg-card-solid)',
+            borderColor: 'var(--border-card)',
+            backdropFilter: 'blur(30px) saturate(190%)',
+            WebkitBackdropFilter: 'blur(30px) saturate(190%)',
+            boxShadow: isLight
+              ? '0 12px 32px -4px rgba(0, 0, 0, 0.12), 0 2px 8px -2px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.95), 0 0 16px var(--accent-glow)'
+              : '0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 4px 16px -2px rgba(0, 0, 0, 0.4), inset 0 1.2px 1px rgba(255, 255, 255, 0.25), inset 0 -1px 1px rgba(0, 0, 0, 0.3), 0 0 22px var(--accent-glow)',
+          }}
         >
-          <div className="w-full h-full px-2 grid grid-cols-5 items-center justify-items-center">
-{/* 1. Home */}
-          <NavLink
-            to="/"
-            end
-            onClick={() => playChime && playChime('pop')}
-            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
-          >
-            {({ isActive }) => (
-              <>
-                <div
-                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
-                  style={{
-                    background: isActive
-                      ? (isLight
-                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
-                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
-                      : 'transparent',
-                    border: isActive
-                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
-                      : '1px solid transparent',
-                    boxShadow: isActive
-                      ? (isLight
-                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
-                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
-                      : 'none',
-                  }}
-                >
-                  <LayoutGrid
-                    size={17}
-                    strokeWidth={isActive ? 2.3 : 1.8}
-                    className="transition-all duration-200"
-                    style={{
-                      color: isActive
-                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
-                        : 'var(--text-muted)',
-                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
-                    }}
-                  />
-                </div>
-                <span
-                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
-                  style={{
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-                  }}
-                >
-                  Home
-                </span>
-              </>
-            )}
-          </NavLink>
-
-          {/* 2. Tasks */}
-          <NavLink
-            to="/tasks"
-            onClick={() => playChime && playChime('pop')}
-            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
-          >
-            {({ isActive }) => (
-              <>
-                <div
-                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
-                  style={{
-                    background: isActive
-                      ? (isLight
-                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
-                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
-                      : 'transparent',
-                    border: isActive
-                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
-                      : '1px solid transparent',
-                    boxShadow: isActive
-                      ? (isLight
-                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
-                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
-                      : 'none',
-                  }}
-                >
-                  <CircleCheck
-                    size={17}
-                    strokeWidth={isActive ? 2.3 : 1.8}
-                    className="transition-all duration-200"
-                    style={{
-                      color: isActive
-                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
-                        : 'var(--text-muted)',
-                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
-                    }}
-                  />
-                </div>
-                <span
-                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
-                  style={{
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-                  }}
-                >
-                  Tasks
-                </span>
-              </>
-            )}
-          </NavLink>
-
-          {/* 3. More (Quick Sheet Trigger — Liquid Action Pill) */}
-          <button
-            type="button"
-            onClick={() => {
-              if (playChime) playChime('pop');
-              setMobileQuickSheetOpen(prev => !prev);
-            }}
-            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
-            aria-label="More actions"
-          >
-            <div
-              className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
-              style={{
-                background: mobileQuickSheetOpen
-                  ? (isLight
-                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
-                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
-                  : (isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.08)'),
-                border: mobileQuickSheetOpen
-                  ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
-                  : (isLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.18)'),
-                boxShadow: mobileQuickSheetOpen
-                  ? (isLight
-                      ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
-                      : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
-                  : 'inset 0 1px 0.5px rgba(255, 255, 255, 0.25)',
-              }}
-            >
-              <MoreHorizontal
-                size={17}
-                strokeWidth={2.3}
-                className="transition-all duration-200"
-                style={{
-                  color: mobileQuickSheetOpen
-                    ? (isLight ? 'var(--accent-color)' : '#ffffff')
-                    : 'var(--text-muted)',
-                  filter: mobileQuickSheetOpen ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
-                }}
-              />
-            </div>
-            <span
-              className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
-              style={{
-                fontWeight: mobileQuickSheetOpen ? 700 : 500,
-                color: mobileQuickSheetOpen ? 'var(--accent-color)' : 'var(--text-muted)',
-              }}
-            >
-              More
-            </span>
-          </button>
-
-          {/* 4. Planner (Schedule / Calendar) */}
-          <NavLink
-            to="/calendar"
-            onClick={() => playChime && playChime('pop')}
-            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
-          >
-            {({ isActive }) => (
-              <>
-                <div
-                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
-                  style={{
-                    background: isActive
-                      ? (isLight
-                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
-                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
-                      : 'transparent',
-                    border: isActive
-                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
-                      : '1px solid transparent',
-                    boxShadow: isActive
-                      ? (isLight
-                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
-                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
-                      : 'none',
-                  }}
-                >
-                  <CalendarDays
-                    size={17}
-                    strokeWidth={isActive ? 2.3 : 1.8}
-                    className="transition-all duration-200"
-                    style={{
-                      color: isActive
-                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
-                        : 'var(--text-muted)',
-                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
-                    }}
-                  />
-                </div>
-                <span
-                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
-                  style={{
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-                  }}
-                >
-                  Planner
-                </span>
-              </>
-            )}
-          </NavLink>
-
-          {/* 5. Notes */}
-          <NavLink
-            to="/notes"
-            onClick={() => playChime && playChime('pop')}
-            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
-          >
-            {({ isActive }) => (
-              <>
-                <div
-                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
-                  style={{
-                    background: isActive
-                      ? (isLight
-                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
-                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
-                      : 'transparent',
-                    border: isActive
-                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
-                      : '1px solid transparent',
-                    boxShadow: isActive
-                      ? (isLight
-                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
-                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
-                      : 'none',
-                  }}
-                >
-                  <FileText
-                    size={17}
-                    strokeWidth={isActive ? 2.3 : 1.8}
-                    className="transition-all duration-200"
-                    style={{
-                      color: isActive
-                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
-                        : 'var(--text-muted)',
-                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
-                    }}
-                  />
-                </div>
-                <span
-                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
-                  style={{
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
-                  }}
-                >
-                  Notes
-                </span>
-              </>
-            )}
-          </NavLink>
-          </div>
-        </GlassSurface>
+          {/* 1. Home */}
+          <NavLink
+            to="/"
+            end
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[52px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid var(--border-card)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.65), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 14px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <LayoutGrid
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : (isLight ? 'rgba(30, 41, 59, 0.72)' : 'rgba(245, 243, 255, 0.72)'),
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10.5px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : (isLight ? 'rgba(30, 41, 59, 0.78)' : 'rgba(245, 243, 255, 0.72)'),
+                    textShadow: isLight ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.85)',
+                  }}
+                >
+                  Home
+                </span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 2. Tasks */}
+          <NavLink
+            to="/tasks"
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[52px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid var(--border-card)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.65), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 14px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <CircleCheck
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : (isLight ? 'rgba(30, 41, 59, 0.72)' : 'rgba(245, 243, 255, 0.72)'),
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10.5px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : (isLight ? 'rgba(30, 41, 59, 0.78)' : 'rgba(245, 243, 255, 0.72)'),
+                    textShadow: isLight ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.85)',
+                  }}
+                >
+                  Tasks
+                </span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 3. More (Quick Sheet Trigger — Resting Squircle Pill) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              setMobileQuickSheetOpen(prev => !prev);
+            }}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+            aria-label="More actions"
+          >
+            <div
+              className="w-[52px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+              style={{
+                background: mobileQuickSheetOpen
+                  ? (isLight
+                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 100%)'
+                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)')
+                  : (isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.09)'),
+                border: mobileQuickSheetOpen
+                  ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid var(--border-card)')
+                  : (isLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.16)'),
+                boxShadow: mobileQuickSheetOpen
+                  ? (isLight
+                      ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                      : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.65), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 14px var(--accent-glow)')
+                  : 'inset 0 1px 0.5px rgba(255, 255, 255, 0.22)',
+              }}
+            >
+              <MoreHorizontal
+                size={18}
+                strokeWidth={2.3}
+                className="transition-all duration-200"
+                style={{
+                  color: mobileQuickSheetOpen
+                    ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                    : (isLight ? 'rgba(30, 41, 59, 0.72)' : 'rgba(245, 243, 255, 0.72)'),
+                  filter: mobileQuickSheetOpen ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                }}
+              />
+            </div>
+            <span
+              className="text-[10.5px] tracking-tight mt-1 leading-none transition-colors duration-200"
+              style={{
+                fontWeight: mobileQuickSheetOpen ? 700 : 500,
+                color: mobileQuickSheetOpen
+                  ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                  : (isLight ? 'rgba(30, 41, 59, 0.78)' : 'rgba(245, 243, 255, 0.72)'),
+                textShadow: isLight ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.85)',
+              }}
+            >
+              More
+            </span>
+          </button>
+
+          {/* 4. Planner */}
+          <NavLink
+            to="/calendar"
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[52px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid var(--border-card)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.65), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 14px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <CalendarDays
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : (isLight ? 'rgba(30, 41, 59, 0.72)' : 'rgba(245, 243, 255, 0.72)'),
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10.5px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : (isLight ? 'rgba(30, 41, 59, 0.78)' : 'rgba(245, 243, 255, 0.72)'),
+                    textShadow: isLight ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.85)',
+                  }}
+                >
+                  Planner
+                </span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 5. Notes */}
+          <NavLink
+            to="/notes"
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[52px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid var(--border-card)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.65), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 14px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <FileText
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : (isLight ? 'rgba(30, 41, 59, 0.72)' : 'rgba(245, 243, 255, 0.72)'),
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10.5px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : (isLight ? 'rgba(30, 41, 59, 0.78)' : 'rgba(245, 243, 255, 0.72)'),
+                    textShadow: isLight ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.85)',
+                  }}
+                >
+                  Notes
+                </span>
+              </>
+            )}
+          </NavLink>
+        </div>
       </nav>
 
       {/* ════════════════════════════════════════════
           FLUID MOBILE QUICK CREATE BOTTOM SHEET
+          100% Theme-Adaptive Liquid Lens Bottom Sheet (Matches Reference)
       ════════════════════════════════════════════ */}
       {mobileQuickSheetOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex items-end justify-center">
           {/* Blurred Backdrop */}
           <div
-            className="fixed inset-0 bg-black/40 transition-opacity"
+            className="fixed inset-0 bg-black/50 transition-opacity"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
             onClick={() => setMobileQuickSheetOpen(false)}
           />
 
-          {/* Sheet Panel */}
+          {/* Sheet Panel — 100% Theme-Adaptive Apple Liquid Glass Sheet */}
           <div
-            className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto custom-scrollbar"
+            className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto custom-scrollbar relative overflow-hidden"
             style={{
-              background: isLight
-                ? 'rgba(255, 255, 255, 0.88)'
-                : 'rgba(13, 17, 30, 0.85)',
-              borderTop: isLight ? '1px solid rgba(255, 255, 255, 0.9)' : '1px solid rgba(255, 255, 255, 0.28)',
-              borderLeft: isLight ? '1px solid rgba(255, 255, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.12)',
-              borderRight: isLight ? '1px solid rgba(255, 255, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(30px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(30px) saturate(180%)',
-              boxShadow: '0 -16px 40px var(--accent-glow), 0 -8px 24px rgba(0,0,0,0.35), inset 0 1.5px 1px rgba(255,255,255,0.3)',
+              background: isNotebook
+                ? 'linear-gradient(180deg, rgba(255, 252, 245, 0.5) 0%, rgba(245, 240, 230, 0.12) 100%), var(--bg-card-solid)'
+                : isLight
+                ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.2) 100%), var(--bg-card-solid)'
+                : 'linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 25%, rgba(0, 0, 0, 0.25) 100%), var(--bg-card-solid)',
+              borderTop: isLight ? '1px solid rgba(255, 255, 255, 0.95)' : '1px solid var(--border-card)',
+              borderLeft: isLight ? '1px solid rgba(255, 255, 255, 0.7)' : '1px solid var(--border-card)',
+              borderRight: isLight ? '1px solid rgba(255, 255, 255, 0.7)' : '1px solid var(--border-card)',
+              backdropFilter: 'blur(30px) saturate(190%) contrast(102%)',
+              WebkitBackdropFilter: 'blur(30px) saturate(190%) contrast(102%)',
+              boxShadow: isLight
+                ? '0 -16px 40px var(--accent-glow), 0 -8px 24px rgba(0,0,0,0.08), inset 0 1.5px 1px rgba(255,255,255,0.95)'
+                : '0 -20px 48px var(--accent-glow), 0 -8px 28px rgba(0,0,0,0.65), inset 0 1.5px 1.2px rgba(255,255,255,0.35), inset 0 0 20px rgba(255,255,255,0.02)',
               paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
             }}
           >
+            {/* Ambient Color-Adaptive Aura */}
+            <div
+              className="absolute inset-x-0 -top-8 h-20 pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse at 50% 100%, var(--accent-glow) 0%, transparent 75%)',
+                filter: 'blur(22px)',
+                opacity: isLight ? 0.35 : 0.65,
+              }}
+            />
+
+            {/* Top Specular Meniscus Sheen */}
+            <div
+              className="absolute inset-x-8 top-0 h-10 pointer-events-none rounded-t-[32px]"
+              style={{
+                background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.0) 100%)',
+                filter: 'blur(0.5px)',
+              }}
+            />
+
             {/* Drag Handle */}
-            <div className="h-1.5 w-12 rounded-full bg-white/25 mx-auto mb-3.5" />
+            <div
+              className="h-1.5 w-12 rounded-full mx-auto mb-3.5 transition-all"
+              style={{
+                background: isLight
+                  ? 'linear-gradient(90deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.15) 100%)'
+                  : 'linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.2) 100%)',
+                boxShadow: isLight ? 'none' : '0 0 8px rgba(255, 255, 255, 0.25)',
+              }}
+            />
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 relative z-10">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: 'var(--accent-gradient)' }} />
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{
+                      background: 'var(--accent-gradient)',
+                      boxShadow: '0 0 10px var(--accent-glow)',
+                    }}
+                  />
                   <h3 className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
                     More
                   </h3>
@@ -1534,14 +1580,19 @@ export default function TopNavPill() {
                 type="button"
                 onClick={() => setMobileQuickSheetOpen(false)}
                 className="h-8 w-8 rounded-full flex items-center justify-center border transition-all active:scale-90"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                style={{
+                  background: isLight ? 'rgba(0, 0, 0, 0.05)' : 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.3)',
+                  color: 'var(--text-muted)',
+                }}
               >
                 <X size={15} />
               </button>
             </div>
 
-            {/* Exactly 3 Cards: Settings, Themes, and Fun Zone */}
-            <div className="space-y-2.5">
+            {/* Exactly 3 Theme-Adaptive Liquid Cards: Settings, Themes, and Fun Zone */}
+            <div className="space-y-2.5 relative z-10">
               {/* 1. Settings */}
               <button
                 type="button"
@@ -1550,18 +1601,28 @@ export default function TopNavPill() {
                   setMobileQuickSheetOpen(false);
                   navigate('/settings');
                 }}
-                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98]"
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden"
                 style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-subtle)',
+                  background: isLight
+                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%), var(--bg-surface)'
+                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(0, 0, 0, 0.22) 100%), var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  boxShadow: isLight
+                    ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 0 12px var(--accent-glow)'
+                    : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
                 }}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
-                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border"
+                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(99,102,241,0.22), rgba(139,92,246,0.12))',
-                      borderColor: 'var(--border-subtle)',
+                      background: isLight
+                        ? 'var(--bg-card)'
+                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, var(--accent-glow) 70%, rgba(255, 255, 255, 0.04) 100%), var(--bg-card)',
+                      borderColor: 'var(--border-card)',
+                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 10px var(--accent-glow)',
                       color: 'var(--accent-color)',
                     }}
                   >
@@ -1577,11 +1638,14 @@ export default function TopNavPill() {
                   </div>
                 </div>
                 <div
-                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border"
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
                   style={{
-                    background: 'var(--bg-card)',
-                    borderColor: 'var(--border-subtle)',
-                    color: 'var(--accent-color)',
+                    background: isLight
+                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.65) 100%)'
+                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)',
+                    borderColor: 'var(--border-card)',
+                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px var(--accent-glow)',
+                    color: isLight ? 'var(--accent-color)' : '#ffffff',
                   }}
                 >
                   <ArrowRight size={14} />
@@ -1596,19 +1660,29 @@ export default function TopNavPill() {
                   setMobileQuickSheetOpen(false);
                   navigate('/appearance');
                 }}
-                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98]"
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden"
                 style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-subtle)',
+                  background: isLight
+                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%), var(--bg-surface)'
+                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(0, 0, 0, 0.22) 100%), var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  boxShadow: isLight
+                    ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 0 12px var(--accent-glow)'
+                    : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
                 }}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
-                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border"
+                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(236,72,153,0.22), rgba(168,85,247,0.12))',
-                      borderColor: 'var(--border-subtle)',
-                      color: '#ec4899',
+                      background: isLight
+                        ? 'var(--bg-card)'
+                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, var(--accent-glow) 70%, rgba(255, 255, 255, 0.04) 100%), var(--bg-card)',
+                      borderColor: 'var(--border-card)',
+                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 10px var(--accent-glow)',
+                      color: 'var(--accent-color)',
                     }}
                   >
                     <Palette size={20} strokeWidth={2.2} />
@@ -1619,11 +1693,14 @@ export default function TopNavPill() {
                         Themes
                       </div>
                       <span
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider"
+                        className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider transition-all"
                         style={{
-                          background: 'var(--bg-card)',
-                          borderColor: 'var(--border-card)',
-                          color: 'var(--accent-color)',
+                          background: isLight
+                            ? 'rgba(255, 255, 255, 0.85)'
+                            : 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, var(--accent-glow) 100%), var(--bg-surface)',
+                          borderColor: 'var(--accent-color)',
+                          boxShadow: '0 0 10px var(--accent-glow), inset 0 1px 1px rgba(255, 255, 255, 0.35)',
+                          color: isLight ? 'var(--accent-color)' : '#ffffff',
                         }}
                       >
                         {THEMES.find(t => t.id === theme)?.name || theme}
@@ -1635,11 +1712,14 @@ export default function TopNavPill() {
                   </div>
                 </div>
                 <div
-                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border"
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
                   style={{
-                    background: 'var(--bg-card)',
-                    borderColor: 'var(--border-subtle)',
-                    color: 'var(--accent-color)',
+                    background: isLight
+                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.65) 100%)'
+                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)',
+                    borderColor: 'var(--border-card)',
+                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px var(--accent-glow)',
+                    color: isLight ? 'var(--accent-color)' : '#ffffff',
                   }}
                 >
                   <ArrowRight size={14} />
@@ -1654,19 +1734,29 @@ export default function TopNavPill() {
                   setMobileQuickSheetOpen(false);
                   navigate('/fun-zone');
                 }}
-                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98]"
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden"
                 style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-subtle)',
+                  background: isLight
+                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%), var(--bg-surface)'
+                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(0, 0, 0, 0.22) 100%), var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  boxShadow: isLight
+                    ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 0 12px var(--accent-glow)'
+                    : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
                 }}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
-                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border"
+                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(234,88,12,0.12))',
-                      borderColor: 'var(--border-subtle)',
-                      color: '#f59e0b',
+                      background: isLight
+                        ? 'var(--bg-card)'
+                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, var(--accent-glow) 70%, rgba(255, 255, 255, 0.04) 100%), var(--bg-card)',
+                      borderColor: 'var(--border-card)',
+                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 10px var(--accent-glow)',
+                      color: 'var(--accent-color)',
                     }}
                   >
                     <Gamepad2 size={20} strokeWidth={2.2} />
@@ -1681,11 +1771,14 @@ export default function TopNavPill() {
                   </div>
                 </div>
                 <div
-                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border"
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
                   style={{
-                    background: 'var(--bg-card)',
-                    borderColor: 'var(--border-subtle)',
-                    color: 'var(--accent-color)',
+                    background: isLight
+                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.65) 100%)'
+                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)',
+                    borderColor: 'var(--border-card)',
+                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px var(--accent-glow)',
+                    color: isLight ? 'var(--accent-color)' : '#ffffff',
                   }}
                 >
                   <ArrowRight size={14} />
