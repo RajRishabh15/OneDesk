@@ -1496,64 +1496,46 @@ export default function TopNavPill() {
 
       {/* ════════════════════════════════════════════
           FLUID MOBILE QUICK CREATE BOTTOM SHEET
-          100% Theme-Adaptive Liquid Lens Bottom Sheet (Matches Reference)
+          Pure Theme-Consistent Liquid Sheet (Zero White Glare)
       ════════════════════════════════════════════ */}
       {mobileQuickSheetOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex items-end justify-center">
           {/* Blurred Backdrop */}
           <div
-            className="fixed inset-0 bg-black/50 transition-opacity"
+            className="fixed inset-0 bg-black/55 transition-opacity"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
             onClick={() => setMobileQuickSheetOpen(false)}
           />
 
-          {/* Sheet Panel — 100% Theme-Adaptive Apple Liquid Glass Sheet */}
+          {/* Sheet Panel — Consistent Theme Canvas without White Glares */}
           <div
             className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto custom-scrollbar relative overflow-hidden"
             style={{
-              background: isNotebook
-                ? 'linear-gradient(180deg, rgba(255, 252, 245, 0.5) 0%, rgba(245, 240, 230, 0.12) 100%), var(--bg-card-solid)'
-                : isLight
-                ? 'linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.2) 100%), var(--bg-card-solid)'
-                : 'linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 25%, rgba(0, 0, 0, 0.25) 100%), var(--bg-card-solid)',
-              borderTop: isLight ? '1px solid rgba(255, 255, 255, 0.95)' : '1px solid var(--border-card)',
-              borderLeft: isLight ? '1px solid rgba(255, 255, 255, 0.7)' : '1px solid var(--border-card)',
-              borderRight: isLight ? '1px solid rgba(255, 255, 255, 0.7)' : '1px solid var(--border-card)',
-              backdropFilter: 'blur(30px) saturate(190%) contrast(102%)',
-              WebkitBackdropFilter: 'blur(30px) saturate(190%) contrast(102%)',
-              boxShadow: isLight
-                ? '0 -16px 40px var(--accent-glow), 0 -8px 24px rgba(0,0,0,0.08), inset 0 1.5px 1px rgba(255,255,255,0.95)'
-                : '0 -20px 48px var(--accent-glow), 0 -8px 28px rgba(0,0,0,0.65), inset 0 1.5px 1.2px rgba(255,255,255,0.35), inset 0 0 20px rgba(255,255,255,0.02)',
+              background: 'var(--bg-card-solid)',
+              borderTop: '1px solid var(--border-card)',
+              borderLeft: '1px solid var(--border-card)',
+              borderRight: '1px solid var(--border-card)',
+              backdropFilter: 'blur(30px) saturate(190%)',
+              WebkitBackdropFilter: 'blur(30px) saturate(190%)',
+              boxShadow: '0 -20px 48px var(--accent-glow), 0 -8px 28px rgba(0, 0, 0, 0.65)',
               paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
             }}
           >
-            {/* Ambient Color-Adaptive Aura */}
+            {/* Ambient Theme-Colored Aura (No White Glare) */}
             <div
               className="absolute inset-x-0 -top-8 h-20 pointer-events-none"
               style={{
                 background: 'radial-gradient(ellipse at 50% 100%, var(--accent-glow) 0%, transparent 75%)',
-                filter: 'blur(22px)',
-                opacity: isLight ? 0.35 : 0.65,
+                filter: 'blur(20px)',
+                opacity: 0.5,
               }}
             />
 
-            {/* Top Specular Meniscus Sheen */}
+            {/* Subtle Minimal Drag Handle (Theme-Blended, No Glare) */}
             <div
-              className="absolute inset-x-8 top-0 h-10 pointer-events-none rounded-t-[32px]"
+              className="h-1.5 w-12 rounded-full mx-auto mb-3.5 transition-all opacity-50"
               style={{
-                background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.0) 100%)',
-                filter: 'blur(0.5px)',
-              }}
-            />
-
-            {/* Drag Handle */}
-            <div
-              className="h-1.5 w-12 rounded-full mx-auto mb-3.5 transition-all"
-              style={{
-                background: isLight
-                  ? 'linear-gradient(90deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0.15) 100%)'
-                  : 'linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.2) 100%)',
-                boxShadow: isLight ? 'none' : '0 0 8px rgba(255, 255, 255, 0.25)',
+                background: 'var(--border-card)',
               }}
             />
 
@@ -1581,9 +1563,8 @@ export default function TopNavPill() {
                 onClick={() => setMobileQuickSheetOpen(false)}
                 className="h-8 w-8 rounded-full flex items-center justify-center border transition-all active:scale-90"
                 style={{
-                  background: isLight ? 'rgba(0, 0, 0, 0.05)' : 'var(--bg-surface)',
+                  background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
-                  boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.3)',
                   color: 'var(--text-muted)',
                 }}
               >
@@ -1591,7 +1572,7 @@ export default function TopNavPill() {
               </button>
             </div>
 
-            {/* Exactly 3 Theme-Adaptive Liquid Cards: Settings, Themes, and Fun Zone */}
+            {/* 3 Theme-Consistent Action Cards (No White Glare) */}
             <div className="space-y-2.5 relative z-10">
               {/* 1. Settings */}
               <button
@@ -1603,26 +1584,18 @@ export default function TopNavPill() {
                 }}
                 className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden"
                 style={{
-                  background: isLight
-                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%), var(--bg-surface)'
-                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(0, 0, 0, 0.22) 100%), var(--bg-surface)',
+                  background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: isLight
-                    ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 0 12px var(--accent-glow)'
-                    : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
+                  boxShadow: '0 4px 18px -2px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
                 }}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
                     className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
                     style={{
-                      background: isLight
-                        ? 'var(--bg-card)'
-                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, var(--accent-glow) 70%, rgba(255, 255, 255, 0.04) 100%), var(--bg-card)',
+                      background: 'var(--bg-card)',
                       borderColor: 'var(--border-card)',
-                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 10px var(--accent-glow)',
+                      boxShadow: '0 0 12px var(--accent-glow)',
                       color: 'var(--accent-color)',
                     }}
                   >
@@ -1640,12 +1613,10 @@ export default function TopNavPill() {
                 <div
                   className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
                   style={{
-                    background: isLight
-                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.65) 100%)'
-                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)',
+                    background: 'var(--bg-card)',
                     borderColor: 'var(--border-card)',
-                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px var(--accent-glow)',
-                    color: isLight ? 'var(--accent-color)' : '#ffffff',
+                    boxShadow: '0 0 12px var(--accent-glow)',
+                    color: 'var(--accent-color)',
                   }}
                 >
                   <ArrowRight size={14} />
@@ -1662,26 +1633,18 @@ export default function TopNavPill() {
                 }}
                 className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden"
                 style={{
-                  background: isLight
-                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%), var(--bg-surface)'
-                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(0, 0, 0, 0.22) 100%), var(--bg-surface)',
+                  background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: isLight
-                    ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 0 12px var(--accent-glow)'
-                    : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
+                  boxShadow: '0 4px 18px -2px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
                 }}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
                     className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
                     style={{
-                      background: isLight
-                        ? 'var(--bg-card)'
-                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, var(--accent-glow) 70%, rgba(255, 255, 255, 0.04) 100%), var(--bg-card)',
+                      background: 'var(--bg-card)',
                       borderColor: 'var(--border-card)',
-                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 10px var(--accent-glow)',
+                      boxShadow: '0 0 12px var(--accent-glow)',
                       color: 'var(--accent-color)',
                     }}
                   >
@@ -1695,12 +1658,10 @@ export default function TopNavPill() {
                       <span
                         className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider transition-all"
                         style={{
-                          background: isLight
-                            ? 'rgba(255, 255, 255, 0.85)'
-                            : 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, var(--accent-glow) 100%), var(--bg-surface)',
+                          background: 'var(--bg-surface)',
                           borderColor: 'var(--accent-color)',
-                          boxShadow: '0 0 10px var(--accent-glow), inset 0 1px 1px rgba(255, 255, 255, 0.35)',
-                          color: isLight ? 'var(--accent-color)' : '#ffffff',
+                          boxShadow: '0 0 10px var(--accent-glow)',
+                          color: 'var(--accent-color)',
                         }}
                       >
                         {THEMES.find(t => t.id === theme)?.name || theme}
@@ -1714,12 +1675,10 @@ export default function TopNavPill() {
                 <div
                   className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
                   style={{
-                    background: isLight
-                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.65) 100%)'
-                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)',
+                    background: 'var(--bg-card)',
                     borderColor: 'var(--border-card)',
-                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px var(--accent-glow)',
-                    color: isLight ? 'var(--accent-color)' : '#ffffff',
+                    boxShadow: '0 0 12px var(--accent-glow)',
+                    color: 'var(--accent-color)',
                   }}
                 >
                   <ArrowRight size={14} />
@@ -1736,26 +1695,18 @@ export default function TopNavPill() {
                 }}
                 className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden"
                 style={{
-                  background: isLight
-                    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%), var(--bg-surface)'
-                    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 50%, rgba(0, 0, 0, 0.22) 100%), var(--bg-surface)',
+                  background: 'var(--bg-surface)',
                   borderColor: 'var(--border-card)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: isLight
-                    ? 'inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 0 12px var(--accent-glow)'
-                    : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.25), 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
+                  boxShadow: '0 4px 18px -2px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow)',
                 }}
               >
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div
                     className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
                     style={{
-                      background: isLight
-                        ? 'var(--bg-card)'
-                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, var(--accent-glow) 70%, rgba(255, 255, 255, 0.04) 100%), var(--bg-card)',
+                      background: 'var(--bg-card)',
                       borderColor: 'var(--border-card)',
-                      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 10px var(--accent-glow)',
+                      boxShadow: '0 0 12px var(--accent-glow)',
                       color: 'var(--accent-color)',
                     }}
                   >
@@ -1773,12 +1724,10 @@ export default function TopNavPill() {
                 <div
                   className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
                   style={{
-                    background: isLight
-                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.65) 100%)'
-                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%), var(--bg-surface)',
+                    background: 'var(--bg-card)',
                     borderColor: 'var(--border-card)',
-                    boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 2px 10px var(--accent-glow)',
-                    color: isLight ? 'var(--accent-color)' : '#ffffff',
+                    boxShadow: '0 0 12px var(--accent-glow)',
+                    color: 'var(--accent-color)',
                   }}
                 >
                   <ArrowRight size={14} />
