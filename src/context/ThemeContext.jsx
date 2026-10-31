@@ -35,6 +35,7 @@ export const THEMES = [
     description: 'Obsidian leather & gilded brass',
     preview: ['#131215', '#1a191d', '#f59e0b'],
     color: '#f59e0b',
+    comingSoon: true,
     mode: 'dark',
   },
   {
@@ -107,13 +108,23 @@ function applyTheme(themeId) {
 }
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => loadData(STORAGE_KEYS.THEME, 'dark'));
+  const [theme, setThemeState] = useState(() => {
+    const saved = loadData(STORAGE_KEYS.THEME, 'dark');
+    const themeObj = THEMES.find((t) => t.id === saved);
+    if (themeObj?.comingSoon) {
+      saveData(STORAGE_KEYS.THEME, 'dark');
+      return 'dark';
+    }
+    return saved;
+  });
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
   function setTheme(id) {
+    const themeObj = THEMES.find((t) => t.id === id);
+    if (themeObj?.comingSoon) return;
     setThemeState(id);
     saveData(STORAGE_KEYS.THEME, id);
   }

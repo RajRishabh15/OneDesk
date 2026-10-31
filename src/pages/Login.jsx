@@ -372,7 +372,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
               const isLocked = Boolean(t.comingSoon);
 
               const circleBorder = active
-                ? (isWhite ? '2px solid var(--accent-color)' : '2px solid #ffffff')
+                ? (isWhite ? '2px solid var(--accent-color)' : isDarkPage ? '2px solid #ffffff' : '2px solid #18181b')
                 : isLocked
                 ? '1.5px solid rgba(245, 158, 11, 0.6)'
                 : isWhite
@@ -396,12 +396,13 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   }}
                 >
                   <span
-                    className="w-5 h-5 rounded-full flex items-center justify-center transition-all shadow-sm relative overflow-hidden group-hover:shadow-[0_0_8px_rgba(255,255,255,0.35)]"
+                    className="w-5 h-5 rounded-full flex items-center justify-center transition-all relative overflow-hidden"
                     style={{
                       background: circleColor,
                       border: circleBorder,
+                      backgroundClip: 'padding-box',
                       boxShadow: active
-                        ? (isWhite ? '0 0 10px rgba(180,83,9,0.5)' : `0 0 12px ${circleColor}cc, 0 1px 3px rgba(0,0,0,0.3)`)
+                        ? '0 1px 3px rgba(0,0,0,0.45)'
                         : '0 1px 2px rgba(0,0,0,0.15)',
                     }}
                   >
@@ -487,12 +488,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
                     : toast.enabled
                       ? '#34d399'
                       : '#f43f5e',
-                boxShadow:
-                  toast.type === 'theme'
-                    ? (toast.isWhite ? '0 0 8px var(--accent-glow)' : `0 0 8px ${toast.color}bb`)
-                    : toast.enabled
-                      ? '0 0 6px #34d399'
-                      : 'none',
+                boxShadow: 'none',
               }}
             />
           </div>

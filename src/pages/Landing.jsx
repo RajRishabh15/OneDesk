@@ -18,12 +18,9 @@ import {
   BookOpen,
   Paperclip,
   CheckCircle2,
-  Palette,
-  Lock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
-import { useTheme, THEMES } from '../context/ThemeContext';
 import OneDeskLogo from '../components/OneDeskLogo';
 
 function NotebookWatermark({ subtitle = 'your life, organized on paper ✦' }) {
@@ -56,13 +53,11 @@ function NotebookWatermark({ subtitle = 'your life, organized on paper ✦' }) {
 export default function Landing() {
   const { user } = useAuth();
   const { playChime } = useSettings();
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('tasks');
   const [completedDemoTask, setCompletedDemoTask] = useState(false);
 
-  const activeThemeObj = THEMES.find((t) => t.id === theme) || THEMES[0];
 
   function handleAction(path) {
     if (playChime) playChime('pop');
@@ -74,10 +69,6 @@ export default function Landing() {
     setActiveTab(tabKey);
   }
 
-  function handleThemeChange(newThemeId) {
-    if (playChime) playChime('pop');
-    setTheme(newThemeId);
-  }
 
   return (
     <div
@@ -106,82 +97,6 @@ export default function Landing() {
             </span>
           </Link>
 
-          {/* Quick Theme Switcher Pill in Header (Desktop / Tablet) */}
-          <div
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-xs backdrop-blur-md transition-all"
-            style={{
-              background: 'rgba(250, 247, 240, 0.95)',
-              borderColor: '#dcd4c5',
-            }}
-          >
-            <div className="flex items-center gap-1.5 pr-2.5 border-r border-[#ded7cb] shrink-0">
-              <div className="w-5 h-5 rounded-full border border-[#d6cebf] bg-[#f2ede4] flex items-center justify-center shrink-0 shadow-2xs">
-                <Palette size={11} className="text-[#57534e]" strokeWidth={2.2} />
-              </div>
-              <span className="text-[11px] font-bold text-[#1c1917] capitalize whitespace-nowrap">
-                {activeThemeObj?.name || theme}
-              </span>
-            </div>
-
-            {/* Quick theme bubbles */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
-              {THEMES.map((t) => {
-                const active = theme === t.id;
-                const isWhite = t.id === 'light' || t.id === 'notebook-light';
-                const circleColor = isWhite
-                  ? (t.id === 'notebook-light' ? '#f5f0e6' : '#ffffff')
-                  : (t.color || t.preview[2] || t.preview[0]);
-                const isLocked = Boolean(t.comingSoon);
-
-                const circleBorder = active
-                  ? '2px solid #1c1917'
-                  : isLocked
-                  ? '1.5px solid rgba(245, 158, 11, 0.6)'
-                  : isWhite
-                  ? '1.5px solid rgba(0, 0, 0, 0.35)'
-                  : '1.5px solid rgba(0, 0, 0, 0.22)';
-
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => handleThemeChange(t.id)}
-                    title={isLocked ? `${t.name} (Coming Soon)` : `Switch to ${t.name}: ${t.description}`}
-                    className={`shrink-0 group relative flex items-center justify-center p-0.5 rounded-full transition-all duration-200 ${
-                      isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:scale-115 active:scale-95'
-                    }`}
-                    style={{
-                      outline: 'none',
-                      transform: active ? 'scale(1.22)' : undefined,
-                    }}
-                  >
-                    <span
-                      className="w-4.5 h-4.5 rounded-full flex items-center justify-center transition-all shadow-xs relative overflow-hidden group-hover:border-stone-800"
-                      style={{
-                        background: circleColor,
-                        border: circleBorder,
-                        boxShadow: active
-                          ? `0 0 8px ${circleColor}cc, 0 1px 3px rgba(0,0,0,0.2)`
-                          : '0 1px 2px rgba(0,0,0,0.08)',
-                      }}
-                    >
-                      {isLocked ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[0.5px]">
-                          <Lock size={8} className="text-amber-300 drop-shadow-sm" strokeWidth={2.5} />
-                        </div>
-                      ) : active ? (
-                        <Check
-                          size={9}
-                          className={isWhite ? 'text-stone-900' : 'text-white drop-shadow'}
-                          strokeWidth={3}
-                        />
-                      ) : null}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-1 xs:gap-2 sm:gap-3 shrink-0">
@@ -217,90 +132,13 @@ export default function Landing() {
           </div>
         </nav>
 
-        {/* Quick Theme Switcher for Mobile / Tablet (<lg) */}
-        <div className="lg:hidden mt-2 flex justify-center px-1">
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-xs backdrop-blur-md max-w-full overflow-hidden"
-            style={{
-              background: 'rgba(250, 247, 240, 0.95)',
-              borderColor: '#dcd4c5',
-            }}
-          >
-            <div className="flex items-center gap-1.5 pr-2 border-r border-[#ded7cb] shrink-0">
-              <div className="w-5 h-5 rounded-full border border-[#d6cebf] bg-[#f2ede4] flex items-center justify-center shrink-0 shadow-2xs">
-                <Palette size={10} className="text-[#57534e]" strokeWidth={2.2} />
-              </div>
-              <span className="text-[10px] font-bold text-[#1c1917] capitalize whitespace-nowrap">
-                {activeThemeObj?.name || theme}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5 max-w-full touch-pan-x">
-              {THEMES.map((t) => {
-                const active = theme === t.id;
-                const isWhite = t.id === 'light' || t.id === 'notebook-light';
-                const circleColor = isWhite
-                  ? (t.id === 'notebook-light' ? '#f5f0e6' : '#ffffff')
-                  : (t.color || t.preview[2] || t.preview[0]);
-                const isLocked = Boolean(t.comingSoon);
-
-                const circleBorder = active
-                  ? '2px solid #1c1917'
-                  : isLocked
-                  ? '1.5px solid rgba(245, 158, 11, 0.6)'
-                  : isWhite
-                  ? '1.5px solid rgba(0, 0, 0, 0.35)'
-                  : '1.5px solid rgba(0, 0, 0, 0.22)';
-
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => handleThemeChange(t.id)}
-                    title={isLocked ? `${t.name} (Coming Soon)` : `${t.name}: ${t.description}`}
-                    className={`shrink-0 group relative flex items-center justify-center p-0.5 rounded-full transition-all duration-200 ${
-                      isLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:scale-115 active:scale-95'
-                    }`}
-                    style={{
-                      outline: 'none',
-                      transform: active ? 'scale(1.2)' : undefined,
-                    }}
-                  >
-                    <span
-                      className="w-4.5 h-4.5 rounded-full flex items-center justify-center transition-all shadow-xs relative overflow-hidden group-hover:border-stone-800"
-                      style={{
-                        background: circleColor,
-                        border: circleBorder,
-                        boxShadow: active
-                          ? `0 0 8px ${circleColor}cc, 0 1px 3px rgba(0,0,0,0.2)`
-                          : '0 1px 2px rgba(0,0,0,0.08)',
-                      }}
-                    >
-                      {isLocked ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[0.5px]">
-                          <Lock size={8} className="text-amber-300 drop-shadow-sm" strokeWidth={2.5} />
-                        </div>
-                      ) : active ? (
-                        <Check
-                          size={9}
-                          className={isWhite ? 'text-stone-900' : 'text-white drop-shadow'}
-                          strokeWidth={3}
-                        />
-                      ) : null}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
       </header>
 
       {/* ── Main Notebook Canvas ──────────────────────────────── */}
       <main className="relative z-20 w-full max-w-6xl mx-auto px-2.5 xs:px-4 sm:px-6 lg:px-8 py-4 xs:py-6 lg:py-6 flex-1 flex flex-col justify-center">
         {/* The Notebook Container */}
         <div className="relative rounded-2xl sm:rounded-3xl border border-[#ded5c6] bg-[#fbf9f4] shadow-[0_8px_30px_rgba(60,50,40,0.08),0_1px_3px_rgba(60,50,40,0.05)] overflow-hidden">
-          
+
           {/* Mobile Top Spiral Coil Wire Loops (Steno / Reporter's Notepad style) */}
           <div className="lg:hidden flex items-center justify-between px-3 sm:px-6 py-2 border-b border-[#e5ddcf] bg-[#f2ecdf] overflow-hidden">
             {Array.from({ length: 14 }).map((_, i) => (
@@ -321,7 +159,7 @@ export default function Landing() {
 
           {/* Dual Page Layout on Desktop / Stacked on Mobile */}
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[580px] lg:min-h-[540px]">
-            
+
             {/* ── Left Page: Hero Manifesto & Actions ─────────────── */}
             <div
               className="lg:col-span-6 p-4 xs:p-6 sm:p-8 lg:p-9 flex flex-col justify-between relative border-b lg:border-b-0 lg:border-r border-[#e5ddcf]"
@@ -336,7 +174,7 @@ export default function Landing() {
                 {/* Washi Tape Badge */}
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100/90 text-amber-900 border-y border-amber-300/60 shadow-xs text-[10px] sm:text-[11px] font-bold rotate-[-1.5deg] tracking-wide font-mono uppercase rounded-xs">
                   <span>✦</span>
-                  <span>The Unified Life & Work Notebook</span>
+                  <span>The Unified Life & Work Platform</span>
                   <span>✦</span>
                 </div>
 
@@ -390,7 +228,7 @@ export default function Landing() {
                     free forever, cloud-synced ✨
                   </span>
                   <svg width="24" height="20" viewBox="0 0 24 20" fill="none" className="stroke-amber-700 -rotate-12">
-                    <path d="M2 10C8 6 14 6 21 11M21 11L16 7M21 11L18 16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 10C8 6 14 6 21 11M21 11L16 7M21 11L18 16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
@@ -463,11 +301,10 @@ export default function Landing() {
                         key={tab.id}
                         type="button"
                         onClick={() => handleTabClick(tab.id)}
-                        className={`relative -mb-px flex items-center gap-1 xs:gap-1.5 sm:gap-2 px-2.5 xs:px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl sm:rounded-t-2xl text-[11px] xs:text-xs sm:text-[13px] font-bold border transition-all cursor-pointer touch-manipulation whitespace-nowrap ${
-                          active
+                        className={`relative -mb-px flex items-center gap-1 xs:gap-1.5 sm:gap-2 px-2.5 xs:px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl sm:rounded-t-2xl text-[11px] xs:text-xs sm:text-[13px] font-bold border transition-all cursor-pointer touch-manipulation whitespace-nowrap ${active
                             ? `${tab.activeBg} ${tab.activeBorder} ${tab.activeText} border-b-transparent shadow-xs z-10 scale-[1.01]`
                             : 'bg-[#f0ebd8]/80 text-[#64748b] border-[#ded7cb] hover:bg-[#ede6d8] hover:text-[#1c1917]'
-                        }`}
+                          }`}
                       >
                         <Icon size={13} className="shrink-0 sm:w-3.5 sm:h-3.5" strokeWidth={2.2} />
                         <span>{tab.label}</span>
@@ -501,16 +338,14 @@ export default function Landing() {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div
-                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0 ${
-                              completedDemoTask ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-[#a8a29e] bg-white'
-                            }`}
+                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0 ${completedDemoTask ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-[#a8a29e] bg-white'
+                              }`}
                           >
                             {completedDemoTask && <Check size={11} strokeWidth={3} />}
                           </div>
                           <span
-                            className={`text-xs sm:text-sm font-medium truncate transition-all ${
-                              completedDemoTask ? 'line-through text-[#a8a29e] decoration-rose-500 decoration-2' : 'text-[#1c1917]'
-                            }`}
+                            className={`text-xs sm:text-sm font-medium truncate transition-all ${completedDemoTask ? 'line-through text-[#a8a29e] decoration-rose-500 decoration-2' : 'text-[#1c1917]'
+                              }`}
                           >
                             Ship OneDesk v3.0 Production Release
                           </span>

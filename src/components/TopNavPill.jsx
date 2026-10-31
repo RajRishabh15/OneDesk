@@ -2,10 +2,15 @@ import { useMemo, useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate, Link } from 'react-router-dom';
 import {
   Search,
+  ChevronUp,
   Bell,
   LogOut,
   User as UserIcon,
   Gamepad2,
+  LayoutGrid,
+  MoreHorizontal,
+  CircleCheck,
+  CalendarDays,
   CheckSquare,
   FileText,
   CalendarPlus,
@@ -30,6 +35,7 @@ import { useData } from '../context/DataContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import OneDeskLogo from './OneDeskLogo';
+import GlassSurface from './GlassSurface';
 
 /* ── Searchable settings registry ──────────────────────── */
 const SETTINGS_ITEMS = [
@@ -153,6 +159,7 @@ export default function TopNavPill() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
+  const isLight = theme === 'light' || theme === 'notebook-light';
 
   const [query, setQuery]                       = useState('');
   const [searchOpen, setSearchOpen]             = useState(false);
@@ -1180,277 +1187,303 @@ export default function TopNavPill() {
 
       {/* ════════════════════════════════════════════
           MOBILE BOTTOM BAR  (< md)
-          Edge-to-Edge Native Mobile Dock — No Square Back!
+          Fluid Color-Adaptive Liquid Lens Dock (Matches Reference + Theme System)
       ════════════════════════════════════════════ */}
-      {/* ════════════════════════════════════════════
-          MOBILE BOTTOM BAR  (< md)
-          Apple-style Liquid Glass Island Dock
-      ════════════════════════════════════════════ */}
-      {/* Bottom Soft Dissolve Fade — smoothly blends page content beneath the dock */}
-      <div
-        className="md:hidden fixed bottom-0 inset-x-0 h-24 pointer-events-none z-30"
-        style={{
-          background: 'linear-gradient(to top, var(--bg-page) 0%, transparent 100%)',
-        }}
-      />
-
-      {/* Floating Island Dock with Apple Liquid Glass Aesthetics */}
+      {/* Floating Color-Adaptive Liquid Lens Dock Bar */}
       <nav
-        className="md:hidden fixed bottom-3 inset-x-3 max-w-[410px] mx-auto z-40 select-none"
+        className="md:hidden fixed bottom-3.5 inset-x-3.5 max-w-[420px] mx-auto z-40 select-none"
         style={{
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        {/* Ambient Fluid Glow Diffuser */}
+        {/* Color-Adaptive Liquid Ambient Aura */}
         <div
-          className="absolute -inset-1 rounded-full pointer-events-none z-0"
+          className="absolute -inset-1 rounded-full pointer-events-none z-0 transition-all duration-500"
           style={{
-            background: 'radial-gradient(ellipse at 50% 50%, var(--accent-glow) 0%, transparent 70%)',
-            filter: 'blur(14px)',
-            opacity: 0.35,
+            background: 'radial-gradient(ellipse at 50% 50%, var(--accent-glow) 0%, transparent 72%)',
+            filter: 'blur(22px)',
+            opacity: isLight ? 0.3 : 0.45,
           }}
         />
 
-        {/* Liquid Glass Capsule Hull */}
-        <div
-          className="h-[60px] px-2 rounded-full flex items-center justify-between relative overflow-hidden transition-all duration-300 z-10"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%), var(--bg-overlay)',
-            border: '1px solid var(--border-card)',
-            backdropFilter: 'blur(14px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(14px) saturate(180%)',
-            boxShadow: '0 8px 28px -4px var(--accent-glow), 0 2px 10px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
-          }}
+        {/* React Bits GlassSurface Liquid Dock Hull */}
+        <GlassSurface
+          width="100%"
+          height={66}
+          borderRadius={33}
+          distortionScale={-180}
+          displace={0.5}
+          backgroundOpacity={isLight ? 0.22 : 0.12}
+          borderWidth={0.07}
+          brightness={isLight ? 100 : 50}
+          opacity={0.96}
+          blur={14}
+          saturation={1.8}
+          redOffset={0}
+          greenOffset={10}
+          blueOffset={20}
+          refraction
+          renderer="auto"
+          className="w-full z-10"
         >
-          {/* 1. Home */}
-          <NavLink
-            to="/"
-            end
-            onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
-          >
-            {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <Home size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Home
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
-                    }}
-                  />
-                )}
-              </div>
-            )}
-          </NavLink>
-
-          {/* 2. Tasks */}
-          <NavLink
-            to="/tasks"
-            onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
-          >
-            {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Tasks
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
-                    }}
-                  />
-                )}
-              </div>
-            )}
-          </NavLink>
-
-          {/* 3. Center Liquid Fluid Bubble FAB (Fun Zone) */}
-          <div className="flex items-center justify-center shrink-0 px-1 relative">
-            {/* Subtle Ambient Aura */}
-            <div
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{
-                background: 'var(--accent-gradient)',
-                filter: 'blur(6px)',
-                opacity: 0.2,
-                transform: 'scale(1.05)',
-              }}
-            />
-
-            <button
-              type="button"
-              onClick={() => {
-                if (playChime) playChime('pop');
-                navigate('/fun-zone');
-              }}
-              className="w-11 h-11 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer relative overflow-hidden group"
-              style={{
-                background: 'var(--accent-gradient)',
-                border: '1.5px solid rgba(255, 255, 255, 0.3)',
-                boxShadow: '0 2px 8px var(--accent-glow)',
-              }}
-              aria-label="Fun Zone"
-              title="Fun Zone"
-            >
-              <Gamepad2
-                size={20}
-                strokeWidth={2.4}
-                className="relative z-10 transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
-              />
-            </button>
+          <div className="w-full h-full px-2 grid grid-cols-5 items-center justify-items-center">
+{/* 1. Home */}
+          <NavLink
+            to="/"
+            end
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <LayoutGrid
+                    size={17}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+                  }}
+                >
+                  Home
+                </span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 2. Tasks */}
+          <NavLink
+            to="/tasks"
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <CircleCheck
+                    size={17}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+                  }}
+                >
+                  Tasks
+                </span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 3. More (Quick Sheet Trigger — Liquid Action Pill) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              setMobileQuickSheetOpen(prev => !prev);
+            }}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+            aria-label="More actions"
+          >
+            <div
+              className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+              style={{
+                background: mobileQuickSheetOpen
+                  ? (isLight
+                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
+                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
+                  : (isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.08)'),
+                border: mobileQuickSheetOpen
+                  ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
+                  : (isLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.18)'),
+                boxShadow: mobileQuickSheetOpen
+                  ? (isLight
+                      ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                      : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
+                  : 'inset 0 1px 0.5px rgba(255, 255, 255, 0.25)',
+              }}
+            >
+              <MoreHorizontal
+                size={17}
+                strokeWidth={2.3}
+                className="transition-all duration-200"
+                style={{
+                  color: mobileQuickSheetOpen
+                    ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                    : 'var(--text-muted)',
+                  filter: mobileQuickSheetOpen ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                }}
+              />
+            </div>
+            <span
+              className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
+              style={{
+                fontWeight: mobileQuickSheetOpen ? 700 : 500,
+                color: mobileQuickSheetOpen ? 'var(--accent-color)' : 'var(--text-muted)',
+              }}
+            >
+              More
+            </span>
+          </button>
+
+          {/* 4. Planner (Schedule / Calendar) */}
+          <NavLink
+            to="/calendar"
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <CalendarDays
+                    size={17}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+                  }}
+                >
+                  Planner
+                </span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 5. Notes */}
+          <NavLink
+            to="/notes"
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[50px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 100%)'
+                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, var(--accent-glow) 65%, rgba(255, 255, 255, 0.08) 100%)')
+                      : 'transparent',
+                    border: isActive
+                      ? (isLight ? '1px solid rgba(255, 255, 255, 1)' : '1px solid rgba(255, 255, 255, 0.45)')
+                      : '1px solid transparent',
+                    boxShadow: isActive
+                      ? (isLight
+                          ? 'inset 0 1px 1px rgba(255, 255, 255, 1), 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 12px var(--accent-glow)'
+                          : 'inset 0 1.2px 1px rgba(255, 255, 255, 0.75), 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 16px var(--accent-glow)')
+                      : 'none',
+                  }}
+                >
+                  <FileText
+                    size={17}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-all duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
+                      filter: isActive ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.35))' : 'none',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[10px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? 'var(--accent-color)' : 'var(--text-muted)',
+                  }}
+                >
+                  Notes
+                </span>
+              </>
+            )}
+          </NavLink>
           </div>
-
-          {/* 4. Notes */}
-          <NavLink
-            to="/notes"
-            onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
-          >
-            {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Notes
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
-                    }}
-                  />
-                )}
-              </div>
-            )}
-          </NavLink>
-
-          {/* 5. Schedule */}
-          <NavLink
-            to="/calendar"
-            onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
-          >
-            {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Schedule
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
-                    }}
-                  />
-                )}
-              </div>
-            )}
-          </NavLink>
-        </div>
+        </GlassSurface>
       </nav>
 
       {/* ════════════════════════════════════════════
@@ -1469,11 +1502,15 @@ export default function TopNavPill() {
           <div
             className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto custom-scrollbar"
             style={{
-              background: 'var(--bg-card-solid)',
-              borderColor: 'var(--border-card)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              boxShadow: '0 -16px 40px var(--accent-glow), 0 -8px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
+              background: isLight
+                ? 'rgba(255, 255, 255, 0.88)'
+                : 'rgba(13, 17, 30, 0.85)',
+              borderTop: isLight ? '1px solid rgba(255, 255, 255, 0.9)' : '1px solid rgba(255, 255, 255, 0.28)',
+              borderLeft: isLight ? '1px solid rgba(255, 255, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.12)',
+              borderRight: isLight ? '1px solid rgba(255, 255, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.12)',
+              backdropFilter: 'blur(30px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+              boxShadow: '0 -16px 40px var(--accent-glow), 0 -8px 24px rgba(0,0,0,0.35), inset 0 1.5px 1px rgba(255,255,255,0.3)',
               paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
             }}
           >
@@ -1481,16 +1518,16 @@ export default function TopNavPill() {
             <div className="h-1.5 w-12 rounded-full bg-white/25 mx-auto mb-3.5" />
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-3.5">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ background: 'var(--accent-gradient)' }} />
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: 'var(--accent-gradient)' }} />
                   <h3 className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                    Quick Create
+                    More
                   </h3>
                 </div>
-                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>
-                  Capture ideas, to-dos & calendar milestones
+                <p className="text-[11px] font-medium mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  Settings, themes &amp; arcade
                 </p>
               </div>
               <button
@@ -1503,95 +1540,157 @@ export default function TopNavPill() {
               </button>
             </div>
 
-            {/* Inline Quick Task Add Form */}
-            <form onSubmit={handleQuickInlineTask} className="relative mb-3.5">
-              <div
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-full border transition-all focus-within:border-indigo-400 shadow-sm"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+            {/* Exactly 3 Cards: Settings, Themes, and Fun Zone */}
+            <div className="space-y-2.5">
+              {/* 1. Settings */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setMobileQuickSheetOpen(false);
+                  navigate('/settings');
+                }}
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98]"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                }}
               >
-                <CheckSquare size={16} style={{ color: 'var(--accent-color)' }} />
-                <input
-                  type="text"
-                  value={quickTaskTitle}
-                  onChange={e => setQuickTaskTitle(e.target.value)}
-                  placeholder="Quick task for today... (Tap Enter ↵)"
-                  className="flex-1 min-w-0 text-xs sm:text-sm bg-transparent outline-none placeholder:text-stone-400"
-                  style={{ color: 'var(--text-primary)' }}
-                />
-                <button
-                  type="submit"
-                  disabled={!quickTaskTitle.trim() || quickTaskSubmitting}
-                  className="h-7 w-7 rounded-full flex items-center justify-center transition-transform active:scale-90 disabled:opacity-30 shrink-0"
-                  style={{ background: 'var(--accent-gradient)', color: '#fff' }}
-                >
-                  <Plus size={14} strokeWidth={3} />
-                </button>
-              </div>
-              {quickTaskSuccess && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/40 backdrop-blur-md text-emerald-400 text-xs font-bold animate-menu-pop">
-                  <Check size={14} className="mr-1.5" /> Task captured for today!
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(99,102,241,0.22), rgba(139,92,246,0.12))',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--accent-color)',
+                    }}
+                  >
+                    <Settings size={20} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                      Settings
+                    </div>
+                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      Preferences, account &amp; sensory controls
+                    </div>
+                  </div>
                 </div>
-              )}
-            </form>
-
-            {/* 3 Large Action Cards */}
-            <div className="space-y-2 mb-4">
-              {quickActions.map(action => (
-                <button
-                  key={action.to}
-                  onClick={() => { setMobileQuickSheetOpen(false); navigate(action.to); }}
-                  className="w-full flex items-center justify-between p-3 rounded-[20px] border transition-all duration-200 text-left active:scale-[0.98]"
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border"
                   style={{
-                    background: 'var(--bg-surface)',
+                    background: 'var(--bg-card)',
                     borderColor: 'var(--border-subtle)',
+                    color: 'var(--accent-color)',
                   }}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className="h-10 w-10 rounded-[14px] flex items-center justify-center shrink-0 border"
-                      style={{
-                        background: action.gradient,
-                        borderColor: action.border,
-                        color: action.color,
-                      }}
-                    >
-                      <action.icon size={19} strokeWidth={2.2} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                        {action.title}
-                      </div>
-                      <div className="text-[11px] truncate" style={{ color: 'var(--text-muted)' }}>
-                        {action.subtitle}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="h-7 w-7 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: 'var(--bg-card)', color: action.color }}
-                  >
-                    <ArrowRight size={14} />
-                  </div>
-                </button>
-              ))}
-            </div>
+                  <ArrowRight size={14} />
+                </div>
+              </button>
 
-            {/* Quick Jump Spaces Bar */}
-            <div className="pt-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
-                Quick Jump Spaces
-              </p>
-              <div className="grid grid-cols-1 gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setMobileQuickSheetOpen(false); navigate('/settings'); }}
-                  className="flex items-center justify-center gap-2 p-2.5 rounded-full border text-xs font-bold transition-all active:scale-95"
-                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+              {/* 2. Themes */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setMobileQuickSheetOpen(false);
+                  navigate('/appearance');
+                }}
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98]"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                }}
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(236,72,153,0.22), rgba(168,85,247,0.12))',
+                      borderColor: 'var(--border-subtle)',
+                      color: '#ec4899',
+                    }}
+                  >
+                    <Palette size={20} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                        Themes
+                      </div>
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider"
+                        style={{
+                          background: 'var(--bg-card)',
+                          borderColor: 'var(--border-card)',
+                          color: 'var(--accent-color)',
+                        }}
+                      >
+                        {THEMES.find(t => t.id === theme)?.name || theme}
+                      </span>
+                    </div>
+                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      Color palettes, styling &amp; visual effects
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border"
+                  style={{
+                    background: 'var(--bg-card)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                  }}
                 >
-                  <Settings size={15} style={{ color: 'var(--accent-color)' }} />
-                  <span>Settings</span>
-                </button>
-              </div>
+                  <ArrowRight size={14} />
+                </div>
+              </button>
+
+              {/* 3. Fun Zone */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setMobileQuickSheetOpen(false);
+                  navigate('/fun-zone');
+                }}
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] border transition-all duration-200 text-left active:scale-[0.98]"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                }}
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className="h-11 w-11 rounded-[16px] flex items-center justify-center shrink-0 border"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(234,88,12,0.12))',
+                      borderColor: 'var(--border-subtle)',
+                      color: '#f59e0b',
+                    }}
+                  >
+                    <Gamepad2 size={20} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                      Fun Zone
+                    </div>
+                    <div className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      Arcade mini games &amp; focus micro-breaks
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border"
+                  style={{
+                    background: 'var(--bg-card)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--accent-color)',
+                  }}
+                >
+                  <ArrowRight size={14} />
+                </div>
+              </button>
             </div>
           </div>
         </div>
