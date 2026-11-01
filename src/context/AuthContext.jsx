@@ -396,6 +396,19 @@ export function AuthProvider({ children }) {
       if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
         return { success: false, cancelled: true };
       }
+      // If popup was blocked on mobile devices, fallback to redirect
+      if (err.code === 'auth/popup-blocked') {
+        try {
+          const provider = new GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          await signInWithRedirect(auth, provider);
+          return { success: true, redirecting: true };
+        } catch (redirectErr) {
+          const msg = friendlyError(redirectErr.code);
+          setAuthError(msg);
+          return { success: false, error: msg };
+        }
+      }
       const msg = friendlyError(err.code);
       setAuthError(msg);
       return { success: false, error: msg };

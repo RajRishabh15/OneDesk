@@ -984,12 +984,12 @@ export function GoogleAuthButton({ mode = 'login' }) {
         <div className="flex-1 border-t border-[var(--border-subtle)]" />
       </div>
 
-      {/* Real One-Click Google Sign-in Button */}
+      {/* Real One-Click Google Sign-in / Sign-up Button */}
       <button
         type="button"
         onClick={handleGoogleClick}
         disabled={googleLoading}
-        className="w-full flex items-center justify-between px-3 sm:px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border select-none cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed group"
+        className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border select-none cursor-pointer transition-all duration-200 hover:scale-[1.01] hover:border-[var(--accent-color)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed group shadow-xs"
         style={{
           background: 'var(--bg-surface)',
           borderColor: 'var(--border-subtle)',
@@ -998,22 +998,13 @@ export function GoogleAuthButton({ mode = 'login' }) {
         title={label}
         aria-label={label}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          {googleLoading ? (
-            <Loader2 size={16} className="shrink-0 animate-spin text-[var(--accent-color)]" />
-          ) : (
-            <GoogleIcon size={16} className="shrink-0 transition-transform group-hover:scale-110" />
-          )}
-          <span className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-            {googleLoading ? 'Connecting to Google…' : label}
-          </span>
-        </div>
-
-        <span
-          className="text-[9px] sm:text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shrink-0 ml-2 flex items-center gap-1.5"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          Active
+        {googleLoading ? (
+          <Loader2 size={17} className="shrink-0 animate-spin text-[var(--accent-color)]" />
+        ) : (
+          <GoogleIcon size={17} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
+        )}
+        <span className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+          {googleLoading ? 'Connecting to Google…' : label}
         </span>
       </button>
 
