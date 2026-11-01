@@ -168,6 +168,38 @@ export function AuthShell({ children, activeTab = 'login' }) {
   const { settings, toggleSetting, playChime } = useSettings();
   const [toast, setToast] = useState(null);
   const toastTimeoutRef = useRef(null);
+  const isLight = theme === 'light' || theme === 'notebook-light';
+  const [infoOpen, setInfoOpen] = useState(false);
+  const infoContainerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (infoContainerRef.current && !infoContainerRef.current.contains(e.target)) {
+        setInfoOpen(false);
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') setInfoOpen(false);
+    }
+    if (infoOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside, { passive: true });
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [infoOpen]);
+
+  function handleInfoToggle() {
+    setInfoOpen((prev) => {
+      const next = !prev;
+      if (playChime) playChime('pop');
+      return next;
+    });
+  }
 
   useEffect(() => {
     return () => {
@@ -289,8 +321,30 @@ export function AuthShell({ children, activeTab = 'login' }) {
         </div>
       )}
 
-      {/* Brand Pill — Top Centralized on Mobile, Top-Left on Desktop — Clickable Link to Landing Page */}
-      <div className="fixed top-3 sm:top-4 inset-x-0 sm:inset-x-auto sm:left-8 mx-auto sm:mx-0 w-fit z-30 pointer-events-auto">
+      {/* Dismissal backdrop to absorb outside clicks and prevent misclicks */}
+      {infoOpen && (
+        <div
+          className="fixed inset-0 z-30 pointer-events-auto"
+          aria-hidden="true"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setInfoOpen(false);
+          }}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setInfoOpen(false);
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        />
+      )}
+
+      {/* Brand Pill & Circular App Info Button — Top Centralized on Mobile, Top-Left on Desktop */}
+      <div className="fixed top-3 sm:top-4 inset-x-0 sm:inset-x-auto sm:left-8 mx-auto sm:mx-0 w-fit z-30 pointer-events-auto flex items-center gap-2">
         <Link
           to="/landing"
           onClick={() => playChime && playChime('pop')}
@@ -326,6 +380,174 @@ export function AuthShell({ children, activeTab = 'login' }) {
             OS v1.11
           </span>
         </Link>
+
+        {/* Separate Circular App Info Button */}
+        <div className="relative" ref={infoContainerRef}>
+          <button
+            type="button"
+            onClick={handleInfoToggle}
+            title="App Information & Version Details"
+            aria-label="App info"
+            className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border shadow-md backdrop-blur-xl transition-all duration-200 cursor-pointer active:scale-95 hover:scale-105"
+            style={{
+              background: 'var(--bg-card-solid)',
+              borderColor: infoOpen ? 'var(--accent-color)' : 'var(--border-card)',
+              color: infoOpen ? 'var(--accent-color)' : 'var(--text-muted)',
+            }}
+          >
+            <Info size={15} strokeWidth={2.2} />
+          </button>
+
+          {/* Gliding App Info Box (Top to Bottom Slide Transition) */}
+          {infoOpen && (
+            <div
+              className="absolute -right-2 sm:right-auto sm:left-0 top-full mt-2.5 w-[300px] max-w-[calc(100vw-28px)] rounded-2xl border p-4 sm:p-5 backdrop-blur-2xl shadow-2xl select-none z-50 info-box-glide overflow-hidden"
+              style={{
+                background: 'var(--bg-card-solid)',
+                borderColor: 'var(--border-card)',
+                boxShadow: isLight
+                  ? '0 16px 40px rgba(0,0,0,0.12)'
+                  : '0 20px 50px rgba(0,0,0,0.65)',
+              }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border-subtle)]">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-7 h-7 rounded-lg border flex items-center justify-center"
+                    style={{
+                      background: 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--accent-color)',
+                    }}
+                  >
+                    <Info size={14} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                      App Info
+                    </h3>
+                    <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                      OneDesk Workspace
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInfoOpen(false);
+                    if (playChime) playChime('pop');
+                  }}
+                  className="p-1 rounded-lg transition-colors cursor-pointer hover:text-[var(--text-primary)]"
+                  style={{ color: 'var(--text-muted)' }}
+                  title="Close"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              {/* Details List */}
+              <div className="space-y-2">
+                {/* Website Version */}
+                <div
+                  className="flex items-center justify-between p-2 rounded-xl border text-xs"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                  }}
+                >
+                  <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                    <GitBranch size={13} style={{ color: 'var(--accent-color)' }} />
+                    <span className="text-[11px] font-medium">Version</span>
+                  </div>
+                  <span
+                    className="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full border"
+                    style={{
+                      background: 'var(--bg-card-solid)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    v1.11.26
+                  </span>
+                </div>
+
+                {/* Developer Name */}
+                <div
+                  className="flex items-center justify-between p-2 rounded-xl border text-xs"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                  }}
+                >
+                  <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                    <Code2 size={13} style={{ color: 'var(--accent-color)' }} />
+                    <span className="text-[11px] font-medium">Developer</span>
+                  </div>
+                  <span className="text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>
+                    Rishabh Raj
+                  </span>
+                </div>
+
+                {/* Sync Status */}
+                <div
+                  className="flex items-center justify-between p-2 rounded-xl border text-xs"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                  }}
+                >
+                  <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                    <Radio size={13} className="text-emerald-400" />
+                    <span className="text-[11px] font-medium">Sync Status</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-emerald-400">
+                      Operational
+                    </span>
+                  </div>
+                </div>
+
+                {/* Last Updated On */}
+                <div
+                  className="flex items-center justify-between p-2 rounded-xl border text-xs"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                  }}
+                >
+                  <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                    <Calendar size={13} style={{ color: 'var(--accent-color)' }} />
+                    <span className="text-[11px] font-medium">Last Updated</span>
+                  </div>
+                  <span className="text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    1 Nov 2026
+                  </span>
+                </div>
+              </div>
+
+              {/* Footer Status Line */}
+              <div
+                className="mt-3 pt-2.5 border-t flex items-center justify-between text-[10px]"
+                style={{
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <span>Build #OD1.11-1</span>
+                <span className="font-medium text-emerald-400 flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  All Systems Normal
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Floating Theme Customizer Pill — Bottom Centralized on Mobile, Top-Right on Desktop */}
@@ -374,12 +596,12 @@ export function AuthShell({ children, activeTab = 'login' }) {
               const circleBorder = active
                 ? (isWhite ? '2px solid var(--accent-color)' : isDarkPage ? '2px solid #ffffff' : '2px solid #18181b')
                 : isLocked
-                ? '1.5px solid rgba(245, 158, 11, 0.6)'
-                : isWhite
-                ? '1.5px solid rgba(0, 0, 0, 0.35)'
-                : isDarkPage
-                ? '1.5px solid rgba(255, 255, 255, 0.38)'
-                : '1.5px solid rgba(0, 0, 0, 0.25)';
+                  ? '1.5px solid rgba(245, 158, 11, 0.6)'
+                  : isWhite
+                    ? '1.5px solid rgba(0, 0, 0, 0.35)'
+                    : isDarkPage
+                      ? '1.5px solid rgba(255, 255, 255, 0.38)'
+                      : '1.5px solid rgba(0, 0, 0, 0.25)';
 
               return (
                 <button
@@ -387,9 +609,8 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   type="button"
                   onClick={() => handleThemeChange(t.id)}
                   title={isLocked ? `${t.name} (Coming Soon)` : `${t.name}: ${t.description}`}
-                  className={`shrink-0 group relative flex items-center justify-center p-0.5 rounded-full transition-all duration-200 ${
-                    isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:scale-115 active:scale-95'
-                  }`}
+                  className={`shrink-0 group relative flex items-center justify-center p-0.5 rounded-full transition-all duration-200 ${isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:scale-115 active:scale-95'
+                    }`}
                   style={{
                     outline: 'none',
                     transform: active ? 'scale(1.18)' : 'scale(1)',
@@ -493,8 +714,6 @@ export function AuthShell({ children, activeTab = 'login' }) {
         </div>
       )}
 
-      {/* Desktop Bottom-Right System Info Button & Dialog Box */}
-      <SystemInfoButton />
 
       {/* Main Auth Container — Mobile responsive, compact centered container */}
       <div className="relative z-10 w-full max-w-[380px] sm:max-w-[390px] my-auto">
@@ -726,221 +945,6 @@ export function GoogleAuthButton({ mode = 'login' }) {
           Coming soon
         </span>
       </div>
-    </div>
-  );
-}
-
-export function SystemInfoButton() {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
-  const { playChime } = useSettings();
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    }
-    function handleKeyDown(e) {
-      if (e.key === 'Escape') setIsOpen(false);
-    }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
-
-  function handleToggle() {
-    setIsOpen((prev) => {
-      const next = !prev;
-      if (playChime) playChime('pop');
-      return next;
-    });
-  }
-
-  return (
-    <div
-      ref={containerRef}
-      className="hidden sm:block fixed bottom-5 right-6 sm:bottom-6 sm:right-8 z-30 pointer-events-auto"
-    >
-      {/* Floating Info Trigger Button */}
-      <button
-        type="button"
-        onClick={handleToggle}
-        title="System Information & Version Details"
-        aria-label="System information"
-        className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border shadow-lg backdrop-blur-xl transition-all duration-200 cursor-pointer ${isOpen ? 'scale-110 shadow-2xl' : 'hover:scale-105 active:scale-95'
-          }`}
-        style={{
-          background: 'var(--bg-card-solid)',
-          borderColor: isOpen ? 'var(--accent-color)' : 'var(--border-card)',
-          color: isOpen ? 'var(--accent-color)' : 'var(--text-muted)',
-          boxShadow: isOpen
-            ? '0 0 16px var(--accent-glow), 0 10px 25px rgba(0,0,0,0.3)'
-            : '0 8px 20px rgba(0,0,0,0.15)',
-        }}
-      >
-        <Info size={17} strokeWidth={2.2} />
-      </button>
-
-      {/* Info Dialog Box */}
-      {isOpen && (
-        <div
-          className="absolute bottom-13 right-0 w-80 rounded-2xl border p-4 sm:p-5 backdrop-blur-2xl shadow-2xl overflow-hidden animate-fade-in select-none"
-          style={{
-            background: 'var(--bg-card-solid)',
-            borderColor: 'var(--border-card)',
-            boxShadow: '0 25px 60px -12px var(--accent-glow), 0 12px 30px rgba(0,0,0,0.4)',
-          }}
-        >
-          {/* Top Specular Line Highlight */}
-          <div
-            className="absolute top-0 inset-x-6 h-px"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
-            }}
-          />
-
-          {/* Header */}
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border-subtle)]">
-            <div className="flex items-center gap-2">
-              <div
-                className="w-7 h-7 rounded-lg border flex items-center justify-center"
-                style={{
-                  background: 'var(--bg-surface)',
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--accent-color)',
-                }}
-              >
-                <Info size={14} />
-              </div>
-              <div>
-                <h3 className="text-xs font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                  System Information
-                </h3>
-                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                  OneDesk Workspace OS
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                if (playChime) playChime('pop');
-              }}
-              className="p-1 rounded-lg transition-colors cursor-pointer hover:text-[var(--text-primary)]"
-              style={{ color: 'var(--text-muted)' }}
-              title="Close"
-            >
-              <X size={14} />
-            </button>
-          </div>
-
-          {/* Details List */}
-          <div className="space-y-2">
-            {/* Website Version */}
-            <div
-              className="flex items-center justify-between p-2 rounded-xl border text-xs"
-              style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-subtle)',
-              }}
-            >
-              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
-                <GitBranch size={13} style={{ color: 'var(--accent-color)' }} />
-                <span className="text-[11px] font-medium">Version</span>
-              </div>
-              <span
-                className="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full border"
-                style={{
-                  background: 'var(--bg-card-solid)',
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                v1.11.26
-              </span>
-            </div>
-
-            {/* Developer Name */}
-            <div
-              className="flex items-center justify-between p-2 rounded-xl border text-xs"
-              style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-subtle)',
-              }}
-            >
-              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
-                <Code2 size={13} style={{ color: 'var(--accent-color)' }} />
-                <span className="text-[11px] font-medium">Developer</span>
-              </div>
-              <span className="text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>
-                Rishabh Raj
-              </span>
-            </div>
-
-            {/* Sync Status */}
-            <div
-              className="flex items-center justify-between p-2 rounded-xl border text-xs"
-              style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-subtle)',
-              }}
-            >
-              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
-                <Radio size={13} className="text-emerald-400" />
-                <span className="text-[11px] font-medium">Sync Status</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                </span>
-                <span className="text-[11px] font-semibold text-emerald-400">
-                  Operational
-                </span>
-              </div>
-            </div>
-
-            {/* Last Updated On */}
-            <div
-              className="flex items-center justify-between p-2 rounded-xl border text-xs"
-              style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-subtle)',
-              }}
-            >
-              <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
-                <Calendar size={13} style={{ color: 'var(--accent-color)' }} />
-                <span className="text-[11px] font-medium">Last Updated</span>
-              </div>
-              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                3 Oct 2026
-              </span>
-            </div>
-          </div>
-
-          {/* Footer Status Line */}
-          <div
-            className="mt-3 pt-2.5 border-t flex items-center justify-between text-[10px]"
-            style={{
-              borderColor: 'var(--border-subtle)',
-              color: 'var(--text-muted)',
-            }}
-          >
-            <span>Cloud Sync Active</span>
-            <span className="flex items-center gap-1 font-medium" style={{ color: 'var(--accent-color)' }}>
-              <CheckCircle2 size={11} /> Verified Build
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
