@@ -95,7 +95,6 @@ export default function TaskCard({
                 : isNotebook
                 ? 'var(--nb-stitch-color)'
                 : priority.border,
-              boxShadow: isCompleted ? '0 0 10px var(--accent-glow)' : 'none',
             }}
           >
             {isCompleted && <Check size={11} strokeWidth={3.2} className="text-white drop-shadow-sm" />}

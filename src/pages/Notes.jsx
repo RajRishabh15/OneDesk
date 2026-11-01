@@ -145,7 +145,7 @@ export default function Notes() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-32 sm:pb-12">
       {/* ── Header ───────────────────────────────────────────── */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 pb-4"

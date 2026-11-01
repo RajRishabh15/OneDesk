@@ -694,7 +694,6 @@ export default function Settings() {
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-subtle)',
                 color: 'var(--accent-color)',
-                boxShadow: '0 0 12px var(--accent-glow)',
               }}
             >
               <MessageSquareHeart size={18} strokeWidth={2.2} />
