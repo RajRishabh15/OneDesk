@@ -110,8 +110,11 @@ function applyTheme(themeId) {
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
     const saved = loadData(STORAGE_KEYS.THEME, 'dark');
-    const matched = THEMES.find((t) => t.id === saved);
-    if (matched?.comingSoon) return 'notebook-light';
+    const themeObj = THEMES.find((t) => t.id === saved);
+    if (themeObj?.comingSoon) {
+      saveData(STORAGE_KEYS.THEME, 'dark');
+      return 'dark';
+    }
     return saved;
   });
 
@@ -120,8 +123,8 @@ export function ThemeProvider({ children }) {
   }, [theme]);
 
   function setTheme(id) {
-    const target = THEMES.find((t) => t.id === id);
-    if (target?.comingSoon) return;
+    const themeObj = THEMES.find((t) => t.id === id);
+    if (themeObj?.comingSoon) return;
     setThemeState(id);
     saveData(STORAGE_KEYS.THEME, id);
   }

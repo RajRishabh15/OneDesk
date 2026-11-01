@@ -265,7 +265,7 @@ export default function Dashboard() {
   const targetTask = highPriorityPending[0] || pending[0];
 
   return (
-    <div className="space-y-8 sm:space-y-10 animate-fade-up max-w-5xl mx-auto pb-16 pt-2 sm:pt-4">
+    <div className="space-y-8 sm:space-y-10 animate-fade-up max-w-5xl mx-auto pb-32 sm:pb-16 pt-2 sm:pt-4">
 
       {/* ══════════════════════════════════════════════════════════════
           1. CENTERED HERO: TYPEWRITER GREETING -> NAME -> INFO

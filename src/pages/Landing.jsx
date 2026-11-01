@@ -58,6 +58,7 @@ export default function Landing() {
   const [activeTab, setActiveTab] = useState('tasks');
   const [completedDemoTask, setCompletedDemoTask] = useState(false);
 
+
   function handleAction(path) {
     if (playChime) playChime('pop');
     navigate(path);
@@ -67,6 +68,7 @@ export default function Landing() {
     if (playChime) playChime('pop');
     setActiveTab(tabKey);
   }
+
 
   return (
     <div
@@ -79,7 +81,7 @@ export default function Landing() {
     >
       {/* ── Top Leather/Stationery Header ─────────────────────── */}
       <header className="relative z-30 w-full max-w-7xl mx-auto px-2.5 xs:px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4">
-        <nav className="flex items-center justify-between px-2.5 xs:px-4 sm:px-6 py-2 sm:py-2.5 rounded-2xl sm:rounded-full border border-[#dcd4c5] shadow-xs backdrop-blur-md bg-[#faf7f0]/90">
+        <nav className="flex items-center justify-between gap-2 sm:gap-4 px-2.5 xs:px-4 sm:px-6 py-2 sm:py-2.5 rounded-2xl sm:rounded-full border border-[#dcd4c5] shadow-xs backdrop-blur-md bg-[#faf7f0]/90">
           {/* Brand Logo & Notebook Edition Pill */}
           <Link
             to="/"
@@ -94,6 +96,7 @@ export default function Landing() {
               Personal Edition
             </span>
           </Link>
+
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-1 xs:gap-2 sm:gap-3 shrink-0">
@@ -128,13 +131,14 @@ export default function Landing() {
             )}
           </div>
         </nav>
+
       </header>
 
       {/* ── Main Notebook Canvas ──────────────────────────────── */}
       <main className="relative z-20 w-full max-w-6xl mx-auto px-2.5 xs:px-4 sm:px-6 lg:px-8 py-4 xs:py-6 lg:py-6 flex-1 flex flex-col justify-center">
         {/* The Notebook Container */}
         <div className="relative rounded-2xl sm:rounded-3xl border border-[#ded5c6] bg-[#fbf9f4] shadow-[0_8px_30px_rgba(60,50,40,0.08),0_1px_3px_rgba(60,50,40,0.05)] overflow-hidden">
-          
+
           {/* Mobile Top Spiral Coil Wire Loops (Steno / Reporter's Notepad style) */}
           <div className="lg:hidden flex items-center justify-between px-3 sm:px-6 py-2 border-b border-[#e5ddcf] bg-[#f2ecdf] overflow-hidden">
             {Array.from({ length: 14 }).map((_, i) => (
@@ -155,7 +159,7 @@ export default function Landing() {
 
           {/* Dual Page Layout on Desktop / Stacked on Mobile */}
           <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[580px] lg:min-h-[540px]">
-            
+
             {/* ── Left Page: Hero Manifesto & Actions ─────────────── */}
             <div
               className="lg:col-span-6 p-4 xs:p-6 sm:p-8 lg:p-9 flex flex-col justify-between relative border-b lg:border-b-0 lg:border-r border-[#e5ddcf]"
@@ -170,7 +174,7 @@ export default function Landing() {
                 {/* Washi Tape Badge */}
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100/90 text-amber-900 border-y border-amber-300/60 shadow-xs text-[10px] sm:text-[11px] font-bold rotate-[-1.5deg] tracking-wide font-mono uppercase rounded-xs">
                   <span>✦</span>
-                  <span>The Unified Life & Work Notebook</span>
+                  <span>The Unified Life & Work Platform</span>
                   <span>✦</span>
                 </div>
 
@@ -224,7 +228,7 @@ export default function Landing() {
                     free forever, cloud-synced ✨
                   </span>
                   <svg width="24" height="20" viewBox="0 0 24 20" fill="none" className="stroke-amber-700 -rotate-12">
-                    <path d="M2 10C8 6 14 6 21 11M21 11L16 7M21 11L18 16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 10C8 6 14 6 21 11M21 11L16 7M21 11L18 16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
@@ -297,11 +301,10 @@ export default function Landing() {
                         key={tab.id}
                         type="button"
                         onClick={() => handleTabClick(tab.id)}
-                        className={`relative -mb-px flex items-center gap-1 xs:gap-1.5 sm:gap-2 px-2.5 xs:px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl sm:rounded-t-2xl text-[11px] xs:text-xs sm:text-[13px] font-bold border transition-all cursor-pointer touch-manipulation whitespace-nowrap ${
-                          active
+                        className={`relative -mb-px flex items-center gap-1 xs:gap-1.5 sm:gap-2 px-2.5 xs:px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl sm:rounded-t-2xl text-[11px] xs:text-xs sm:text-[13px] font-bold border transition-all cursor-pointer touch-manipulation whitespace-nowrap ${active
                             ? `${tab.activeBg} ${tab.activeBorder} ${tab.activeText} border-b-transparent shadow-xs z-10 scale-[1.01]`
                             : 'bg-[#f0ebd8]/80 text-[#64748b] border-[#ded7cb] hover:bg-[#ede6d8] hover:text-[#1c1917]'
-                        }`}
+                          }`}
                       >
                         <Icon size={13} className="shrink-0 sm:w-3.5 sm:h-3.5" strokeWidth={2.2} />
                         <span>{tab.label}</span>
@@ -335,18 +338,16 @@ export default function Landing() {
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div
-                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0 ${
-                              completedDemoTask ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-[#a8a29e] bg-white'
-                            }`}
+                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all shrink-0 ${completedDemoTask ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-[#a8a29e] bg-white'
+                              }`}
                           >
                             {completedDemoTask && <Check size={11} strokeWidth={3} />}
                           </div>
                           <span
-                            className={`text-xs sm:text-sm font-medium truncate transition-all ${
-                              completedDemoTask ? 'line-through text-[#a8a29e] decoration-rose-500 decoration-2' : 'text-[#1c1917]'
-                            }`}
+                            className={`text-xs sm:text-sm font-medium truncate transition-all ${completedDemoTask ? 'line-through text-[#a8a29e] decoration-rose-500 decoration-2' : 'text-[#1c1917]'
+                              }`}
                           >
-                            Ship OneDesk v3.0 Production Release
+                            Ship OneDesk v1.11 Production Release
                           </span>
                         </div>
                         <span className="shrink-0 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-300">
@@ -412,7 +413,7 @@ export default function Landing() {
 
                       <div className="p-2.5 rounded-lg border border-[#e5ddcf] bg-[#faf7f0] flex flex-col xs:flex-row items-start xs:items-center justify-between gap-1 text-xs text-[#57534e]">
                         <span className="font-handwriting text-base xs:text-lg text-emerald-800">⚡ everything autosaves in real time</span>
-                        <span className="font-mono text-[9px] xs:text-[10px] font-bold text-[#1c1917] shrink-0">v3.0 Notebook Engine</span>
+                        <span className="font-mono text-[9px] xs:text-[10px] font-bold text-[#1c1917] shrink-0">v1.11 Notebook Engine</span>
                       </div>
 
                       {/* Notebook styled "onedesk" doodle watermark */}

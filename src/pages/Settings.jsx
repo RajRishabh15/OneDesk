@@ -1,8 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Download,
-  Upload,
   Trash2,
   LogOut,
   Palette,
@@ -15,7 +13,6 @@ import {
   Loader2,
   Key,
   Bell,
-  Database,
   User,
   Mail,
   Camera,
@@ -23,6 +20,9 @@ import {
   ChevronRight,
   Pencil,
   Clock,
+  MessageSquare,
+  MessageSquareHeart,
+  ExternalLink,
 } from 'lucide-react';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -32,6 +32,9 @@ import Toggle from '../components/Toggle';
 import Modal from '../components/Modal';
 
 /* ─── Preset Avatars: Nature & Automotive Photography ──────── */
+// User Feedback Google Form URL (Provide link to embed)
+const GOOGLE_FORM_URL = "https://forms.gle/SBwAELPdwsbXjFpk8";
+
 const PRESET_AVATARS = [
   // Nature & Landscapes
   { id: 'nat1', category: 'Nature', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&auto=format&fit=crop&q=80', label: 'Mountain Peak' },
@@ -161,8 +164,6 @@ export default function Settings() {
     requestNotificationPermission,
   } = useSettings();
   const navigate = useNavigate();
-
-  const fileRef = useRef(null);
   const photoFileRef = useRef(null);
 
   // Edit Profile States
@@ -219,7 +220,7 @@ export default function Settings() {
         setPasswordModalOpen(true);
       }, 80);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleOpenEditProfile() {
@@ -383,54 +384,6 @@ export default function Settings() {
   async function handleLogout() {
     await logout();
     navigate('/', { replace: true });
-  }
-
-  function handleExport() {
-    const blob = new Blob(
-      [JSON.stringify({ notes, tasks, events, exportedAt: new Date().toISOString() }, null, 2)],
-      { type: 'application/json' }
-    );
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(blob),
-      download: `onedesk-backup-${new Date().toISOString().slice(0, 10)}.json`,
-    });
-    a.click();
-    URL.revokeObjectURL(a.href);
-    if (playChime) playChime('pop');
-  }
-
-  function handleImport(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const b = JSON.parse(reader.result);
-        if (Array.isArray(b.notes)) {
-          for (const n of b.notes) {
-            const { id: _, createdAt: __, ...r } = n;
-            await addNote(r);
-          }
-        }
-        if (Array.isArray(b.tasks)) {
-          for (const t of b.tasks) {
-            const { id: _, createdAt: __, ...r } = t;
-            await addTask(r);
-          }
-        }
-        if (Array.isArray(b.events)) {
-          for (const ev of b.events) {
-            const { id: _, createdAt: __, ...r } = ev;
-            await addEvent(r);
-          }
-        }
-        if (playChime) playChime('success');
-        alert('Backup imported successfully!');
-      } catch {
-        alert('Invalid or corrupted backup file.');
-      }
-    };
-    reader.readAsText(file);
   }
 
   return (
@@ -670,123 +623,9 @@ export default function Settings() {
               />
             </div>
           </SettingRow>
-
-          {/* Interaction & Sensory Link */}
-          <SettingRow
-            icon={Sparkles}
-            label="Sensory & Interaction Dynamics"
-            description="Customize audio chimes, tactile spring physics, due badges, and ambient background waves."
-            onClick={() => {
-              if (playChime) playChime('pop');
-              navigate('/settings/appearance');
-            }}
-          >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (playChime) playChime('pop');
-                navigate('/settings/appearance');
-              }}
-              className="text-[11px] font-semibold flex items-center gap-1 hover:underline cursor-pointer py-1 px-2.5 rounded-lg border transition-all"
-              style={{
-                background: 'var(--bg-surface)',
-                borderColor: 'var(--border-subtle)',
-                color: 'var(--accent-color)',
-              }}
-            >
-              <span>Customize</span>
-              <ChevronRight size={13} />
-            </button>
-          </SettingRow>
         </div>
       </SettingCard>
 
-      {/* ── 4. Workspace Data & Portability ────────────────── */}
-      <SettingCard>
-        <SectionHeader
-          icon={Database}
-          title="Data & Backups"
-          description="Export an offline copy of your workspace data or restore from a previous JSON backup."
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          {/* Export Tile */}
-          <div
-            className="p-4 rounded-xl sm:rounded-2xl border flex flex-col justify-between space-y-3"
-            style={{
-              background: 'var(--bg-surface)',
-              borderColor: 'var(--border-subtle)',
-            }}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Download size={15} style={{ color: 'var(--accent-color)' }} />
-                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Export Workspace Data
-                </h3>
-              </div>
-              <p className="text-[11px] sm:text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Download your notes, tasks, and schedule events into a portable JSON file.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleExport}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-[var(--accent-color)] active:scale-95 cursor-pointer shadow-xs"
-              style={{
-                background: 'var(--bg-card-solid)',
-                borderColor: 'var(--border-card)',
-                color: 'var(--text-primary)',
-              }}
-            >
-              <Download size={13} />
-              <span>Export Archive (.json)</span>
-            </button>
-          </div>
-
-          {/* Import Tile */}
-          <div
-            className="p-4 rounded-xl sm:rounded-2xl border flex flex-col justify-between space-y-3"
-            style={{
-              background: 'var(--bg-surface)',
-              borderColor: 'var(--border-subtle)',
-            }}
-          >
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Upload size={15} style={{ color: 'var(--accent-color)' }} />
-                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Restore from Backup
-                </h3>
-              </div>
-              <p className="text-[11px] sm:text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Import notes, tasks, and schedule events from an exported OneDesk backup file.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-[var(--accent-color)] active:scale-95 cursor-pointer shadow-xs"
-              style={{
-                background: 'var(--bg-card-solid)',
-                borderColor: 'var(--border-card)',
-                color: 'var(--text-primary)',
-              }}
-            >
-              <Upload size={13} />
-              <span>Import Archive (.json)</span>
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={handleImport}
-            />
-          </div>
-        </div>
-      </SettingCard>
 
       {/* ── 5. App Info ────────────────────────────────────── */}
       <SettingCard>
@@ -815,14 +654,14 @@ export default function Settings() {
                     color: 'var(--accent-color)',
                   }}
                 >
-                  v3.10.26
+                  v1.11.26
                 </span>
                 <span className="text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>
-                  Build #OD3.10-1
+                  Build #OD1.11-1
                 </span>
               </div>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Last updated: <span className="font-medium" style={{ color: 'var(--text-primary)' }}>October 3, 2026</span>
+                Last updated: <span className="font-medium" style={{ color: 'var(--text-primary)' }}>November 1, 2026</span>
               </p>
             </div>
           </div>
@@ -845,6 +684,49 @@ export default function Settings() {
           </button>
         </div>
       </SettingCard>
+      {/* ── 5. User Feedback & Suggestions ─────────────────── */}
+      <SettingCard>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div
+              className="w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--accent-color)',
+              }}
+            >
+              <MessageSquareHeart size={18} strokeWidth={2.2} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                User Feedback &amp; Suggestions
+              </h2>
+              <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Help us improve OneDesk. Share your thoughts, report issues, or suggest new features.
+              </p>
+            </div>
+          </div>
+
+          <a
+            href={GOOGLE_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => playChime && playChime('pop')}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all hover:border-[var(--accent-color)] hover:text-[var(--text-primary)] active:scale-95 cursor-pointer shadow-xs whitespace-nowrap self-start sm:self-auto"
+            style={{
+              background: 'var(--bg-surface)',
+              borderColor: 'var(--border-subtle)',
+              color: 'var(--text-primary)',
+            }}
+          >
+            <MessageSquare size={13} style={{ color: 'var(--accent-color)' }} />
+            <span>Share Feedback</span>
+            <ExternalLink size={12} className="opacity-70" />
+          </a>
+        </div>
+      </SettingCard>
+
 
       {/* ── 6. Danger Zone ─────────────────────────────────── */}
       <SettingCard
@@ -1484,7 +1366,7 @@ export default function Settings() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Release v3.10.26
+                  Release v1.11.26
                 </span>
                 <span
                   className="text-[10px] px-2 py-0.5 rounded-full font-bold border"
@@ -1498,7 +1380,7 @@ export default function Settings() {
                 </span>
               </div>
               <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Released on October 3, 2026 • Build #OD3.10-1
+                Released on November 1, 2026 • Build #OD1.11-1
               </p>
             </div>
             <div
@@ -1515,7 +1397,7 @@ export default function Settings() {
 
           {/* Changelog Highlights */}
           <div className="space-y-2.5">
-            {/* Point 1: New Redesigned Landing Page (1st point) */}
+            {/* 1. New Redesigned Landing Page */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1534,7 +1416,7 @@ export default function Settings() {
               </p>
             </div>
 
-            {/* Point 2: Added Notebook Style Theme */}
+            {/* 2. New Themes Added */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1545,15 +1427,15 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  📓 Notebook Styled Themes &amp; Elements
+                  🎨 New Themes Added
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Added handcrafted Notebook themes (Light &amp; Dark) with continuous ruled notebook lines, graph paper grids, wire-ring coils, silk bookmark ribbons, brass corner protectors, washi tape labels, and fountain pen ink accents.
+                Added new handcrafted themes including Notebook Light &amp; Dark, Ember, and Peacock with ambient liquid backdrops, glowing borders, and color-adaptive palettes.
               </p>
             </div>
 
-            {/* Point 3: FunZone Point */}
+            {/* 3. User Privacy Strengthening & Enhanced Password & Data Security */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1564,15 +1446,15 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  🎮 Fun Zone Hub &amp; Interactive Arcade
+                  🛡️ User Privacy Strengthening &amp; Enhanced Password &amp; Data Security
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Introduced the new Fun Zone teaser portal and gaming hub for quick relaxation between deep work sessions, complete with streak rewards and interactive mini-game previews.
+                Strengthened account privacy protections, client-side data security, protected routes, and credential encryption for workspace safety.
               </p>
             </div>
 
-            {/* Point 4: Change Password and Forgot Password */}
+            {/* 4. Added Forgot & Reset Passwords */}
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1583,15 +1465,15 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  🔑 Change Password &amp; Forgot Password Recovery
+                  🔑 Added Forgot &amp; Reset Passwords
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Added full self-service account credential management with password updates and secure email reset workflows directly in Settings and Login.
+                Added self-service password recovery with instant email reset links and in-app password changes directly in Settings and Login.
               </p>
             </div>
 
-            {/* Point 5: Enhanced Password Security */}
+            {/* 5. Updated Navigation for Redesigned Mobile Experience
             <div
               className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
               style={{
@@ -1602,11 +1484,68 @@ export default function Settings() {
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
                 <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  🛡️ Enhanced Password &amp; Data Security
+                  📱 Redesigned Mobile Navigation Bar
                 </h3>
               </div>
               <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                Strengthened authentication encryption, password validation, protected routes, and credential hashing for bulletproof account and data safety.
+                Revamped the bottom navigation into a floating squircle dock with glowing active pill tabs and an all-new theme-adaptive.
+              </p>
+            </div> */}
+
+            {/* 6. Profile Pictures Integration */}
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  🖼️ Profile Picture Integration
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Full custom profile picture avatar integration across desktop and mobile with preset images.
+              </p>
+            </div>
+
+            {/* 7. New Global Universal Search */}
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  🔍 New Global Universal Search
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Instant global search across tasks, notes, calendar events, quick navigation actions, and settings directly accessible anywhere via header and keyboard shortcut.
+              </p>
+            </div>
+
+            {/* 8. Coming Soon: Fun Zone */}
+            <div
+              className="p-3.5 rounded-xl sm:rounded-2xl border space-y-1"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent-color)' }} />
+                <h3 className="text-xs sm:text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  🎮 Coming Soon: Fun Zone
+                </h3>
+              </div>
+              <p className="text-xs pl-4 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Arcade micro-games, focus break streaks, and relaxing mini-puzzles are in active development to help you recharge between productivity sessions.
               </p>
             </div>
           </div>

@@ -1,11 +1,16 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { NavLink, useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   Search,
+  ChevronUp,
   Bell,
   LogOut,
   User as UserIcon,
   Gamepad2,
+  LayoutGrid,
+  MoreHorizontal,
+  CircleCheck,
+  CalendarDays,
   CheckSquare,
   FileText,
   CalendarPlus,
@@ -24,6 +29,12 @@ import {
   Key,
   Database,
   Trash2,
+  MessageSquareHeart,
+  ExternalLink,
+  Info,
+  Navigation,
+  Compass,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
@@ -31,13 +42,136 @@ import { useSettings } from '../context/SettingsContext';
 import { useTheme, THEMES } from '../context/ThemeContext';
 import OneDeskLogo from './OneDeskLogo';
 
-/* ── Searchable settings registry ──────────────────────── */
+/* ── Searchable Pages Registry ─────────────────────────── */
+const PAGE_ITEMS = [
+  {
+    id: 'page-home',
+    label: 'Home Dashboard',
+    description: 'Workspace command center, glanceable metrics & focus tasks',
+    keywords: ['home', 'dashboard', 'overview', 'main', 'start', 'metrics', 'glance', 'focus'],
+    icon: Home,
+    path: '/',
+    color: '#818cf8',
+  },
+  {
+    id: 'page-tasks',
+    label: 'Tasks & Todo',
+    description: 'Organize to-do items, track priorities, statuses & deadlines',
+    keywords: ['tasks', 'todo', 'task list', 'to do', 'checklist', 'work', 'kanban', 'priority', 'status', 'deadline'],
+    icon: CheckSquare,
+    path: '/tasks',
+    color: '#f43f5e',
+  },
+  {
+    id: 'page-notes',
+    label: 'Notes & Notebook',
+    description: 'Capture markdown drafts, quick ideas & personal journal entries',
+    keywords: ['notes', 'notebook', 'drafts', 'journal', 'scratchpad', 'ideas', 'docs', 'text', 'markdown', 'write'],
+    icon: StickyNote,
+    path: '/notes',
+    color: '#10b981',
+  },
+  {
+    id: 'page-calendar',
+    label: 'Schedule & Calendar',
+    description: 'Daily agenda, timeblocking, calendar milestones & events',
+    keywords: ['schedule', 'calendar', 'agenda', 'planner', 'timeline', 'timeblock', 'meetings', 'events', 'date', 'month', 'week'],
+    icon: Calendar,
+    path: '/calendar',
+    color: '#f59e0b',
+  },
+  {
+    id: 'page-funzone',
+    label: 'Fun Zone Arcade',
+    description: 'Retro mini games & focus micro-breaks to recharge',
+    keywords: ['fun', 'zone', 'funzone', 'game', 'games', 'arcade', 'play', 'break', 'breaktime', 'retro', 'mini games', 'chill'],
+    icon: Gamepad2,
+    path: '/fun-zone',
+    badge: 'NEW',
+    color: '#ec4899',
+  },
+  {
+    id: 'page-appearance',
+    label: 'Themes & Appearance',
+    description: 'Explore 11 workspace themes, notebook styling & canvas waves',
+    keywords: ['appearance', 'themes', 'styles', 'colors', 'palettes', 'notebook style', 'dark mode', 'light mode', 'design'],
+    icon: Palette,
+    path: '/settings/appearance',
+    color: '#06b6d4',
+  },
+  {
+    id: 'page-settings',
+    label: 'Settings & Preferences',
+    description: 'Account profile, sound chimes, alerts, privacy & feedback',
+    keywords: ['settings', 'preferences', 'configuration', 'options', 'account', 'profile', 'sound', 'haptics'],
+    icon: Settings,
+    path: '/settings',
+    color: '#a855f7',
+  },
+  {
+    id: 'page-landing',
+    label: 'OneDesk Landing Page',
+    description: 'Redesigned public landing page, feature showcase & highlights',
+    keywords: ['landing', 'landing page', 'welcome', 'showcase', 'website', 'features', 'intro', 'about onedesk', 'preview'],
+    icon: Sparkles,
+    path: '/landing',
+    badge: 'SHOWCASE',
+    color: '#3b82f6',
+  },
+];
+
+/* ── Searchable Quick Actions Registry ─────────────────── */
+const ACTION_ITEMS = [
+  {
+    id: 'action-task',
+    label: '+ Create New Task',
+    description: 'Add an action item with priority & due date',
+    keywords: ['new task', 'add task', 'create task', '+ task', 'make task', 'schedule task'],
+    icon: CheckSquare,
+    action: 'newTask',
+    path: '/tasks',
+    color: '#f43f5e',
+  },
+  {
+    id: 'action-note',
+    label: '+ Create Quick Note',
+    description: 'Capture markdown thoughts or journal draft',
+    keywords: ['new note', 'add note', 'create note', '+ note', 'write note', 'journal entry'],
+    icon: FileText,
+    action: 'newNote',
+    path: '/notes',
+    color: '#10b981',
+  },
+  {
+    id: 'action-event',
+    label: '+ Schedule Calendar Event',
+    description: 'Block time on your daily schedule or calendar',
+    keywords: ['schedule event', 'new event', 'add event', '+ event', 'block time', 'meeting', 'book slot'],
+    icon: CalendarPlus,
+    action: 'newEvent',
+    path: '/calendar',
+    color: '#f59e0b',
+  },
+  {
+    id: 'action-feedback',
+    label: 'Share User Feedback',
+    description: 'Direct Google Form link to suggest features & report issues',
+    keywords: ['feedback', 'share feedback', 'google form', 'form', 'gform', 'survey', 'report issue', 'suggest', 'review', 'rating'],
+    icon: MessageSquareHeart,
+    url: 'https://forms.gle/SBwAELPdwsbXjFpk8',
+    external: true,
+    badge: 'GOOGLE FORM',
+    color: '#ec4899',
+  },
+];
+
+/* ── Searchable Settings & System Registry ─────────────── */
 const SETTINGS_ITEMS = [
   {
     id: 'profile',
     label: 'Profile & Account',
-    description: 'Edit display name, avatar, email',
-    keywords: ['profile', 'name', 'avatar', 'photo', 'picture', 'account', 'user', 'display'],
+    description: 'Update display name, avatar picture, Google account',
+    keywords: ['profile', 'name', 'avatar', 'photo', 'picture', 'account', 'user', 'display', 'google photo'],
     icon: UserIcon,
     path: '/settings',
     navState: { openModal: 'editProfile' },
@@ -45,9 +179,9 @@ const SETTINGS_ITEMS = [
   },
   {
     id: 'password',
-    label: 'Change Password',
-    description: 'Update password and security settings',
-    keywords: ['password', 'security', 'login', 'change password', 'reset', 'credentials', 'auth'],
+    label: 'Password & Security',
+    description: 'Update password, reset credentials & enhance data security',
+    keywords: ['password', 'security', 'login', 'change password', 'reset', 'credentials', 'auth', 'protection', 'forgot password'],
     icon: Key,
     path: '/settings',
     navState: { openModal: 'changePassword' },
@@ -56,54 +190,76 @@ const SETTINGS_ITEMS = [
   {
     id: 'appearance',
     label: 'Appearance & Themes',
-    description: 'Themes, notebook styles, dark mode, canvas waves',
+    description: '11 themes, ruled notebook styles, dark mode & background waves',
     keywords: ['theme', 'dark', 'light', 'appearance', 'color', 'notebook', 'style', 'palette', 'mode', 'background', 'wave'],
     icon: Palette,
     path: '/settings/appearance',
     color: '#34d399',
   },
   {
+    id: 'sensory',
+    label: 'Sensory & Audio Dynamics',
+    description: 'Audio chimes, tactile spring physics & ambient waves',
+    keywords: ['sound', 'audio', 'chime', 'bell', 'sound effects', 'haptic', 'spring', 'physics', 'wave', 'sensory', 'dynamics'],
+    icon: Sparkles,
+    path: '/settings',
+    color: '#06b6d4',
+  },
+  {
     id: 'notifications',
     label: 'Notifications & Alerts',
-    description: 'Desktop reminders and deadline notifications',
-    keywords: ['notification', 'alert', 'reminder', 'deadline', 'bell', 'push', 'desktop'],
+    description: 'Browser desktop notifications for deadlines & schedule',
+    keywords: ['notification', 'alert', 'reminder', 'deadline', 'bell', 'push', 'desktop', 'browser alert'],
     icon: Bell,
     path: '/settings',
     color: '#f472b6',
   },
   {
-    id: 'data',
-    label: 'Data & Backups',
-    description: 'Export, import or restore workspace data',
-    keywords: ['data', 'backup', 'export', 'import', 'restore', 'download', 'json', 'sync'],
-    icon: Database,
+    id: 'feedback-section',
+    label: 'User Feedback & Suggestions',
+    description: 'Submit feedback via Google Form or suggest improvements',
+    keywords: ['feedback', 'user feedback', 'google form', 'gform', 'survey', 'form', 'suggestions', 'report', 'support'],
+    icon: MessageSquareHeart,
     path: '/settings',
-    color: '#60a5fa',
+    url: 'https://forms.gle/SBwAELPdwsbXjFpk8',
+    color: '#ec4899',
+  },
+  {
+    id: 'app-info',
+    label: 'App Info (v1.11.26)',
+    description: 'Build #OD1.11-1, release notes & all systems normal status',
+    keywords: ['info', 'app info', 'version', 'build', 'v1.11', 'od1.11-1', 'release date', 'system info', 'status', 'changelog', 'developer', 'updates', 'whats new'],
+    icon: Info,
+    path: '/settings',
+    navState: { openModal: 'changelog' },
+    badge: 'v1.11.26',
+    color: '#10b981',
   },
   {
     id: 'danger',
-    label: 'Delete Account',
-    description: 'Permanently delete account and all data',
-    keywords: ['delete', 'account', 'remove', 'danger', 'terminate', 'deactivate', 'wipe'],
+    label: 'Delete Account (Danger Zone)',
+    description: 'Permanently wipe workspace account and cloud data',
+    keywords: ['delete', 'account', 'remove', 'danger', 'terminate', 'deactivate', 'wipe', 'danger zone'],
     icon: Trash2,
     path: '/settings',
+    navState: { openModal: 'deleteAccount' },
     color: '#f87171',
   },
 ];
 
 /* ── Searchable theme keywords ─────────────────────────── */
 const THEME_SEARCH_KEYWORDS = {
-  dark: ['dark', 'midnight', 'indigo', 'night', 'deep', 'black', 'dark mode'],
-  light: ['light', 'daylight', 'day', 'stone', 'white', 'bright', 'light mode'],
-  'notebook-light': ['notebook', 'notebook light', 'journal', 'parchment', 'paper', 'writer', 'book', 'sepia'],
-  'notebook-dark': ['notebook', 'notebook dark', 'journal', 'obsidian', 'brass', 'leather', 'dark notebook'],
-  aurora: ['aurora', 'green', 'emerald', 'mint', 'northern lights'],
-  ocean: ['ocean', 'blue', 'cyan', 'sea', 'water', 'aqua', 'marine'],
-  rose: ['rose', 'rosé', 'pink', 'blush', 'red', 'cream', 'pastel'],
-  amber: ['amber', 'ember', 'gold', 'orange', 'warm', 'honey', 'sunset'],
-  peacock: ['peacock', 'teal', 'turquoise', 'cyan', 'green', 'blue', 'sea'],
-  lavender: ['lavender', 'violet', 'purple', 'lilac', 'plum'],
-  babypink: ['baby pink', 'babypink', 'pink', 'pastel', 'cotton candy', 'sakura'],
+  dark: ['dark', 'midnight', 'indigo', 'night', 'deep', 'black', 'dark mode', 'standard dark'],
+  light: ['light', 'daylight', 'day', 'stone', 'white', 'bright', 'light mode', 'standard light'],
+  'notebook-light': ['notebook', 'notebook light', 'journal', 'parchment', 'paper', 'writer', 'book', 'sepia', 'ruled paper', 'study', 'ivory'],
+  'notebook-dark': ['notebook', 'notebook dark', 'journal', 'obsidian', 'brass', 'leather', 'dark notebook', 'dark journal', 'spine', 'vintage'],
+  aurora: ['aurora', 'green', 'emerald', 'mint', 'northern lights', 'forest', 'nature'],
+  ocean: ['ocean', 'blue', 'cyan', 'sea', 'water', 'aqua', 'marine', 'deep blue'],
+  rose: ['rose', 'rosé', 'pink', 'blush', 'red', 'cream', 'pastel', 'wine'],
+  amber: ['amber', 'ember', 'gold', 'orange', 'warm', 'honey', 'sunset', 'autumn'],
+  peacock: ['peacock', 'teal', 'turquoise', 'cyan', 'green', 'blue', 'sea', 'feather'],
+  lavender: ['lavender', 'violet', 'purple', 'lilac', 'plum', 'dream'],
+  babypink: ['baby pink', 'babypink', 'pink', 'pastel', 'cotton candy', 'sakura', 'sweet pink'],
 };
 
 const navLinks = [
@@ -153,6 +309,7 @@ export default function TopNavPill() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const isNotebook = theme === 'notebook-light' || theme === 'notebook-dark';
+  const isLight = theme === 'light' || theme === 'notebook-light';
 
   const [query, setQuery]                       = useState('');
   const [searchOpen, setSearchOpen]             = useState(false);
@@ -160,6 +317,34 @@ export default function TopNavPill() {
   const [notifOpen, setNotifOpen]               = useState(false);
   const [quickAddOpen, setQuickAddOpen]         = useState(false);
   const [mobileQuickSheetOpen, setMobileQuickSheetOpen] = useState(false);
+  const location = useLocation();
+  const touchStartY = useRef(0);
+
+  useEffect(() => {
+    setMobileQuickSheetOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && mobileQuickSheetOpen) {
+        setMobileQuickSheetOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mobileQuickSheetOpen]);
+
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (deltaY > 60) {
+      if (playChime) playChime('pop');
+      setMobileQuickSheetOpen(false);
+    }
+  };
 
   const [quickTaskTitle, setQuickTaskTitle]     = useState('');
   const [quickTaskSuccess, setQuickTaskSuccess] = useState(false);
@@ -213,33 +398,13 @@ export default function TopNavPill() {
     }
   }
 
-  /* ── close on outside click ── */
-  useEffect(() => {
-    function onDown(e) {
-      const inDesktopSearch = desktopSearchBoxRef.current && desktopSearchBoxRef.current.contains(e.target);
-      const inMobileSearch  = (mobileSearchBoxRef.current && mobileSearchBoxRef.current.contains(e.target)) ||
-                              (mobileSearchDropdownRef.current && mobileSearchDropdownRef.current.contains(e.target));
-      if (!inDesktopSearch && !inMobileSearch) setSearchOpen(false);
-
-      const inDesktopNotif  = desktopNotifRef.current && desktopNotifRef.current.contains(e.target);
-      const inMobileNotif   = (mobileNotifRef.current && mobileNotifRef.current.contains(e.target)) ||
-                              (mobileNotifDropdownRef.current && mobileNotifDropdownRef.current.contains(e.target));
-      if (!inDesktopNotif && !inMobileNotif) setNotifOpen(false);
-
-      const inDesktopProfile = profileRef.current && profileRef.current.contains(e.target);
-      const inMobileProfile  = (mobileProfileRef.current && mobileProfileRef.current.contains(e.target)) ||
-                               (mobileProfileDropdownRef.current && mobileProfileDropdownRef.current.contains(e.target));
-      if (!inDesktopProfile && !inMobileProfile) setProfileOpen(false);
-
-      if (quickAddRef.current && !quickAddRef.current.contains(e.target)) setQuickAddOpen(false);
-    }
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('touchstart', onDown, { passive: true });
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('touchstart', onDown);
-    };
-  }, []);
+  /* ── Helper to dismiss all top nav dropdowns safely ── */
+  function closeAllDropdowns() {
+    setProfileOpen(false);
+    setNotifOpen(false);
+    setSearchOpen(false);
+    setQuickAddOpen(false);
+  }
 
   /* ── Ctrl+K ── */
   useEffect(() => {
@@ -268,10 +433,48 @@ export default function TopNavPill() {
   }, []);
 
   const results = useMemo(() => {
-    if (!query.trim()) return { notes: [], tasks: [], events: [], settings: [], themes: [] };
     const q = query.toLowerCase().trim();
-    const isGenericThemeSearch = ['theme', 'themes', 'palette', 'palettes'].includes(q);
+    if (!q) {
+      return {
+        isDefault: true,
+        pages: PAGE_ITEMS.slice(0, 4),
+        actions: ACTION_ITEMS,
+        settings: SETTINGS_ITEMS.slice(0, 4),
+        themes: THEMES.filter(t => !t.comingSoon).slice(0, 4),
+        tasks: tasks.slice(0, 3),
+        notes: notes.slice(0, 3),
+        events: events.slice(0, 3),
+      };
+    }
+
+    const isGenericThemeSearch = ['theme', 'themes', 'palette', 'palettes', 'color', 'colors', 'mode', 'modes', 'look', 'skin'].includes(q);
+    const isGenericPageSearch = ['page', 'pages', 'navigate', 'goto', 'go to', 'open', 'view', 'screen'].includes(q);
+    const isGenericActionSearch = ['action', 'actions', 'create', 'new', 'add', '+', 'quick', 'make'].includes(q);
+    const isGenericSettingsSearch = ['setting', 'settings', 'config', 'preference', 'preferences', 'option', 'options', 'system'].includes(q);
+
     return {
+      isDefault: false,
+      pages: PAGE_ITEMS.filter(p => {
+        if (isGenericPageSearch) return true;
+        const nameNorm = p.label.toLowerCase();
+        const descNorm = p.description.toLowerCase();
+        const kw = p.keywords || [];
+        return nameNorm.includes(q) || descNorm.includes(q) || kw.some(k => k.includes(q) || q.includes(k));
+      }),
+      actions: ACTION_ITEMS.filter(a => {
+        if (isGenericActionSearch) return true;
+        const nameNorm = a.label.toLowerCase();
+        const descNorm = a.description.toLowerCase();
+        const kw = a.keywords || [];
+        return nameNorm.includes(q) || descNorm.includes(q) || kw.some(k => k.includes(q) || q.includes(k));
+      }),
+      settings: SETTINGS_ITEMS.filter(s => {
+        if (isGenericSettingsSearch) return true;
+        const nameNorm = s.label.toLowerCase();
+        const descNorm = s.description.toLowerCase();
+        const kw = s.keywords || [];
+        return nameNorm.includes(q) || descNorm.includes(q) || kw.some(k => k.includes(q) || q.includes(k));
+      }),
       themes: THEMES.filter(t => {
         if (t.comingSoon) return false;
         if (isGenericThemeSearch) return true;
@@ -289,17 +492,68 @@ export default function TopNavPill() {
           kw.some(k => k.includes(q) || q.includes(k))
         );
       }),
-      notes:  notes.filter(n  => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q)),
-      tasks:  tasks.filter(t  => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)),
+      tasks: tasks.filter(t => t.title.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)),
+      notes: notes.filter(n => n.title.toLowerCase().includes(q) || n.description?.toLowerCase().includes(q)),
       events: events.filter(ev => ev.title.toLowerCase().includes(q) || ev.description?.toLowerCase().includes(q)),
-      settings: SETTINGS_ITEMS.filter(
-        s =>
-          s.label.toLowerCase().includes(q) ||
-          s.description.toLowerCase().includes(q) ||
-          s.keywords.some(k => k.includes(q))
-      ),
     };
   }, [query, notes, tasks, events]);
+
+  const totalResultsCount =
+    results.pages.length +
+    results.actions.length +
+    results.settings.length +
+    results.themes.length +
+    results.tasks.length +
+    results.notes.length +
+    results.events.length;
+
+  function handleSelectSearchResult(item, type) {
+    if (playChime) playChime('pop');
+    setSearchOpen(false);
+    setQuery('');
+
+    if (type === 'theme') {
+      setTheme(item);
+      if (playChime) playChime('success');
+      return;
+    }
+
+    if (item.url && item.external) {
+      window.open(item.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (item.action === 'newTask') {
+      navigate('/tasks', { state: { createTask: true } });
+      return;
+    }
+    if (item.action === 'newNote') {
+      navigate('/notes', { state: { createNote: true } });
+      return;
+    }
+    if (item.action === 'newEvent') {
+      navigate('/calendar', { state: { createEvent: true } });
+      return;
+    }
+
+    if (item.path) {
+      navigate(item.path, { state: item.navState || {} });
+      return;
+    }
+
+    if (type === 'task') {
+      navigate('/tasks');
+      return;
+    }
+    if (type === 'note') {
+      navigate('/notes');
+      return;
+    }
+    if (type === 'event') {
+      navigate('/calendar');
+      return;
+    }
+  }
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -321,6 +575,35 @@ export default function TopNavPill() {
 
   return (
     <>
+      {/* ── Global Dismiss Backdrop for Open Dropdowns (Absorbs Dismissal Clicks, Prevents Misclicks / Overclicks) ── */}
+      {(profileOpen || notifOpen || searchOpen || quickAddOpen) && (
+        <div
+          className="fixed inset-0 z-30 pointer-events-auto select-none cursor-default"
+          aria-hidden="true"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onMouseUp={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeAllDropdowns();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeAllDropdowns();
+          }}
+        />
+      )}
       {/* ════════════════════════════════════════════
           DESKTOP NAV  (md+)
       ════════════════════════════════════════════ */}
@@ -437,7 +720,7 @@ export default function TopNavPill() {
                     {isActive && (
                       <span
                         className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[3px] w-3.5 rounded-full"
-                        style={{ background: 'var(--accent-gradient)', boxShadow: '0 0 6px var(--accent-glow)' }}
+                        style={{ background: 'var(--accent-gradient)' }}
                       />
                     )}
                   </>
@@ -525,39 +808,26 @@ export default function TopNavPill() {
               </div>
 
               {/* Search Results Dropdown */}
-              {searchOpen && query.trim() && (
+              {searchOpen && (
                 <div
-                  className="absolute right-0 top-full mt-2.5 w-80 rounded-2xl border shadow-2xl p-3 space-y-3 animate-menu-pop z-50 max-h-[70vh] overflow-y-auto"
-                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 top-full mt-2.5 w-[420px] max-w-[calc(100vw-32px)] rounded-2xl border shadow-2xl p-3.5 space-y-3 animate-menu-pop z-50 max-h-[72vh] overflow-y-auto custom-scrollbar"
+                  style={{
+                    background: 'var(--bg-card-solid)',
+                    borderColor: 'var(--border-card)',
+                    backdropFilter: 'blur(36px)',
+                    WebkitBackdropFilter: 'blur(36px)',
+                    boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.08) inset',
+                  }}
                 >
-                  {results.themes.length > 0 && (
-                    <ThemeSearchGroup
-                      items={results.themes}
-                      currentTheme={theme}
-                      onSelect={(themeId) => {
-                        setTheme(themeId);
-                        if (playChime) playChime('success');
-                        setSearchOpen(false);
-                        setQuery('');
-                      }}
-                    />
-                  )}
-                  {results.settings.length > 0 && (
-                    <SettingsSearchGroup
-                      items={results.settings}
-                      onSelect={(item) => {
-                        setSearchOpen(false);
-                        setQuery('');
-                        navigate(item.path, { state: item.navState || {} });
-                      }}
-                    />
-                  )}
-                  <SearchGroup label="Tasks"    count={results.tasks.length}  items={results.tasks.map(t  => t.title)}  onSee={() => { setSearchOpen(false); navigate('/tasks'); }} />
-                  <SearchGroup label="Notes"    count={results.notes.length}  items={results.notes.map(n  => n.title)}  onSee={() => { setSearchOpen(false); navigate('/notes'); }} />
-                  <SearchGroup label="Schedule" count={results.events.length} items={results.events.map(e => e.title)} onSee={() => { setSearchOpen(false); navigate('/calendar'); }} />
-                  {results.notes.length + results.tasks.length + results.events.length + results.settings.length + results.themes.length === 0 && (
-                    <p className="text-xs py-2 text-center" style={{ color: 'var(--text-muted)' }}>No results for &ldquo;{query}&rdquo;.</p>
-                  )}
+                  <SearchDropdownView
+                    results={results}
+                    query={query}
+                    totalCount={totalResultsCount}
+                    theme={theme}
+                    onSelect={handleSelectSearchResult}
+                    onSeeCategory={(cat) => handleSelectSearchResult(null, cat)}
+                  />
                 </div>
               )}
             </div>
@@ -570,7 +840,7 @@ export default function TopNavPill() {
                 className="h-[34px] w-[34px] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 text-white"
                 style={{
                   background: 'var(--accent-gradient)',
-                  boxShadow: '0 2px 14px var(--accent-glow)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                 }}
                 aria-label="Fun Zone"
                 title="Fun Zone"
@@ -710,7 +980,7 @@ export default function TopNavPill() {
                 style={{
                   background: profileOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
                   borderColor: profileOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
-                  boxShadow: profileOpen ? '0 0 14px var(--accent-glow)' : 'none',
+                  boxShadow: 'none',
                 }}
                 title={user?.name ? `${user.name} (Account)` : 'Account'}
                 aria-label="Account profile"
@@ -729,6 +999,7 @@ export default function TopNavPill() {
 
               {profileOpen && (
                 <div
+                  onClick={(e) => e.stopPropagation()}
                   className="absolute right-0 mt-2.5 w-52 rounded-2xl border shadow-2xl animate-menu-pop z-50 overflow-hidden"
                   style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
                 >
@@ -740,7 +1011,7 @@ export default function TopNavPill() {
                     <div className="flex items-center gap-2.5 mb-0.5">
                       <div
                         className="h-8 w-8 rounded-full grid place-items-center text-white text-xs font-black shrink-0 overflow-hidden"
-                        style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
+                        style={{ background: 'var(--accent-gradient)' }}
                       >
                         {user?.photoURL ? (
                           <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
@@ -826,7 +1097,7 @@ export default function TopNavPill() {
                   setSearchOpen(false);
                   setQuery('');
                 }}
-                className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-200 active:scale-90 cursor-pointer"
+                className="h-9 w-9 rounded-full flex items-center justify-center shrink-0 border transition-all duration-200 active:scale-90 cursor-pointer"
                 style={{
                   background: 'var(--bg-surface)',
                   borderColor: 'var(--border-subtle)',
@@ -908,12 +1179,12 @@ export default function TopNavPill() {
                       setSearchOpen(false);
                       setProfileOpen(false);
                     }}
-                    className="relative h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer"
+                    className="relative h-9 w-9 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer"
                     style={{
                       background: notifOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
                       borderColor: notifOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
                       color: notifOpen ? 'var(--accent-color)' : 'var(--text-muted)',
-                      boxShadow: notifOpen ? '0 0 14px var(--accent-glow)' : 'none',
+                      boxShadow: 'none',
                     }}
                     aria-label="Notifications"
                   >
@@ -934,7 +1205,7 @@ export default function TopNavPill() {
                     setProfileOpen(false);
                     setTimeout(() => mobileSearchInputRef.current?.focus(), 100);
                   }}
-                  className="h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer"
+                  className="h-9 w-9 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer"
                   style={{
                     background: 'var(--bg-surface)',
                     borderColor: 'var(--border-subtle)',
@@ -955,19 +1226,28 @@ export default function TopNavPill() {
                       setNotifOpen(false);
                       setSearchOpen(false);
                     }}
-                    className="h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer p-0.5"
+                    className="h-9 w-9 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 border cursor-pointer p-0.5 overflow-hidden"
                     style={{
                       background: profileOpen ? 'var(--bg-card-solid)' : 'var(--bg-surface)',
                       borderColor: profileOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
-                      boxShadow: profileOpen ? '0 0 14px var(--accent-glow)' : 'none',
+                      boxShadow: 'none',
                     }}
                     aria-label="Account Profile"
                   >
                     <div
-                      className="h-full w-full rounded-[9px] grid place-items-center text-white text-[11px] font-black shrink-0 select-none shadow-sm"
+                      className="h-full w-full rounded-full overflow-hidden grid place-items-center text-white text-[11px] font-black shrink-0 select-none shadow-sm"
                       style={{ background: 'var(--accent-gradient)' }}
                     >
-                      {initials || <UserIcon size={12} />}
+                      {user?.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          alt={user?.name || 'User'}
+                          className="h-full w-full object-cover rounded-full"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        initials || <UserIcon size={12} />
+                      )}
                     </div>
                   </button>
                 </div>
@@ -1107,6 +1387,7 @@ export default function TopNavPill() {
         {profileOpen && (
           <div
             ref={mobileProfileDropdownRef}
+            onClick={(e) => e.stopPropagation()}
             className="fixed right-3.5 top-[62px] w-64 rounded-2xl border shadow-2xl animate-menu-pop z-50 overflow-hidden"
             style={{
               background: 'var(--bg-card-solid)',
@@ -1126,7 +1407,7 @@ export default function TopNavPill() {
               <div className="flex items-center gap-2.5">
                 <div
                   className="h-9 w-9 rounded-xl grid place-items-center text-white text-xs font-black shrink-0 select-none shadow-sm overflow-hidden"
-                  style={{ background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
+                  style={{ background: 'var(--accent-gradient)' }}
                 >
                   {user?.photoURL ? (
                     <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
@@ -1180,46 +1461,23 @@ export default function TopNavPill() {
 
       {/* ════════════════════════════════════════════
           MOBILE BOTTOM BAR  (< md)
-          Edge-to-Edge Native Mobile Dock — No Square Back!
+          Clean Theme-Adaptive Floating Dock (No Glass, No Glow)
       ════════════════════════════════════════════ */}
-      {/* ════════════════════════════════════════════
-          MOBILE BOTTOM BAR  (< md)
-          Apple-style Liquid Glass Island Dock
-      ════════════════════════════════════════════ */}
-      {/* Bottom Soft Dissolve Fade — smoothly blends page content beneath the dock */}
-      <div
-        className="md:hidden fixed bottom-0 inset-x-0 h-24 pointer-events-none z-30"
-        style={{
-          background: 'linear-gradient(to top, var(--bg-page) 0%, transparent 100%)',
-        }}
-      />
-
-      {/* Floating Island Dock with Apple Liquid Glass Aesthetics */}
       <nav
-        className="md:hidden fixed bottom-3 inset-x-3 max-w-[410px] mx-auto z-40 select-none"
+        className={`md:hidden fixed bottom-3 inset-x-3.5 max-w-[420px] mx-auto select-none ${(profileOpen || notifOpen || searchOpen) ? 'z-20 pointer-events-none' : 'z-40'}`}
         style={{
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
-        {/* Ambient Fluid Glow Diffuser */}
+        {/* Simple Squircle Dock Shell — 100% Theme Adaptive (No Glass Gimmicks) */}
         <div
-          className="absolute -inset-1 rounded-full pointer-events-none z-0"
+          className="relative w-full h-[64px] rounded-[24px] border px-2 grid grid-cols-5 items-center justify-items-center transition-all duration-200 z-10"
           style={{
-            background: 'radial-gradient(ellipse at 50% 50%, var(--accent-glow) 0%, transparent 70%)',
-            filter: 'blur(14px)',
-            opacity: 0.35,
-          }}
-        />
-
-        {/* Liquid Glass Capsule Hull */}
-        <div
-          className="h-[60px] px-2 rounded-full flex items-center justify-between relative overflow-hidden transition-all duration-300 z-10"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%), var(--bg-overlay)',
-            border: '1px solid var(--border-card)',
-            backdropFilter: 'blur(14px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(14px) saturate(180%)',
-            boxShadow: '0 8px 28px -4px var(--accent-glow), 0 2px 10px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
+            background: 'var(--bg-card-solid)',
+            borderColor: 'var(--border-card)',
+            boxShadow: isLight
+              ? '0 10px 25px -4px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04)'
+              : '0 12px 30px -4px rgba(0, 0, 0, 0.6), 0 2px 6px -1px rgba(0, 0, 0, 0.35)',
           }}
         >
           {/* 1. Home */}
@@ -1227,47 +1485,43 @@ export default function TopNavPill() {
             to="/"
             end
             onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
           >
             {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <Home size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Home
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+              <>
+                <div
+                  className="w-[52px] h-[32px] rounded-[16px] flex items-center justify-center transition-all duration-200 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'color-mix(in srgb, var(--accent-color) 16%, transparent)'
+                          : 'color-mix(in srgb, var(--accent-color) 22%, transparent)')
+                      : 'transparent',
+                  }}
+                >
+                  <LayoutGrid
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-colors duration-200"
                     style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
                     }}
                   />
-                )}
-              </div>
+                </div>
+                <span
+                  className="text-[11px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : 'var(--text-muted)',
+                  }}
+                >
+                  Home
+                </span>
+              </>
             )}
           </NavLink>
 
@@ -1275,328 +1529,680 @@ export default function TopNavPill() {
           <NavLink
             to="/tasks"
             onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
           >
             {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <CheckSquare size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Tasks
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+              <>
+                <div
+                  className="w-[52px] h-[32px] rounded-[16px] flex items-center justify-center transition-all duration-200 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'color-mix(in srgb, var(--accent-color) 16%, transparent)'
+                          : 'color-mix(in srgb, var(--accent-color) 22%, transparent)')
+                      : 'transparent',
+                  }}
+                >
+                  <CircleCheck
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-colors duration-200"
                     style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
                     }}
                   />
-                )}
-              </div>
+                </div>
+                <span
+                  className="text-[11px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : 'var(--text-muted)',
+                  }}
+                >
+                  Tasks
+                </span>
+              </>
             )}
           </NavLink>
 
-          {/* 3. Center Liquid Fluid Bubble FAB (Fun Zone) */}
-          <div className="flex items-center justify-center shrink-0 px-1 relative">
-            {/* Subtle Ambient Aura */}
+          {/* 3. More (Quick Sheet Trigger — Resting Pill) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              setMobileQuickSheetOpen(prev => !prev);
+            }}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+            aria-label="More actions"
+          >
             <div
-              className="absolute inset-0 rounded-full pointer-events-none"
+              className="w-[52px] h-[32px] rounded-[16px] flex items-center justify-center transition-all duration-200 relative"
               style={{
-                background: 'var(--accent-gradient)',
-                filter: 'blur(6px)',
-                opacity: 0.2,
-                transform: 'scale(1.05)',
+                background: mobileQuickSheetOpen
+                  ? (isLight
+                      ? 'color-mix(in srgb, var(--accent-color) 16%, transparent)'
+                      : 'color-mix(in srgb, var(--accent-color) 22%, transparent)')
+                  : (isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.06)'),
               }}
-            />
-
-            <button
-              type="button"
-              onClick={() => {
-                if (playChime) playChime('pop');
-                navigate('/fun-zone');
-              }}
-              className="w-11 h-11 rounded-full flex items-center justify-center text-white transition-all duration-300 active:scale-90 cursor-pointer relative overflow-hidden group"
-              style={{
-                background: 'var(--accent-gradient)',
-                border: '1.5px solid rgba(255, 255, 255, 0.3)',
-                boxShadow: '0 2px 8px var(--accent-glow)',
-              }}
-              aria-label="Fun Zone"
-              title="Fun Zone"
             >
-              <Gamepad2
-                size={20}
-                strokeWidth={2.4}
-                className="relative z-10 transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
+              <MoreHorizontal
+                size={18}
+                strokeWidth={2.3}
+                className="transition-colors duration-200"
+                style={{
+                  color: mobileQuickSheetOpen
+                    ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                    : 'var(--text-muted)',
+                }}
               />
-            </button>
-          </div>
+            </div>
+            <span
+              className="text-[11px] tracking-tight mt-1 leading-none transition-colors duration-200"
+              style={{
+                fontWeight: mobileQuickSheetOpen ? 700 : 500,
+                color: mobileQuickSheetOpen
+                  ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                  : 'var(--text-muted)',
+              }}
+            >
+              More
+            </span>
+          </button>
 
-          {/* 4. Notes */}
-          <NavLink
-            to="/notes"
-            onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
-          >
-            {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <StickyNote size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Notes
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
-                    }}
-                  />
-                )}
-              </div>
-            )}
-          </NavLink>
-
-          {/* 5. Schedule */}
+          {/* 4. Planner */}
           <NavLink
             to="/calendar"
             onClick={() => playChime && playChime('pop')}
-            className={({ isActive }) =>
-              `relative flex items-center justify-center transition-all duration-300 rounded-full cursor-pointer select-none active:scale-90 ${
-                isActive
-                  ? 'px-3.5 py-1.5 font-bold shadow-sm'
-                  : 'p-2.5 opacity-60 hover:opacity-100 hover:bg-white/5 active:bg-white/10'
-              }`
-            }
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    color: 'var(--accent-color)',
-                    boxShadow: '0 2px 8px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                  }
-                : {
-                    border: '1px solid transparent',
-                    color: 'var(--text-muted)',
-                  }
-            }
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
           >
             {({ isActive }) => (
-              <div className="flex items-center gap-1.5">
-                <Calendar size={18} strokeWidth={isActive ? 2.5 : 1.9} />
-                {isActive && (
-                  <span className="text-xs font-bold tracking-tight animate-fade-in">
-                    Schedule
-                  </span>
-                )}
-                {isActive && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+              <>
+                <div
+                  className="w-[52px] h-[32px] rounded-[16px] flex items-center justify-center transition-all duration-200 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'color-mix(in srgb, var(--accent-color) 16%, transparent)'
+                          : 'color-mix(in srgb, var(--accent-color) 22%, transparent)')
+                      : 'transparent',
+                  }}
+                >
+                  <CalendarDays
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-colors duration-200"
                     style={{
-                      background: 'var(--accent-color)',
-                      boxShadow: '0 0 8px var(--accent-color)',
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
                     }}
                   />
-                )}
-              </div>
+                </div>
+                <span
+                  className="text-[11px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : 'var(--text-muted)',
+                  }}
+                >
+                  Planner
+                </span>
+              </>
+            )}
+          </NavLink>
+
+          {/* 5. Notes */}
+          <NavLink
+            to="/notes"
+            onClick={() => playChime && playChime('pop')}
+            className="flex flex-col items-center justify-center w-full h-full py-1 group cursor-pointer select-none active:scale-95 transition-transform"
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className="w-[52px] h-[32px] rounded-[16px] flex items-center justify-center transition-all duration-200 relative"
+                  style={{
+                    background: isActive
+                      ? (isLight
+                          ? 'color-mix(in srgb, var(--accent-color) 16%, transparent)'
+                          : 'color-mix(in srgb, var(--accent-color) 22%, transparent)')
+                      : 'transparent',
+                  }}
+                >
+                  <FileText
+                    size={18}
+                    strokeWidth={isActive ? 2.3 : 1.8}
+                    className="transition-colors duration-200"
+                    style={{
+                      color: isActive
+                        ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                        : 'var(--text-muted)',
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-[11px] tracking-tight mt-1 leading-none transition-colors duration-200"
+                  style={{
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive
+                      ? (isLight ? 'var(--accent-color)' : '#ffffff')
+                      : 'var(--text-muted)',
+                  }}
+                >
+                  Notes
+                </span>
+              </>
             )}
           </NavLink>
         </div>
       </nav>
 
       {/* ════════════════════════════════════════════
-          FLUID MOBILE QUICK CREATE BOTTOM SHEET
+          FLUID MOBILE MORE BOTTOM SHEET
+          Clean Theme-Adaptive Sheet (No Glass Reflections, No Border Glow)
       ════════════════════════════════════════════ */}
-      {mobileQuickSheetOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex items-end justify-center">
-          {/* Blurred Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/40 transition-opacity"
-            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
-            onClick={() => setMobileQuickSheetOpen(false)}
-          />
+      <div
+        className={`md:hidden fixed inset-0 z-50 flex items-end justify-center sheet-container-smooth ${
+          mobileQuickSheetOpen ? 'open' : ''
+        }`}
+        aria-hidden={!mobileQuickSheetOpen}
+      >
+        {/* Subtle Backdrop with buttery fade */}
+        <div
+          className="fixed inset-0 bg-black/60 sheet-backdrop-smooth"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setMobileQuickSheetOpen(false);
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setMobileQuickSheetOpen(false);
+          }}
+        />
 
-          {/* Sheet Panel */}
-          <div
-            className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3 animate-sheet-bounce z-10 max-h-[85vh] overflow-y-auto custom-scrollbar"
+        {/* Sheet Panel — 100% Theme Adaptive Canvas with Butter-Smooth Slide Up & Down */}
+        <div
+          className="relative w-full rounded-t-[32px] border-t border-x p-5 pt-3.5 sheet-panel-smooth z-10 max-h-[85vh] overflow-y-auto custom-scrollbar overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
             style={{
               background: 'var(--bg-card-solid)',
               borderColor: 'var(--border-card)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              boxShadow: '0 -16px 40px var(--accent-glow), 0 -8px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
-              paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
+              boxShadow: isLight
+                ? '0 -10px 30px rgba(0, 0, 0, 0.08)'
+                : '0 -12px 36px rgba(0, 0, 0, 0.65)',
+              paddingBottom: 'max(1.75rem, env(safe-area-inset-bottom, 1.75rem))',
             }}
           >
-            {/* Drag Handle */}
-            <div className="h-1.5 w-12 rounded-full bg-white/25 mx-auto mb-3.5" />
+            {/* Minimal Centered Drag Handle */}
+            <div
+              className="h-1.5 w-12 rounded-full mx-auto mb-4 opacity-30"
+              style={{ background: 'var(--text-muted)' }}
+            />
 
-            {/* Header */}
-            <div className="flex items-center justify-between mb-3.5">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ background: 'var(--accent-gradient)' }} />
-                  <h3 className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                    Quick Create
+            {/* Header: Theme Dot + Title + Subtitle + Close Button */}
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ background: 'var(--accent-color)' }}
+                  />
+                  <h3
+                    className="text-[17px] font-bold tracking-tight font-display"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    More
                   </h3>
                 </div>
-                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>
-                  Capture ideas, to-dos & calendar milestones
+                <p
+                  className="text-xs font-normal mt-0.5"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  Settings, themes &amp; arcade
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileQuickSheetOpen(false)}
-                className="h-8 w-8 rounded-full flex items-center justify-center border transition-all active:scale-90"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                className="h-8 w-8 rounded-full flex items-center justify-center border transition-all active:scale-90 cursor-pointer"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-muted)',
+                }}
+                aria-label="Close"
               >
                 <X size={15} />
               </button>
             </div>
 
-            {/* Inline Quick Task Add Form */}
-            <form onSubmit={handleQuickInlineTask} className="relative mb-3.5">
-              <div
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-full border transition-all focus-within:border-indigo-400 shadow-sm"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
+            {/* 3 Theme-Consistent Action Cards (Clean, No Glow) */}
+            <div className="space-y-2.5 relative z-10">
+              {/* 1. Settings */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setMobileQuickSheetOpen(false);
+                  navigate('/settings');
+                }}
+                className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden cursor-pointer"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                }}
               >
-                <CheckSquare size={16} style={{ color: 'var(--accent-color)' }} />
-                <input
-                  type="text"
-                  value={quickTaskTitle}
-                  onChange={e => setQuickTaskTitle(e.target.value)}
-                  placeholder="Quick task for today... (Tap Enter ↵)"
-                  className="flex-1 min-w-0 text-xs sm:text-sm bg-transparent outline-none placeholder:text-stone-400"
-                  style={{ color: 'var(--text-primary)' }}
-                />
-                <button
-                  type="submit"
-                  disabled={!quickTaskTitle.trim() || quickTaskSubmitting}
-                  className="h-7 w-7 rounded-full flex items-center justify-center transition-transform active:scale-90 disabled:opacity-30 shrink-0"
-                  style={{ background: 'var(--accent-gradient)', color: '#fff' }}
-                >
-                  <Plus size={14} strokeWidth={3} />
-                </button>
-              </div>
-              {quickTaskSuccess && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/40 backdrop-blur-md text-emerald-400 text-xs font-bold animate-menu-pop">
-                  <Check size={14} className="mr-1.5" /> Task captured for today!
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className="h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
+                    style={{
+                      background: 'var(--bg-card-solid)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--accent-color)',
+                    }}
+                  >
+                    <Settings size={20} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <div
+                      className="text-[15px] font-bold tracking-tight"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      Settings
+                    </div>
+                    <div
+                      className="text-xs leading-relaxed mt-0.5 break-words"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      Preferences, account &amp; sensory controls
+                    </div>
+                  </div>
                 </div>
-              )}
-            </form>
-
-            {/* 3 Large Action Cards */}
-            <div className="space-y-2 mb-4">
-              {quickActions.map(action => (
-                <button
-                  key={action.to}
-                  onClick={() => { setMobileQuickSheetOpen(false); navigate(action.to); }}
-                  className="w-full flex items-center justify-between p-3 rounded-[20px] border transition-all duration-200 text-left active:scale-[0.98]"
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
                   style={{
-                    background: 'var(--bg-surface)',
+                    background: 'var(--bg-card-solid)',
                     borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-muted)',
                   }}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className="h-10 w-10 rounded-[14px] flex items-center justify-center shrink-0 border"
-                      style={{
-                        background: action.gradient,
-                        borderColor: action.border,
-                        color: action.color,
-                      }}
-                    >
-                      <action.icon size={19} strokeWidth={2.2} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                        {action.title}
-                      </div>
-                      <div className="text-[11px] truncate" style={{ color: 'var(--text-muted)' }}>
-                        {action.subtitle}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="h-7 w-7 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: 'var(--bg-card)', color: action.color }}
-                  >
-                    <ArrowRight size={14} />
-                  </div>
-                </button>
-              ))}
-            </div>
+                  <ArrowRight size={14} />
+                </div>
+              </button>
 
-            {/* Quick Jump Spaces Bar */}
-            <div className="pt-3 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
-                Quick Jump Spaces
-              </p>
-              <div className="grid grid-cols-1 gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setMobileQuickSheetOpen(false); navigate('/settings'); }}
-                  className="flex items-center justify-center gap-2 p-2.5 rounded-full border text-xs font-bold transition-all active:scale-95"
-                  style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+              {/* 2. Themes */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setMobileQuickSheetOpen(false);
+                  navigate('/appearance');
+                }}
+                className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden cursor-pointer"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                }}
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className="h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
+                    style={{
+                      background: 'var(--bg-card-solid)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--accent-color)',
+                    }}
+                  >
+                    <Palette size={20} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="text-[15px] font-bold tracking-tight"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        Themes
+                      </div>
+                      <span
+                        className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border uppercase tracking-wider transition-all"
+                        style={{
+                          background: 'var(--bg-card-solid)',
+                          borderColor: 'var(--accent-color)',
+                          color: 'var(--accent-color)',
+                        }}
+                      >
+                        {(THEMES.find(t => t.id === theme)?.name || theme).toUpperCase()}
+                      </span>
+                    </div>
+                    <div
+                      className="text-xs leading-relaxed mt-0.5 break-words"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      Color palettes, styling &amp; visual effects
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
+                  style={{
+                    background: 'var(--bg-card-solid)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-muted)',
+                  }}
                 >
-                  <Settings size={15} style={{ color: 'var(--accent-color)' }} />
-                  <span>Settings</span>
-                </button>
-              </div>
+                  <ArrowRight size={14} />
+                </div>
+              </button>
+
+              {/* 3. Fun Zone */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setMobileQuickSheetOpen(false);
+                  navigate('/fun-zone');
+                }}
+                className="w-full flex items-center justify-between p-3.5 sm:p-4 rounded-[20px] border transition-all duration-200 text-left active:scale-[0.98] group relative overflow-hidden cursor-pointer"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-card)',
+                }}
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className="h-11 w-11 rounded-[14px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-105"
+                    style={{
+                      background: 'var(--bg-card-solid)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--accent-color)',
+                    }}
+                  >
+                    <Gamepad2 size={20} strokeWidth={2.2} />
+                  </div>
+                  <div className="min-w-0">
+                    <div
+                      className="text-[15px] font-bold tracking-tight"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      Fun Zone
+                    </div>
+                    <div
+                      className="text-xs leading-relaxed mt-0.5 break-words"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      Arcade mini games &amp; focus micro-breaks
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:translate-x-0.5"
+                  style={{
+                    background: 'var(--bg-card-solid)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  <ArrowRight size={14} />
+                </div>
+              </button>
             </div>
           </div>
         </div>
-      )}
     </>
+  );
+}
+
+/* ── Unified Search Dropdown View ── */
+function SearchDropdownView({ results, query, totalCount, theme, onSelect, onSeeCategory }) {
+  const isDefault = results.isDefault;
+
+  return (
+    <div className="space-y-3.5">
+      {/* Header bar */}
+      <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+        <div className="flex items-center gap-2">
+          {isDefault ? (
+            <>
+              <Compass size={13} style={{ color: 'var(--accent-color)' }} />
+              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>
+                Quick Launcher &amp; Actions
+              </span>
+            </>
+          ) : (
+            <>
+              <Search size={13} style={{ color: 'var(--accent-color)' }} />
+              <span className="text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>
+                Results for &ldquo;{query}&rdquo;
+              </span>
+              <span
+                className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-full"
+                style={{
+                  background: 'color-mix(in srgb, var(--accent-color) 15%, transparent)',
+                  color: 'var(--accent-color)',
+                }}
+              >
+                {totalCount}
+              </span>
+            </>
+          )}
+        </div>
+        <span className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>
+          {isDefault ? 'Explore' : 'Global Search'}
+        </span>
+      </div>
+
+      {/* Pages Section */}
+      {results.pages && results.pages.length > 0 && (
+        <PageSearchGroup items={results.pages} onSelect={onSelect} />
+      )}
+
+      {/* Quick Actions Section */}
+      {results.actions && results.actions.length > 0 && (
+        <ActionSearchGroup items={results.actions} onSelect={onSelect} />
+      )}
+
+      {/* Settings Section */}
+      {results.settings && results.settings.length > 0 && (
+        <SettingsSearchGroup items={results.settings} onSelect={onSelect} />
+      )}
+
+      {/* Themes Section */}
+      {results.themes && results.themes.length > 0 && (
+        <ThemeSearchGroup
+          items={results.themes}
+          currentTheme={theme}
+          onSelect={(themeId) => onSelect(themeId, 'theme')}
+        />
+      )}
+
+      {/* User Data Sections */}
+      {!isDefault && (
+        <>
+          <SearchGroup
+            label="Tasks"
+            count={results.tasks.length}
+            items={results.tasks.map(t => t.title)}
+            onSee={() => onSeeCategory('task')}
+          />
+          <SearchGroup
+            label="Notes"
+            count={results.notes.length}
+            items={results.notes.map(n => n.title)}
+            onSee={() => onSeeCategory('note')}
+          />
+          <SearchGroup
+            label="Schedule"
+            count={results.events.length}
+            items={results.events.map(e => e.title)}
+            onSee={() => onSeeCategory('event')}
+          />
+        </>
+      )}
+
+      {/* Empty State */}
+      {!isDefault && totalCount === 0 && (
+        <div className="py-6 px-4 text-center">
+          <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+            No results found for &ldquo;{query}&rdquo;
+          </p>
+          <p className="text-[11px] mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+            Try searching for <span style={{ color: 'var(--accent-color)' }}>tasks</span>, <span style={{ color: 'var(--accent-color)' }}>notes</span>, <span style={{ color: 'var(--accent-color)' }}>themes</span>, <span style={{ color: 'var(--accent-color)' }}>funzone</span>, <span style={{ color: 'var(--accent-color)' }}>feedback</span>, or <span style={{ color: 'var(--accent-color)' }}>app info</span>.
+          </p>
+        </div>
+      )}
+
+      {/* Footer shortcut tip */}
+      <div className="pt-2 border-t flex items-center justify-between text-[10px]" style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}>
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded border font-mono text-[9px]" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>Esc</kbd> dismiss
+        </span>
+        <span className="flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded border font-mono text-[9px]" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}>Ctrl+K</kbd> search anytime
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Pages search result group ── */
+function PageSearchGroup({ items, onSelect }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Navigation size={10} style={{ color: 'var(--accent-color)' }} />
+        <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          Pages &amp; Navigation <span className="opacity-60">({items.length})</span>
+        </p>
+      </div>
+      <ul className="space-y-1">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <li
+              key={item.id}
+              onClick={() => onSelect(item, 'page')}
+              className="flex items-start gap-2.5 text-xs py-2 px-2.5 rounded-xl cursor-pointer group transition-colors"
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105 mt-0.5"
+                style={{
+                  background: `${item.color}18`,
+                  borderColor: `${item.color}35`,
+                  color: item.color,
+                }}
+              >
+                <Icon size={13} strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-semibold text-[11.5px] leading-snug break-words" style={{ color: 'var(--text-primary)' }}>
+                    {item.label}
+                  </span>
+                  {item.badge && (
+                    <span
+                      className="text-[8px] font-extrabold px-1.5 py-0.2 rounded uppercase tracking-wider shrink-0"
+                      style={{
+                        background: 'color-mix(in srgb, var(--accent-color) 15%, transparent)',
+                        color: 'var(--accent-color)',
+                        border: '1px solid color-mix(in srgb, var(--accent-color) 30%, transparent)',
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+                <div className="text-[10.5px] leading-relaxed break-words mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {item.description}
+                </div>
+              </div>
+              <ArrowRight size={12} className="shrink-0 opacity-30 group-hover:opacity-80 transition-opacity self-center mt-1" style={{ color: 'var(--accent-color)' }} />
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/* ── Actions search result group ── */
+function ActionSearchGroup({ items, onSelect }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Sparkles size={10} style={{ color: '#fbbf24' }} />
+        <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          Quick Actions <span className="opacity-60">({items.length})</span>
+        </p>
+      </div>
+      <ul className="space-y-1">
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <li
+              key={item.id}
+              onClick={() => onSelect(item, 'action')}
+              className="flex items-start gap-2.5 text-xs py-2 px-2.5 rounded-xl cursor-pointer group transition-colors"
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105 mt-0.5"
+                style={{
+                  background: `${item.color}18`,
+                  borderColor: `${item.color}35`,
+                  color: item.color,
+                }}
+              >
+                <Icon size={13} strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-semibold text-[11.5px] leading-snug break-words" style={{ color: 'var(--text-primary)' }}>
+                    {item.label}
+                  </span>
+                  {item.badge && (
+                    <span
+                      className="text-[8px] font-extrabold px-1.5 py-0.2 rounded uppercase tracking-wider shrink-0"
+                      style={{
+                        background: 'rgba(236,72,153,0.15)',
+                        color: '#ec4899',
+                        border: '1px solid rgba(236,72,153,0.3)',
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.external && (
+                    <ExternalLink size={10} className="opacity-60 shrink-0" />
+                  )}
+                </div>
+                <div className="text-[10.5px] leading-relaxed break-words mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {item.description}
+                </div>
+              </div>
+              <ArrowRight size={12} className="shrink-0 opacity-30 group-hover:opacity-80 transition-opacity self-center mt-1" style={{ color: 'var(--accent-color)' }} />
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -1609,16 +2215,16 @@ function SearchGroup({ label, count, items, onSee }) {
         <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
           {label} <span className="opacity-60">({count})</span>
         </p>
-        <button onClick={onSee} className="text-[10px] font-semibold" style={{ color: 'var(--accent-color)' }}>
+        <button onClick={onSee} className="text-[10px] font-semibold cursor-pointer hover:underline" style={{ color: 'var(--accent-color)' }}>
           View all
         </button>
       </div>
-      <ul className="space-y-0.5">
-        {items.slice(0, 3).map((t, i) => (
+      <ul className="space-y-1">
+        {items.slice(0, 4).map((t, i) => (
           <li
             key={i}
             onClick={onSee}
-            className="truncate text-xs py-1 px-2.5 rounded-lg cursor-pointer transition-colors"
+            className="text-xs leading-snug break-words py-1.5 px-2.5 rounded-lg cursor-pointer transition-colors"
             style={{ color: 'var(--text-primary)' }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -1638,35 +2244,55 @@ function SettingsSearchGroup({ items, onSelect }) {
       <div className="flex items-center gap-1.5 mb-1.5">
         <Settings size={10} style={{ color: 'var(--text-muted)' }} />
         <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
-          Settings <span className="opacity-60">({items.length})</span>
+          Settings &amp; System <span className="opacity-60">({items.length})</span>
         </p>
       </div>
-      <ul className="space-y-0.5">
+      <ul className="space-y-1">
         {items.map((item) => {
           const Icon = item.icon;
           return (
             <li
               key={item.id}
-              onClick={() => onSelect(item)}
-              className="flex items-center gap-2.5 text-xs py-1.5 px-2 rounded-xl cursor-pointer group transition-colors"
+              onClick={() => onSelect(item, 'setting')}
+              className="flex items-start gap-2.5 text-xs py-2 px-2.5 rounded-xl cursor-pointer group transition-colors"
               onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               <div
-                className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border"
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105 mt-0.5"
                 style={{
-                  background: `${item.color}1a`,
-                  borderColor: `${item.color}40`,
+                  background: `${item.color}18`,
+                  borderColor: `${item.color}35`,
                   color: item.color,
                 }}
               >
-                <Icon size={12} strokeWidth={2.3} />
+                <Icon size={13} strokeWidth={2.2} />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="font-semibold truncate" style={{ color: 'var(--text-primary)', fontSize: '11px' }}>{item.label}</div>
-                <div className="truncate" style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{item.description}</div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-semibold text-[11.5px] leading-snug break-words" style={{ color: 'var(--text-primary)' }}>
+                    {item.label}
+                  </span>
+                  {item.badge && (
+                    <span
+                      className="text-[8px] font-extrabold px-1.5 py-0.2 rounded font-mono uppercase tracking-wider shrink-0"
+                      style={{
+                        background: 'color-mix(in srgb, var(--accent-color) 15%, transparent)',
+                        color: 'var(--accent-color)',
+                      }}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.url && (
+                    <ExternalLink size={10} className="opacity-60 shrink-0" />
+                  )}
+                </div>
+                <div className="text-[10.5px] leading-relaxed break-words mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {item.description}
+                </div>
               </div>
-              <ArrowRight size={11} className="shrink-0 opacity-30 group-hover:opacity-70 transition-opacity" style={{ color: 'var(--accent-color)' }} />
+              <ArrowRight size={12} className="shrink-0 opacity-30 group-hover:opacity-80 transition-opacity self-center mt-1" style={{ color: 'var(--accent-color)' }} />
             </li>
           );
         })}
@@ -1695,7 +2321,7 @@ function ThemeSearchGroup({ items, currentTheme, onSelect }) {
             <li
               key={t.id}
               onClick={() => onSelect(t.id)}
-              className="flex items-center gap-2.5 text-xs py-1.5 px-2 rounded-xl cursor-pointer group transition-all"
+              className="flex items-start gap-2.5 text-xs py-2 px-2.5 rounded-xl cursor-pointer group transition-all"
               style={{
                 background: isActive ? 'var(--bg-surface)' : 'transparent',
                 border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
@@ -1709,7 +2335,7 @@ function ThemeSearchGroup({ items, currentTheme, onSelect }) {
             >
               {/* Mini color swatch preview */}
               <div
-                className="w-7 h-5 rounded-md shrink-0 border relative overflow-hidden flex items-end p-0.5 shadow-xs transition-transform group-hover:scale-105"
+                className="w-7 h-5 rounded-md shrink-0 border relative overflow-hidden flex items-end p-0.5 shadow-xs transition-transform group-hover:scale-105 mt-1"
                 style={{
                   background: bg,
                   borderColor: isWhite ? '#d6cdc0' : 'rgba(255,255,255,0.18)',
@@ -1727,9 +2353,9 @@ function ThemeSearchGroup({ items, currentTheme, onSelect }) {
 
               {/* Theme title & description */}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <span
-                    className="font-semibold truncate text-[11px]"
+                    className="font-semibold text-[11.5px] leading-snug break-words"
                     style={{ color: 'var(--text-primary)' }}
                   >
                     {t.name}
@@ -1747,7 +2373,7 @@ function ThemeSearchGroup({ items, currentTheme, onSelect }) {
                   )}
                 </div>
                 <div
-                  className="truncate text-[10px]"
+                  className="text-[10.5px] leading-relaxed break-words mt-0.5"
                   style={{ color: 'var(--text-muted)' }}
                 >
                   {t.description}
@@ -1755,31 +2381,33 @@ function ThemeSearchGroup({ items, currentTheme, onSelect }) {
               </div>
 
               {/* Action */}
-              {isActive ? (
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'var(--accent-color)', color: '#fff' }}
-                  title="Currently active"
-                >
-                  <Check size={11} strokeWidth={2.8} />
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0 transition-all opacity-85 group-hover:opacity-100 group-hover:scale-105 active:scale-95"
-                  style={{
-                    background: 'var(--accent-gradient)',
-                    color: '#ffffff',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect(t.id);
-                  }}
-                >
-                  Apply
-                </button>
-              )}
+              <div className="self-center mt-0.5 shrink-0">
+                {isActive ? (
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: 'var(--accent-color)', color: '#fff' }}
+                    title="Currently active"
+                  >
+                    <Check size={11} strokeWidth={2.8} />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0 transition-all opacity-85 group-hover:opacity-100 group-hover:scale-105 active:scale-95"
+                    style={{
+                      background: 'var(--accent-gradient)',
+                      color: '#ffffff',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelect(t.id);
+                    }}
+                  >
+                    Apply
+                  </button>
+                )}
+              </div>
             </li>
           );
         })}

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -100,6 +101,16 @@ export default function CalendarPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.createEvent) {
+      window.history.replaceState({}, '');
+      setEditing(null);
+      setForm(emptyForm);
+      setTimeout(() => setModalOpen(true), 60);
+    }
+  }, [location.state]);
 
   const today = localISO(new Date());
   const tomorrow = localISO(new Date(Date.now() + 86400000));
@@ -225,7 +236,7 @@ export default function CalendarPage() {
       : cursor.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-32 sm:pb-12">
       {/* ── Page Header ────────────────────────────────────────── */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 pb-4"
@@ -387,8 +398,7 @@ export default function CalendarPage() {
                             : 'var(--text-muted)',
                           opacity: inCurrentMonth ? 1 : 0.35,
                           border: isToday && !isSelected ? '1px solid var(--border-card)' : '1px solid transparent',
-                          boxShadow: isSelected ? '0 2px 10px var(--accent-glow)' : 'none',
-                        }}
+                                                  }}
                       >
                         <span>{d.getDate()}</span>
                         {dayHasItems && (

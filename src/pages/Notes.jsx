@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -47,6 +48,16 @@ export default function Notes() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.createNote) {
+      window.history.replaceState({}, '');
+      setEditing(null);
+      setForm(emptyForm);
+      setTimeout(() => setModalOpen(true), 60);
+    }
+  }, [location.state]);
 
   // Quick Inline Note State
   const [quickTitle, setQuickTitle] = useState('');
@@ -145,7 +156,7 @@ export default function Notes() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 animate-fade-up max-w-7xl mx-auto pb-32 sm:pb-12">
       {/* ── Header ───────────────────────────────────────────── */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 pb-4"
