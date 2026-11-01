@@ -173,22 +173,13 @@ export function AuthShell({ children, activeTab = 'login' }) {
   const infoContainerRef = useRef(null);
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (infoContainerRef.current && !infoContainerRef.current.contains(e.target)) {
-        setInfoOpen(false);
-      }
-    }
     function handleKeyDown(e) {
       if (e.key === 'Escape') setInfoOpen(false);
     }
     if (infoOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside, { passive: true });
       document.addEventListener('keydown', handleKeyDown);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [infoOpen]);
@@ -324,14 +315,21 @@ export function AuthShell({ children, activeTab = 'login' }) {
       {/* Dismissal backdrop to absorb outside clicks and prevent misclicks */}
       {infoOpen && (
         <div
-          className="fixed inset-0 z-30 pointer-events-auto"
+          className="fixed inset-0 z-30 pointer-events-auto select-none"
           aria-hidden="true"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setInfoOpen(false);
+          }}
+          onMouseUp={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
           }}
           onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchEnd={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setInfoOpen(false);
@@ -339,6 +337,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            setInfoOpen(false);
           }}
         />
       )}
@@ -390,45 +389,68 @@ export function AuthShell({ children, activeTab = 'login' }) {
             aria-label="App info"
             className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border shadow-md backdrop-blur-xl transition-all duration-200 cursor-pointer active:scale-95 hover:scale-105"
             style={{
-              background: 'var(--bg-card-solid)',
+              background: infoOpen
+                ? 'color-mix(in srgb, var(--accent-color) 16%, var(--bg-card-solid))'
+                : 'var(--bg-card-solid)',
               borderColor: infoOpen ? 'var(--accent-color)' : 'var(--border-card)',
               color: infoOpen ? 'var(--accent-color)' : 'var(--text-muted)',
+              boxShadow: infoOpen ? '0 0 10px color-mix(in srgb, var(--accent-color) 35%, transparent)' : 'none',
             }}
           >
             <Info size={15} strokeWidth={2.2} />
           </button>
 
-          {/* Gliding App Info Box (Top to Bottom Slide Transition) */}
+          {/* Gliding App Info Box — Symmetrically Centered on Mobile, Highlighted Accent Styling */}
           {infoOpen && (
             <div
-              className="absolute -right-2 sm:right-auto sm:left-0 top-full mt-2.5 w-[300px] max-w-[calc(100vw-28px)] rounded-2xl border p-4 sm:p-5 backdrop-blur-2xl shadow-2xl select-none z-50 info-box-glide overflow-hidden"
+              className="fixed sm:absolute top-[56px] sm:top-full sm:mt-2.5 inset-x-3.5 sm:inset-x-auto sm:left-0 max-w-[340px] sm:w-[320px] mx-auto sm:mx-0 rounded-[22px] border-[1.5px] p-4 sm:p-5 backdrop-blur-2xl shadow-2xl select-none z-50 info-box-glide overflow-hidden"
               style={{
                 background: 'var(--bg-card-solid)',
-                borderColor: 'var(--border-card)',
+                borderColor: 'color-mix(in srgb, var(--accent-color) 45%, var(--border-card))',
                 boxShadow: isLight
-                  ? '0 16px 40px rgba(0,0,0,0.12)'
-                  : '0 20px 50px rgba(0,0,0,0.65)',
+                  ? '0 16px 45px rgba(0,0,0,0.14), 0 0 0 1px color-mix(in srgb, var(--accent-color) 15%, transparent)'
+                  : '0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px color-mix(in srgb, var(--accent-color) 20%, transparent)',
               }}
             >
+              {/* Top Specular Accent Highlight Line */}
+              <div
+                className="absolute top-0 inset-x-4 h-[1.5px] pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, var(--accent-color), transparent)',
+                }}
+              />
+
               {/* Header */}
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border-subtle)]">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <div
-                    className="w-7 h-7 rounded-lg border flex items-center justify-center"
+                    className="w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 shadow-xs"
                     style={{
-                      background: 'var(--bg-surface)',
-                      borderColor: 'var(--border-subtle)',
-                      color: 'var(--accent-color)',
+                      background: 'var(--accent-gradient)',
+                      borderColor: 'color-mix(in srgb, var(--accent-color) 35%, transparent)',
+                      color: '#ffffff',
                     }}
                   >
-                    <Info size={14} />
+                    <Info size={14} strokeWidth={2.4} />
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                      App Info
-                    </h3>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="text-xs font-bold font-display tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                        App Info
+                      </h3>
+                      <span
+                        className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full tracking-wider"
+                        style={{
+                          background: 'color-mix(in srgb, var(--accent-color) 18%, transparent)',
+                          color: 'var(--accent-color)',
+                          border: '1px solid color-mix(in srgb, var(--accent-color) 30%, transparent)',
+                        }}
+                      >
+                        v1.11
+                      </span>
+                    </div>
                     <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                      OneDesk Workspace
+                      OneDesk Workspace OS
                     </p>
                   </div>
                 </div>
@@ -439,11 +461,16 @@ export function AuthShell({ children, activeTab = 'login' }) {
                     setInfoOpen(false);
                     if (playChime) playChime('pop');
                   }}
-                  className="p-1 rounded-lg transition-colors cursor-pointer hover:text-[var(--text-primary)]"
-                  style={{ color: 'var(--text-muted)' }}
+                  className="h-7 w-7 rounded-full flex items-center justify-center border transition-all active:scale-90 cursor-pointer"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-muted)',
+                  }}
                   title="Close"
+                  aria-label="Close"
                 >
-                  <X size={14} />
+                  <X size={13} />
                 </button>
               </div>
 
@@ -464,9 +491,9 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   <span
                     className="text-[11px] font-bold font-mono px-2 py-0.5 rounded-full border"
                     style={{
-                      background: 'var(--bg-card-solid)',
-                      borderColor: 'var(--border-subtle)',
-                      color: 'var(--text-primary)',
+                      background: 'color-mix(in srgb, var(--accent-color) 12%, var(--bg-surface))',
+                      borderColor: 'color-mix(in srgb, var(--accent-color) 40%, transparent)',
+                      color: 'var(--accent-color)',
                     }}
                   >
                     v1.11.26
@@ -531,7 +558,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
                 </div>
               </div>
 
-              {/* Footer Status Line */}
+              {/* Footer Status Line with Highlighted Build Pill */}
               <div
                 className="mt-3 pt-2.5 border-t flex items-center justify-between text-[10px]"
                 style={{
@@ -539,7 +566,16 @@ export function AuthShell({ children, activeTab = 'login' }) {
                   color: 'var(--text-muted)',
                 }}
               >
-                <span>Build #OD1.11-1</span>
+                <span
+                  className="px-2 py-0.5 rounded-full font-mono font-bold text-[9.5px]"
+                  style={{
+                    background: 'color-mix(in srgb, var(--accent-color) 12%, transparent)',
+                    color: 'var(--accent-color)',
+                    border: '1px solid color-mix(in srgb, var(--accent-color) 30%, transparent)',
+                  }}
+                >
+                  Build #OD1.11-1
+                </span>
                 <span className="font-medium text-emerald-400 flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   All Systems Normal
@@ -549,6 +585,7 @@ export function AuthShell({ children, activeTab = 'login' }) {
           )}
         </div>
       </div>
+
 
       {/* Floating Theme Customizer Pill — Bottom Centralized on Mobile, Top-Right on Desktop */}
       <div className="fixed bottom-3.5 sm:bottom-auto sm:top-4 inset-x-0 sm:inset-x-auto sm:right-8 mx-auto sm:mx-0 w-fit max-w-[calc(100vw-20px)] sm:max-w-none px-1 sm:px-0 z-30 pointer-events-auto">
@@ -903,6 +940,31 @@ export function GoogleIcon({ size = 18, className = '' }) {
 
 export function GoogleAuthButton({ mode = 'login' }) {
   const label = mode === 'signup' ? 'Sign up with Google' : 'Sign in with Google';
+  const { signInWithGoogle } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState('');
+  const navigate = useNavigate();
+  const { playChime } = useSettings();
+
+  async function handleGoogleClick() {
+    if (googleLoading) return;
+    setGoogleLoading(true);
+    setGoogleError('');
+    if (playChime) playChime('pop');
+    try {
+      const res = await signInWithGoogle();
+      if (res && res.success) {
+        if (playChime) playChime('success');
+        navigate('/', { replace: true });
+      } else if (res && res.error) {
+        setGoogleError(res.error);
+      }
+    } catch (err) {
+      setGoogleError(err.message || 'Google sign-in failed');
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   return (
     <div className="mt-2 sm:mt-2.5">
@@ -922,29 +984,44 @@ export function GoogleAuthButton({ mode = 'login' }) {
         <div className="flex-1 border-t border-[var(--border-subtle)]" />
       </div>
 
-      {/* Colorful Faded Google Option */}
-      <div
-        className="w-full flex items-center justify-between px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border select-none opacity-70 cursor-not-allowed transition-all"
+      {/* Real One-Click Google Sign-in Button */}
+      <button
+        type="button"
+        onClick={handleGoogleClick}
+        disabled={googleLoading}
+        className="w-full flex items-center justify-between px-3 sm:px-3.5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl border select-none cursor-pointer transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed group"
         style={{
           background: 'var(--bg-surface)',
           borderColor: 'var(--border-subtle)',
           color: 'var(--text-primary)',
         }}
-        title="Google login is coming soon"
+        title={label}
+        aria-label={label}
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <GoogleIcon size={16} className="shrink-0" />
-          <span className="text-xs sm:text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-            {label}
+          {googleLoading ? (
+            <Loader2 size={16} className="shrink-0 animate-spin text-[var(--accent-color)]" />
+          ) : (
+            <GoogleIcon size={16} className="shrink-0 transition-transform group-hover:scale-110" />
+          )}
+          <span className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+            {googleLoading ? 'Connecting to Google…' : label}
           </span>
         </div>
 
         <span
-          className="text-[9px] sm:text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-500 dark:text-amber-300 shrink-0 ml-2"
+          className="text-[9px] sm:text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shrink-0 ml-2 flex items-center gap-1.5"
         >
-          Coming soon
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          Active
         </span>
-      </div>
+      </button>
+
+      {googleError && (
+        <div className="mt-2 p-2 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 text-xs text-center leading-relaxed">
+          {googleError}
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,8 @@ import {
   EmailAuthProvider,
   updatePassword as fbUpdatePassword,
   sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -368,8 +370,40 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function signInWithGoogle() {
+    setAuthError('');
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const cred = await signInWithPopup(auth, provider);
+      const fbUser = cred.user;
+      const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'User';
+      const photoURL = fbUser.photoURL || '';
+      if (name) {
+        localStorage.setItem(`onedesk_user_name_${fbUser.uid}`, name);
+      }
+      if (photoURL) {
+        localStorage.setItem(`onedesk_user_photo_${fbUser.uid}`, photoURL);
+      }
+      setUser({
+        id: fbUser.uid,
+        name,
+        email: fbUser.email,
+        photoURL,
+      });
+      return { success: true, user: fbUser };
+    } catch (err) {
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        return { success: false, cancelled: true };
+      }
+      const msg = friendlyError(err.code);
+      setAuthError(msg);
+      return { success: false, error: msg };
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile, deleteAccount, changePassword, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, authError, login, signup, logout, updateProfile, deleteAccount, changePassword, resetPassword, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

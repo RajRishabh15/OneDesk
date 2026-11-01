@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Plus,
   CheckSquare,
@@ -49,6 +50,16 @@ export default function Tasks() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [dragId, setDragId] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.createTask) {
+      window.history.replaceState({}, '');
+      setEditing(null);
+      setForm(emptyForm);
+      setTimeout(() => setModalOpen(true), 60);
+    }
+  }, [location.state]);
 
   // Quick inline add state
   const [inlineTitle, setInlineTitle] = useState('');

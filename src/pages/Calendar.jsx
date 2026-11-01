@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -100,6 +101,16 @@ export default function CalendarPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.createEvent) {
+      window.history.replaceState({}, '');
+      setEditing(null);
+      setForm(emptyForm);
+      setTimeout(() => setModalOpen(true), 60);
+    }
+  }, [location.state]);
 
   const today = localISO(new Date());
   const tomorrow = localISO(new Date(Date.now() + 86400000));
