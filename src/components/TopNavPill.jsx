@@ -262,6 +262,34 @@ const THEME_SEARCH_KEYWORDS = {
   babypink: ['baby pink', 'babypink', 'pink', 'pastel', 'cotton candy', 'sakura', 'sweet pink'],
 };
 
+/* ── 24 Curated Hourly Thoughts (1 Quote Per Hour) ── */
+const HOURLY_THOUGHTS = [
+  { text: "Rest and recharge; tomorrow's victories begin with tonight's peace.", author: "OneDesk" },
+  { text: "Quiet hours are when deep ideas take root.", author: "Cal Newport" },
+  { text: "In stillness, clarity emerges effortlessly.", author: "Marcus Aurelius" },
+  { text: "Rest is not a luxury; it is a biological necessity.", author: "Matthew Walker" },
+  { text: "A fresh dawn brings new strength and endless possibilities.", author: "Robin Sharma" },
+  { text: "Win the morning, win the day.", author: "Tim Ferriss" },
+  { text: "The secret of getting ahead is simply getting started.", author: "Mark Twain" },
+  { text: "Make each day your personal masterpiece.", author: "John Wooden" },
+  { text: "Focus on what truly moves the needle today.", author: "Robin Sharma" },
+  { text: "Focus on being productive instead of merely busy.", author: "Tim Ferriss" },
+  { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
+  { text: "Simplicity boils down to: identify the essential, eliminate the rest.", author: "Leo Babauta" },
+  { text: "Small daily improvements over time compound into stunning results.", author: "Robin Sharma" },
+  { text: "Do what you can, with what you have, right where you are.", author: "Theodore Roosevelt" },
+  { text: "Deep work creates rare and irreplaceable value.", author: "Cal Newport" },
+  { text: "Discipline is choosing between what you want now and what you want most.", author: "Abraham Lincoln" },
+  { text: "Your future is created by what you do today, not tomorrow.", author: "Peter Drucker" },
+  { text: "Progress over perfection, every single day.", author: "OneDesk" },
+  { text: "Reflect on today's progress; every finished step counts.", author: "OneDesk" },
+  { text: "Celebrate the small wins along the way.", author: "James Clear" },
+  { text: "Unwind your mind; you gave your best effort today.", author: "OneDesk" },
+  { text: "Peace of mind is the ultimate form of productivity.", author: "Naval Ravikant" },
+  { text: "A peaceful evening prepares the canvas for tomorrow.", author: "OneDesk" },
+  { text: "Rest deeply, reflect gently, and dream boldly.", author: "OneDesk" },
+];
+
 const navLinks = [
   { to: '/',          label: 'Home',     icon: Home,        end: true },
   { to: '/tasks',     label: 'Tasks',    icon: CheckSquare },
@@ -561,6 +589,21 @@ export default function TopNavPill() {
     return () => clearInterval(id);
   }, []);
 
+  /* ── Exactly 1 Quote Per Hour ── */
+  const [hourlyThought, setHourlyThought] = useState(() => {
+    const currentHour = new Date().getHours();
+    return HOURLY_THOUGHTS[currentHour % HOURLY_THOUGHTS.length];
+  });
+
+  useEffect(() => {
+    function syncHourlyQuote() {
+      const currentHour = new Date().getHours();
+      setHourlyThought(HOURLY_THOUGHTS[currentHour % HOURLY_THOUGHTS.length]);
+    }
+    const timer = setInterval(syncHourlyQuote, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
   const dueSoon = useMemo(() => {
     const cutoff = now + 86400000;
     return tasks.filter(
@@ -641,6 +684,36 @@ export default function TopNavPill() {
               OneDesk
             </span>
           </Link>
+
+          {/* ── CENTER: Daily Spark / Thought of the Day Marquee ── */}
+          <div className="hidden min-[940px]:flex items-center flex-1 max-w-[460px] lg:max-w-[560px] xl:max-w-[640px] mx-4 overflow-hidden">
+            <div
+              className="relative w-full h-[34px] rounded-full flex items-center px-3 border transition-all duration-300 overflow-hidden cursor-default group"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+                maskImage: 'linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent)',
+                WebkitMaskImage: 'linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent)',
+              }}
+              title="Daily Spark • Hover to pause"
+            >
+              <div className="animate-onedesk-marquee items-center text-[11.5px] font-medium select-none">
+                {/* Single hourly quote — 2 copies for infinite smooth loop */}
+                <div className="flex items-center gap-2.5 whitespace-nowrap shrink-0 pr-16">
+                  <Sparkles size={11} className="text-amber-400 shrink-0 animate-pulse" />
+                  <span style={{ color: 'var(--text-primary)' }}>&ldquo;{hourlyThought.text}&rdquo;</span>
+                  <span className="opacity-55 text-[10.5px]" style={{ color: 'var(--text-muted)' }}>&mdash; {hourlyThought.author}</span>
+                  <span className="h-1 w-1 rounded-full bg-stone-500/40 shrink-0 ml-3" />
+                </div>
+                <div className="flex items-center gap-2.5 whitespace-nowrap shrink-0 pr-16">
+                  <Sparkles size={11} className="text-amber-400 shrink-0 animate-pulse" />
+                  <span style={{ color: 'var(--text-primary)' }}>&ldquo;{hourlyThought.text}&rdquo;</span>
+                  <span className="opacity-55 text-[10.5px]" style={{ color: 'var(--text-muted)' }}>&mdash; {hourlyThought.author}</span>
+                  <span className="h-1 w-1 rounded-full bg-stone-500/40 shrink-0 ml-3" />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* ── RIGHT: Fun Zone + Notifications + Account Profile ── */}
           <div className="flex items-center gap-2.5 shrink-0">

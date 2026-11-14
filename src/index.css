@@ -284,6 +284,20 @@ body {
 
 
 /* ─── Animations ─────────────────────────────────────────── */
+@keyframes onedeskMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-onedesk-marquee {
+  display: flex;
+  width: max-content;
+  animation: onedeskMarquee 18s linear infinite;
+  will-change: transform;
+}
+.animate-onedesk-marquee:hover {
+  animation-play-state: paused;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: none; }
