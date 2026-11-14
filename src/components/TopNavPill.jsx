@@ -341,6 +341,29 @@ export default function TopNavPill() {
 
   const [query, setQuery]                       = useState('');
   const [searchOpen, setSearchOpen]             = useState(false);
+  const [searchRendered, setSearchRendered]   = useState(false);
+  const [searchAnimating, setSearchAnimating] = useState(false);
+
+  /* ── Fluid Fly-Up & Fly-Down Animation Lifecycle ── */
+  useEffect(() => {
+    if (searchOpen) {
+      setSearchRendered(true);
+      const r1 = requestAnimationFrame(() => {
+        const r2 = requestAnimationFrame(() => {
+          setSearchAnimating(true);
+          desktopSearchInputRef.current?.focus();
+        });
+        return () => cancelAnimationFrame(r2);
+      });
+      return () => cancelAnimationFrame(r1);
+    } else {
+      setSearchAnimating(false);
+      const timer = setTimeout(() => {
+        setSearchRendered(false);
+      }, 260);
+      return () => clearTimeout(timer);
+    }
+  }, [searchOpen]);
   const [profileOpen, setProfileOpen]           = useState(false);
   const [notifOpen, setNotifOpen]               = useState(false);
   const [quickAddOpen, setQuickAddOpen]         = useState(false);
@@ -604,6 +627,30 @@ export default function TopNavPill() {
     return () => clearInterval(timer);
   }, []);
 
+  /* ── Typewriter Effect for Thought of the Hour ── */
+  const [typedChars, setTypedChars] = useState(0);
+  const [typingComplete, setTypingComplete] = useState(false);
+  const [typewriterReplayKey, setTypewriterReplayKey] = useState(0);
+
+  useEffect(() => {
+    setTypedChars(0);
+    setTypingComplete(false);
+
+    const fullText = hourlyThought?.text || '';
+    let charIdx = 0;
+
+    const interval = setInterval(() => {
+      charIdx += 1;
+      setTypedChars(charIdx);
+      if (charIdx >= fullText.length) {
+        clearInterval(interval);
+        setTypingComplete(true);
+      }
+    }, 38);
+
+    return () => clearInterval(interval);
+  }, [hourlyThought, typewriterReplayKey]);
+
   const dueSoon = useMemo(() => {
     const cutoff = now + 86400000;
     return tasks.filter(
@@ -619,7 +666,7 @@ export default function TopNavPill() {
   return (
     <>
       {/* ── Global Dismiss Backdrop for Open Dropdowns (Absorbs Dismissal Clicks, Prevents Misclicks / Overclicks) ── */}
-      {(profileOpen || notifOpen || searchOpen || quickAddOpen) && (
+      {(profileOpen || notifOpen || searchOpen || searchRendered || quickAddOpen) && (
         <div
           className="fixed inset-0 z-30 pointer-events-auto select-none cursor-default"
           aria-hidden="true"
@@ -685,34 +732,43 @@ export default function TopNavPill() {
             </span>
           </Link>
 
-          {/* ── CENTER: Daily Spark / Thought of the Day Marquee ── */}
-          <div className="hidden min-[940px]:flex items-center flex-1 max-w-[460px] lg:max-w-[560px] xl:max-w-[640px] mx-4 overflow-hidden">
-            <div
-              className="relative w-full h-[34px] rounded-full flex items-center px-3 border transition-all duration-300 overflow-hidden cursor-default group"
+          {/* ── CENTER: Thought of the Hour Typewriter Pill ── */}
+          <div className="hidden min-[940px]:flex items-center flex-1 max-w-[480px] lg:max-w-[560px] xl:max-w-[640px] mx-4 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => {
+                if (playChime) playChime('pop');
+                setTypewriterReplayKey(k => k + 1);
+              }}
+              className="relative w-full h-[34px] rounded-full flex items-center px-3.5 border transition-all duration-300 overflow-hidden group cursor-pointer active:scale-[0.99]"
               style={{
                 background: 'var(--bg-surface)',
                 borderColor: 'var(--border-subtle)',
-                maskImage: 'linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent)',
-                WebkitMaskImage: 'linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent)',
               }}
-              title="Daily Spark • Hover to pause"
+              title="Thought of the Hour • Click to replay"
+              aria-label="Thought of the hour"
             >
-              <div className="animate-onedesk-marquee items-center text-[11.5px] font-medium select-none">
-                {/* Single hourly quote — 2 copies for infinite smooth loop */}
-                <div className="flex items-center gap-2.5 whitespace-nowrap shrink-0 pr-16">
-                  <Sparkles size={11} className="text-amber-400 shrink-0 animate-pulse" />
-                  <span style={{ color: 'var(--text-primary)' }}>&ldquo;{hourlyThought.text}&rdquo;</span>
-                  <span className="opacity-55 text-[10.5px]" style={{ color: 'var(--text-muted)' }}>&mdash; {hourlyThought.author}</span>
-                  <span className="h-1 w-1 rounded-full bg-stone-500/40 shrink-0 ml-3" />
-                </div>
-                <div className="flex items-center gap-2.5 whitespace-nowrap shrink-0 pr-16">
-                  <Sparkles size={11} className="text-amber-400 shrink-0 animate-pulse" />
-                  <span style={{ color: 'var(--text-primary)' }}>&ldquo;{hourlyThought.text}&rdquo;</span>
-                  <span className="opacity-55 text-[10.5px]" style={{ color: 'var(--text-muted)' }}>&mdash; {hourlyThought.author}</span>
-                  <span className="h-1 w-1 rounded-full bg-stone-500/40 shrink-0 ml-3" />
+              <div className="flex items-center gap-2 text-[11.5px] font-medium select-none min-w-0 w-full">
+                <Sparkles size={12} className="text-amber-400 shrink-0 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
+                <div className="min-w-0 flex-1 truncate text-left">
+                  <span style={{ color: 'var(--text-primary)' }}>
+                    &ldquo;{hourlyThought.text.slice(0, typedChars)}&rdquo;
+                  </span>
+                  <span
+                    className="inline-block w-[1.5px] h-3.5 ml-0.5 align-middle animate-cursor-blink"
+                    style={{ background: 'var(--accent-color)' }}
+                  />
+                  {typingComplete && (
+                    <span
+                      className="opacity-60 text-[10.5px] ml-1.5 animate-fade-in font-normal inline-block"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      &mdash; {hourlyThought.author}
+                    </span>
+                  )}
                 </div>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* ── RIGHT: Fun Zone + Notifications + Account Profile ── */}
@@ -1176,18 +1232,29 @@ export default function TopNavPill() {
             )}
           </NavLink>
 
-          {/* ── Upward-popping Search Palette: Precisely Centralized to Nav Dock ── */}
-          {searchOpen && (
+          {/* ── Upward-popping Search Palette: Fluid Fly-up & Fly-down Animation ── */}
+          {searchRendered && (
             <div
               ref={desktopSearchBoxRef}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-[520px] max-w-[calc(100vw-32px)] rounded-[24px] border shadow-2xl p-4 space-y-3 animate-menu-pop z-50 max-h-[72vh] overflow-y-auto custom-scrollbar"
+              className="absolute bottom-full mb-3 left-1/2 w-[520px] max-w-[calc(100vw-32px)] rounded-[24px] border p-4 space-y-3 z-50 max-h-[72vh] overflow-y-auto custom-scrollbar"
               style={{
                 background: 'var(--bg-card-solid)',
                 borderColor: 'var(--border-card)',
                 backdropFilter: 'blur(36px)',
                 WebkitBackdropFilter: 'blur(36px)',
-                boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.08) inset',
+                transformOrigin: 'bottom center',
+                transform: searchAnimating
+                  ? 'translate(-50%, 0) scale(1)'
+                  : 'translate(-50%, 32px) scale(0.94)',
+                opacity: searchAnimating ? 1 : 0,
+                transition: searchAnimating
+                  ? 'transform 0.36s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.36s ease'
+                  : 'transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.20s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.24s ease',
+                boxShadow: searchAnimating
+                  ? '0 28px 70px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.08) inset'
+                  : '0 8px 20px rgba(0,0,0,0.3)',
+                pointerEvents: searchAnimating ? 'auto' : 'none',
               }}
             >
               {/* Header search bar inside palette */}
