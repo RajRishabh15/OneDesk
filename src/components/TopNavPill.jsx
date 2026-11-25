@@ -262,6 +262,34 @@ const THEME_SEARCH_KEYWORDS = {
   babypink: ['baby pink', 'babypink', 'pink', 'pastel', 'cotton candy', 'sakura', 'sweet pink'],
 };
 
+/* ── 24 Curated Hourly Thoughts (1 Quote Per Hour) ── */
+const HOURLY_THOUGHTS = [
+  { text: "Rest and recharge; tomorrow's victories begin with tonight's peace.", author: "OneDesk" },
+  { text: "Quiet hours are when deep ideas take root.", author: "Cal Newport" },
+  { text: "In stillness, clarity emerges effortlessly.", author: "Marcus Aurelius" },
+  { text: "Rest is not a luxury; it is a biological necessity.", author: "Matthew Walker" },
+  { text: "A fresh dawn brings new strength and endless possibilities.", author: "Robin Sharma" },
+  { text: "Win the morning, win the day.", author: "Tim Ferriss" },
+  { text: "The secret of getting ahead is simply getting started.", author: "Mark Twain" },
+  { text: "Make each day your personal masterpiece.", author: "John Wooden" },
+  { text: "Focus on what truly moves the needle today.", author: "Robin Sharma" },
+  { text: "Focus on being productive instead of merely busy.", author: "Tim Ferriss" },
+  { text: "Action is the foundational key to all success.", author: "Pablo Picasso" },
+  { text: "Simplicity boils down to: identify the essential, eliminate the rest.", author: "Leo Babauta" },
+  { text: "Small daily improvements over time compound into stunning results.", author: "Robin Sharma" },
+  { text: "Do what you can, with what you have, right where you are.", author: "Theodore Roosevelt" },
+  { text: "Deep work creates rare and irreplaceable value.", author: "Cal Newport" },
+  { text: "Discipline is choosing between what you want now and what you want most.", author: "Abraham Lincoln" },
+  { text: "Your future is created by what you do today, not tomorrow.", author: "Peter Drucker" },
+  { text: "Progress over perfection, every single day.", author: "OneDesk" },
+  { text: "Reflect on today's progress; every finished step counts.", author: "OneDesk" },
+  { text: "Celebrate the small wins along the way.", author: "James Clear" },
+  { text: "Unwind your mind; you gave your best effort today.", author: "OneDesk" },
+  { text: "Peace of mind is the ultimate form of productivity.", author: "Naval Ravikant" },
+  { text: "A peaceful evening prepares the canvas for tomorrow.", author: "OneDesk" },
+  { text: "Rest deeply, reflect gently, and dream boldly.", author: "OneDesk" },
+];
+
 const navLinks = [
   { to: '/',          label: 'Home',     icon: Home,        end: true },
   { to: '/tasks',     label: 'Tasks',    icon: CheckSquare },
@@ -313,6 +341,29 @@ export default function TopNavPill() {
 
   const [query, setQuery]                       = useState('');
   const [searchOpen, setSearchOpen]             = useState(false);
+  const [searchRendered, setSearchRendered]   = useState(false);
+  const [searchAnimating, setSearchAnimating] = useState(false);
+
+  /* ── Fluid Fly-Up & Fly-Down Animation Lifecycle ── */
+  useEffect(() => {
+    if (searchOpen) {
+      setSearchRendered(true);
+      const r1 = requestAnimationFrame(() => {
+        const r2 = requestAnimationFrame(() => {
+          setSearchAnimating(true);
+          desktopSearchInputRef.current?.focus();
+        });
+        return () => cancelAnimationFrame(r2);
+      });
+      return () => cancelAnimationFrame(r1);
+    } else {
+      setSearchAnimating(false);
+      const timer = setTimeout(() => {
+        setSearchRendered(false);
+      }, 260);
+      return () => clearTimeout(timer);
+    }
+  }, [searchOpen]);
   const [profileOpen, setProfileOpen]           = useState(false);
   const [notifOpen, setNotifOpen]               = useState(false);
   const [quickAddOpen, setQuickAddOpen]         = useState(false);
@@ -561,6 +612,45 @@ export default function TopNavPill() {
     return () => clearInterval(id);
   }, []);
 
+  /* ── Exactly 1 Quote Per Hour ── */
+  const [hourlyThought, setHourlyThought] = useState(() => {
+    const currentHour = new Date().getHours();
+    return HOURLY_THOUGHTS[currentHour % HOURLY_THOUGHTS.length];
+  });
+
+  useEffect(() => {
+    function syncHourlyQuote() {
+      const currentHour = new Date().getHours();
+      setHourlyThought(HOURLY_THOUGHTS[currentHour % HOURLY_THOUGHTS.length]);
+    }
+    const timer = setInterval(syncHourlyQuote, 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  /* ── Typewriter Effect for Thought of the Hour ── */
+  const [typedChars, setTypedChars] = useState(0);
+  const [typingComplete, setTypingComplete] = useState(false);
+  const [typewriterReplayKey, setTypewriterReplayKey] = useState(0);
+
+  useEffect(() => {
+    setTypedChars(0);
+    setTypingComplete(false);
+
+    const fullText = hourlyThought?.text || '';
+    let charIdx = 0;
+
+    const interval = setInterval(() => {
+      charIdx += 1;
+      setTypedChars(charIdx);
+      if (charIdx >= fullText.length) {
+        clearInterval(interval);
+        setTypingComplete(true);
+      }
+    }, 38);
+
+    return () => clearInterval(interval);
+  }, [hourlyThought, typewriterReplayKey]);
+
   const dueSoon = useMemo(() => {
     const cutoff = now + 86400000;
     return tasks.filter(
@@ -576,7 +666,7 @@ export default function TopNavPill() {
   return (
     <>
       {/* ── Global Dismiss Backdrop for Open Dropdowns (Absorbs Dismissal Clicks, Prevents Misclicks / Overclicks) ── */}
-      {(profileOpen || notifOpen || searchOpen || quickAddOpen) && (
+      {(profileOpen || notifOpen || searchOpen || searchRendered || quickAddOpen) && (
         <div
           className="fixed inset-0 z-30 pointer-events-auto select-none cursor-default"
           aria-hidden="true"
@@ -605,11 +695,12 @@ export default function TopNavPill() {
         />
       )}
       {/* ════════════════════════════════════════════
-          DESKTOP NAV  (md+)
+          DESKTOP TOP NAV BAR  (md+)
+          Website name & icon (left), Fun Zone, Notifications, Account (right)
       ════════════════════════════════════════════ */}
-      <header className="hidden md:flex fixed top-4 sm:top-5 inset-x-0 z-40 justify-center px-6 pointer-events-none">
+      <header className="hidden md:flex fixed top-4 sm:top-5 inset-x-0 z-40 justify-center px-4 sm:px-6 md:px-8 pointer-events-none select-none">
         <div
-          className={`pointer-events-auto relative flex items-center gap-3 px-4 sm:px-5 py-2.5 transition-all duration-300${isNotebook ? ' nb-bookmark-pill' : ''}`}
+          className={`pointer-events-auto relative flex items-center justify-between px-5 py-2.5 transition-all duration-300 w-full max-w-7xl${isNotebook ? ' nb-bookmark-pill' : ''}`}
           style={{
             background:     'var(--bg-card-solid)',
             borderRadius:   '24px',
@@ -619,46 +710,143 @@ export default function TopNavPill() {
             boxShadow:      isNotebook
               ? '0 6px 28px rgba(120,80,30,0.18), 0 1px 0 rgba(255,255,255,0.06) inset'
               : '0 12px 45px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset',
-            width:          'fit-content',
-            maxWidth:       'min(1100px, calc(100vw - 48px))',
           }}
         >
-          {/* ── LEFT CLUSTER: Logo + Notifications ─────────── */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* ── LEFT: Logo & Website Name ─────────────────── */}
+          <Link
+            to="/"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              closeAllDropdowns();
+            }}
+            className="flex items-center gap-2.5 group shrink-0 active:scale-95 transition-transform"
+          >
+            <div className="transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_2px_8px_rgba(99,102,241,0.35)]">
+              <OneDeskLogo size={28} />
+            </div>
+            <span
+              className="font-display text-[16px] font-extrabold tracking-tight"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              OneDesk
+            </span>
+          </Link>
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_2px_8px_rgba(99,102,241,0.35)]">
-                <OneDeskLogo size={28} />
+          {/* ── CENTER: Thought of the Hour Typewriter Pill ── */}
+          <div className="hidden min-[940px]:flex items-center flex-1 max-w-[480px] lg:max-w-[560px] xl:max-w-[640px] mx-4 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => {
+                if (playChime) playChime('pop');
+                setTypewriterReplayKey(k => k + 1);
+              }}
+              className="relative w-full h-[34px] rounded-full flex items-center px-3.5 border transition-all duration-300 overflow-hidden group cursor-pointer active:scale-[0.99]"
+              style={{
+                background: 'var(--bg-surface)',
+                borderColor: 'var(--border-subtle)',
+              }}
+              title="Thought of the Hour • Click to replay"
+              aria-label="Thought of the hour"
+            >
+              <div className="flex items-center gap-2 text-[11.5px] font-medium select-none min-w-0 w-full">
+                <Sparkles size={12} className="text-amber-400 shrink-0 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
+                <div className="min-w-0 flex-1 truncate text-left">
+                  <span style={{ color: 'var(--text-primary)' }}>
+                    &ldquo;{hourlyThought.text.slice(0, typedChars)}&rdquo;
+                  </span>
+                  <span
+                    className="inline-block w-[1.5px] h-3.5 ml-0.5 align-middle animate-cursor-blink"
+                    style={{ background: 'var(--accent-color)' }}
+                  />
+                  {typingComplete && (
+                    <span
+                      className="opacity-60 text-[10.5px] ml-1.5 animate-fade-in font-normal inline-block"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      &mdash; {hourlyThought.author}
+                    </span>
+                  )}
+                </div>
               </div>
-              <span
-                className="font-display text-[15px] font-extrabold tracking-tight"
-                style={{ color: 'var(--text-primary)' }}
-              >OneDesk</span>
-            </Link>
+            </button>
+          </div>
 
-            {/* Divider */}
-            <div className="h-5 w-px mx-1.5" style={{ background: 'var(--border-card)' }} />
+          {/* ── RIGHT: Fun Zone + Notifications + Account Profile ── */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* 1. Game Zone Button */}
+            <button
+              type="button"
+              onClick={() => {
+                if (playChime) playChime('pop');
+                closeAllDropdowns();
+                navigate('/fun-zone');
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-[12px] text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 border cursor-pointer group ${
+                location.pathname === '/fun-zone' ? 'shadow-sm' : ''
+              }`}
+              style={
+                location.pathname === '/fun-zone'
+                  ? {
+                      background: 'color-mix(in srgb, var(--accent-color) 16%, var(--bg-surface))',
+                      borderColor: 'var(--accent-color)',
+                      color: 'var(--accent-color)',
+                    }
+                  : {
+                      background: 'var(--bg-surface)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                    }
+              }
+              title="Fun Zone Arcade"
+              aria-label="Fun Zone"
+            >
+              <div
+                className="h-6 w-6 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm transition-transform duration-200 group-hover:rotate-6"
+                style={{ background: 'var(--accent-gradient)' }}
+              >
+                <Gamepad2 size={14} strokeWidth={2.2} />
+              </div>
+              <span className="font-extrabold tracking-tight">Fun Zone</span>
+            </button>
 
-            {/* Notification Bell */}
+            {/* Subtle Divider */}
+            <div className="h-5 w-px mx-0.5" style={{ background: 'var(--border-subtle)' }} />
+
+            {/* 2. Notification Bell */}
             <div className="relative" ref={desktopNotifRef}>
               <button
                 type="button"
-                onClick={() => { setNotifOpen(v => !v); setProfileOpen(false); setQuickAddOpen(false); setSearchOpen(false); }}
-                className="relative h-[34px] w-[34px] rounded-[11px] flex items-center justify-center transition-all hover:brightness-125 active:scale-95 border"
-                style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setNotifOpen(v => !v);
+                  setProfileOpen(false);
+                  setSearchOpen(false);
+                }}
+                className="relative h-[34px] w-[34px] rounded-[11px] flex items-center justify-center transition-all hover:brightness-125 active:scale-95 border cursor-pointer"
+                style={{
+                  background: notifOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
+                  borderColor: notifOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
+                  color: notifOpen ? 'var(--accent-color)' : 'var(--text-muted)',
+                }}
                 aria-label="Notifications"
+                title="Upcoming Deadlines"
               >
-                <Bell size={15} />
+                <Bell size={15} strokeWidth={notifOpen ? 2.3 : 1.8} />
                 {dueSoon.length > 0 && settings.dueTaskBadges && (
-                  <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)]" />
+                  <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-[1.5px] ring-[var(--bg-card)] shadow-[0_0_6px_rgba(244,63,94,0.6)] animate-pulse" />
                 )}
               </button>
 
               {notifOpen && (
                 <div
-                  className="absolute left-0 mt-2.5 w-72 rounded-2xl border shadow-2xl p-3 animate-menu-pop z-50"
-                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 top-full mt-2.5 w-72 rounded-2xl border shadow-2xl p-3.5 animate-menu-pop z-50"
+                  style={{
+                    background: 'var(--bg-card-solid)',
+                    borderColor: 'var(--border-card)',
+                    backdropFilter: 'blur(32px)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                  }}
                 >
                   <div className="flex items-center justify-between mb-2.5">
                     <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Upcoming Deadlines</p>
@@ -677,7 +865,10 @@ export default function TopNavPill() {
                           key={t.id}
                           className="text-xs p-2 rounded-xl cursor-pointer transition-colors"
                           style={{ color: 'var(--text-primary)' }}
-                          onClick={() => { setNotifOpen(false); navigate('/tasks'); }}
+                          onClick={() => {
+                            setNotifOpen(false);
+                            navigate('/tasks');
+                          }}
                           onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
@@ -690,307 +881,31 @@ export default function TopNavPill() {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* ── CENTER: Nav Tabs ────────────────────────── */}
-          <nav
-            className="flex items-center gap-1 px-1.5 py-1 rounded-[16px]"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
-          >
-            {navLinks.map(({ to, label, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  `relative px-4 py-2 rounded-[12px] text-xs font-bold tracking-wide transition-all duration-200 ${
-                    isActive
-                      ? 'shadow-sm'
-                      : 'hover:opacity-90'
-                  }`
-                }
-                style={({ isActive }) => isActive
-                  ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }
-                  : { color: 'var(--text-muted)' }
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {label}
-                    {isActive && (
-                      <span
-                        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-[3px] w-3.5 rounded-full"
-                        style={{ background: 'var(--accent-gradient)' }}
-                      />
-                    )}
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </nav>
-
-          {/* ── RIGHT CLUSTER: Search + Add + Account ─── */}
-          <div className="flex items-center gap-2 shrink-0">
-
-            {/* Search — single morphing pill, spring-width transition */}
-            <div className="relative" ref={desktopSearchBoxRef}>
-              {/* The pill itself — width springs open/closed */}
-              <div
-                className="flex items-center overflow-hidden rounded-[11px] border"
-                style={{
-                  height: '34px',
-                  width: searchOpen ? '175px' : '34px',
-                  /* Spring easing: fast out, slight overshoot, then settle */
-                  transition: 'width 0.38s cubic-bezier(0.34, 1.45, 0.64, 1), border-color 0.25s ease, background 0.25s ease',
-                  background: searchOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
-                  borderColor: searchOpen ? 'var(--border-card)' : 'var(--border-subtle)',
-                  boxShadow: searchOpen ? '0 2px 14px rgba(0,0,0,0.25)' : 'none',
-                }}
-              >
-                {/* Search icon — always the leftmost element, acts as trigger */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchOpen(v => {
-                      const next = !v;
-                      if (next) setTimeout(() => desktopSearchInputRef.current?.focus(), 220);
-                      return next;
-                    });
-                  }}
-                  title="Search (Ctrl+K)"
-                  className="h-full w-[34px] shrink-0 flex items-center justify-center transition-colors duration-200"
-                  style={{ color: searchOpen ? 'var(--accent-color)' : 'var(--text-muted)' }}
-                >
-                  <Search size={14} />
-                </button>
-
-                {/* Input — fades in after pill opens */}
-                <input
-                  ref={desktopSearchInputRef}
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  placeholder="Search…"
-                  className="flex-1 min-w-0 bg-transparent text-xs outline-none"
-                  style={{
-                    color: 'var(--text-primary)',
-                    opacity: searchOpen ? 1 : 0,
-                    transition: 'opacity 0.18s ease',
-                    transitionDelay: searchOpen ? '0.18s' : '0s',
-                    pointerEvents: searchOpen ? 'auto' : 'none',
-                  }}
-                />
-
-                {/* Clear or close — fades in when open */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (query) {
-                      setQuery('');
-                      desktopSearchInputRef.current?.focus();
-                    } else {
-                      setSearchOpen(false);
-                    }
-                  }}
-                  className="h-8 w-8 shrink-0 flex items-center justify-center"
-                  style={{
-                    color: 'var(--text-muted)',
-                    opacity: searchOpen ? 0.55 : 0,
-                    transition: 'opacity 0.15s ease',
-                    transitionDelay: searchOpen ? '0.22s' : '0s',
-                    pointerEvents: searchOpen ? 'auto' : 'none',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                  onMouseLeave={e => e.currentTarget.style.opacity = searchOpen ? '0.55' : '0'}
-                >
-                  <X size={12} />
-                </button>
-              </div>
-
-              {/* Search Results Dropdown */}
-              {searchOpen && (
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute right-0 top-full mt-2.5 w-[420px] max-w-[calc(100vw-32px)] rounded-2xl border shadow-2xl p-3.5 space-y-3 animate-menu-pop z-50 max-h-[72vh] overflow-y-auto custom-scrollbar"
-                  style={{
-                    background: 'var(--bg-card-solid)',
-                    borderColor: 'var(--border-card)',
-                    backdropFilter: 'blur(36px)',
-                    WebkitBackdropFilter: 'blur(36px)',
-                    boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.08) inset',
-                  }}
-                >
-                  <SearchDropdownView
-                    results={results}
-                    query={query}
-                    totalCount={totalResultsCount}
-                    theme={theme}
-                    onSelect={handleSelectSearchResult}
-                    onSeeCategory={(cat) => handleSelectSearchResult(null, cat)}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Fun Zone — game icon navigates to /fun-zone */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => { setQuickAddOpen(false); setProfileOpen(false); setNotifOpen(false); setSearchOpen(false); navigate('/fun-zone'); }}
-                className="h-[34px] w-[34px] rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 text-white"
-                style={{
-                  background: 'var(--accent-gradient)',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-                }}
-                aria-label="Fun Zone"
-                title="Fun Zone"
-              >
-                <Gamepad2
-                  size={17}
-                  strokeWidth={2.2}
-                />
-              </button>
-
-              {quickAddOpen && (
-                <div
-                  className="absolute right-0 mt-3 w-80 rounded-[28px] border shadow-2xl p-3.5 space-y-2.5 animate-menu-pop z-50 overflow-hidden"
-                  style={{
-                    background: 'var(--bg-card-solid)',
-                    borderColor: 'var(--border-card)',
-                    backdropFilter: 'blur(40px)',
-                    WebkitBackdropFilter: 'blur(40px)',
-                    boxShadow: '0 24px 70px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)',
-                  }}
-                >
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-1 pt-0.5">
-                    <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-indigo-400 border border-indigo-500/25 bg-indigo-500/10">
-                      <Sparkles size={11} className="animate-pulse text-indigo-400" />
-                      <span>Quick Create</span>
-                    </div>
-                    <span
-                      className="text-[10px] font-mono px-1.5 py-0.5 rounded-md border"
-                      style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
-                    >
-                      ESC
-                    </span>
-                  </div>
-
-                  {/* Micro tagline */}
-                  <p className="text-[11px] font-medium px-1 -mt-1" style={{ color: 'var(--text-muted)' }}>
-                    Capture actionable items & notes instantly
-                  </p>
-
-                  {/* 3 Fluid Action Cards */}
-                  <div className="space-y-1.5">
-                    {quickActions.map(action => (
-                      <button
-                        key={action.to}
-                        onClick={() => { setQuickAddOpen(false); navigate(action.to); }}
-                        className="w-full flex items-center justify-between p-2.5 rounded-[20px] border transition-all duration-200 text-left group hover:scale-[1.015] active:scale-[0.98]"
-                        style={{
-                          background: 'var(--bg-surface)',
-                          borderColor: 'var(--border-subtle)',
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.borderColor = action.border;
-                          e.currentTarget.style.boxShadow = `0 4px 18px ${action.glow}`;
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.borderColor = 'var(--border-subtle)';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div
-                            className="h-9 w-9 rounded-[13px] flex items-center justify-center shrink-0 border transition-transform duration-200 group-hover:scale-110"
-                            style={{
-                              background: action.gradient,
-                              borderColor: action.border,
-                              color: action.color,
-                            }}
-                          >
-                            <action.icon size={17} strokeWidth={2.2} />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-xs font-extrabold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                              {action.title}
-                            </div>
-                            <div className="text-[10px] truncate" style={{ color: 'var(--text-muted)' }}>
-                              {action.subtitle}
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="h-6 w-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 opacity-60 group-hover:opacity-100"
-                          style={{ color: action.color }}
-                        >
-                          <ArrowRight size={13} />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Inline quick task entry */}
-                  <div className="pt-1.5 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-                    <form onSubmit={handleQuickInlineTask} className="relative">
-                      <div
-                        className="flex items-center gap-2 px-3 py-2 rounded-full border transition-all focus-within:border-indigo-400 shadow-sm"
-                        style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)' }}
-                      >
-                        <CheckSquare size={13} style={{ color: 'var(--accent-color)' }} />
-                        <input
-                          type="text"
-                          value={quickTaskTitle}
-                          onChange={e => setQuickTaskTitle(e.target.value)}
-                          placeholder="Quick add task for today... ↵"
-                          className="flex-1 min-w-0 text-xs bg-transparent outline-none placeholder:text-stone-400"
-                          style={{ color: 'var(--text-primary)' }}
-                        />
-                        <button
-                          type="submit"
-                          disabled={!quickTaskTitle.trim() || quickTaskSubmitting}
-                          className="h-5 w-5 rounded-full flex items-center justify-center transition-transform active:scale-90 disabled:opacity-30 shrink-0"
-                          style={{ background: 'var(--accent-gradient)', color: '#fff' }}
-                          title="Save task"
-                        >
-                          <Plus size={12} strokeWidth={2.8} />
-                        </button>
-                      </div>
-                      {quickTaskSuccess && (
-                        <div className="absolute inset-0 flex items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/40 backdrop-blur-md text-emerald-400 text-xs font-bold animate-menu-pop">
-                          <Check size={13} className="mr-1.5" /> Task captured for today!
-                        </div>
-                      )}
-                    </form>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Thin divider */}
-            <div className="h-5 w-px" style={{ background: 'var(--border-card)' }} />
-
-            {/* Account + Settings merged — Name-based logo */}
+            {/* 3. Account Profile Avatar & Dropdown */}
             <div className="relative" ref={profileRef}>
               <button
                 type="button"
-                onClick={() => { setProfileOpen(v => !v); setNotifOpen(false); setQuickAddOpen(false); setSearchOpen(false); }}
-                className="h-[34px] w-[34px] rounded-full flex items-center justify-center transition-all hover:brightness-110 hover:scale-105 active:scale-95 border"
+                onClick={() => {
+                  if (playChime) playChime('pop');
+                  setProfileOpen(v => !v);
+                  setNotifOpen(false);
+                  setSearchOpen(false);
+                }}
+                className="h-[34px] w-[34px] rounded-full flex items-center justify-center transition-all hover:brightness-110 hover:scale-105 active:scale-95 border cursor-pointer p-0.5"
                 style={{
                   background: profileOpen ? 'var(--bg-card)' : 'var(--bg-surface)',
                   borderColor: profileOpen ? 'var(--accent-color)' : 'var(--border-subtle)',
-                  boxShadow: 'none',
                 }}
                 title={user?.name ? `${user.name} (Account)` : 'Account'}
                 aria-label="Account profile"
               >
                 <div
-                  className="h-7 w-7 rounded-full grid place-items-center text-white text-xs font-black tracking-tight shrink-0 select-none shadow-sm overflow-hidden"
+                  className="h-full w-full rounded-full grid place-items-center text-white text-xs font-black tracking-tight shrink-0 select-none shadow-sm overflow-hidden"
                   style={{ background: 'var(--accent-gradient)' }}
                 >
                   {user?.photoURL ? (
-                    <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
+                    <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                   ) : (
                     initials || <UserIcon size={12} />
                   )}
@@ -1000,8 +915,13 @@ export default function TopNavPill() {
               {profileOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute right-0 mt-2.5 w-52 rounded-2xl border shadow-2xl animate-menu-pop z-50 overflow-hidden"
-                  style={{ background: 'var(--bg-card-solid)', borderColor: 'var(--border-card)', backdropFilter: 'blur(32px)', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}
+                  className="absolute right-0 top-full mt-2.5 w-56 rounded-2xl border shadow-2xl animate-menu-pop z-50 overflow-hidden"
+                  style={{
+                    background: 'var(--bg-card-solid)',
+                    borderColor: 'var(--border-card)',
+                    backdropFilter: 'blur(32px)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+                  }}
                 >
                   {/* User info */}
                   <div
@@ -1014,7 +934,7 @@ export default function TopNavPill() {
                         style={{ background: 'var(--accent-gradient)' }}
                       >
                         {user?.photoURL ? (
-                          <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" />
+                          <img src={user.photoURL} alt={user?.name || 'User'} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
                           initials
                         )}
@@ -1029,29 +949,35 @@ export default function TopNavPill() {
                   {/* Actions */}
                   <div className="p-1.5 space-y-0.5">
                     <button
-                      onClick={() => { setProfileOpen(false); navigate('/settings'); }}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition-all"
+                      type="button"
+                      onClick={() => {
+                        if (playChime) playChime('pop');
+                        setProfileOpen(false);
+                        navigate('/settings');
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer"
                       style={{ color: 'var(--text-primary)' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
                       <span
-                        className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+                        className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0 border"
+                        style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
                       >
                         <Sliders size={12} />
                       </span>
-                      Settings & Preferences
+                      Settings &amp; Preferences
                     </button>
                     <button
+                      type="button"
                       onClick={handleLogout}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium transition-all text-rose-400"
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all text-rose-400 cursor-pointer"
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(251,113,133,0.08)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
                       <span
-                        className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: 'rgba(251,113,133,0.1)', color: '#fb7185', border: '1px solid rgba(251,113,133,0.2)' }}
+                        className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0 border border-rose-500/30 bg-rose-500/10"
+                        style={{ color: '#fb7185' }}
                       >
                         <LogOut size={12} />
                       </span>
@@ -1064,6 +990,326 @@ export default function TopNavPill() {
           </div>
         </div>
       </header>
+
+      {/* ════════════════════════════════════════════
+          DESKTOP BOTTOM NAV DOCK  (md+)
+          Home, Tasks, Search (center), Calendar, Notes
+      ════════════════════════════════════════════ */}
+      <div className="hidden md:flex fixed bottom-5 inset-x-0 z-40 justify-center px-6 pointer-events-none select-none">
+        <nav
+          className={`pointer-events-auto relative flex items-center gap-1.5 px-3 py-2 transition-all duration-300${isNotebook ? ' nb-bookmark-pill' : ''}`}
+          style={{
+            background:     'var(--bg-card-solid)',
+            borderRadius:   '24px',
+            border:         '1px solid var(--border-card)',
+            backdropFilter: 'blur(32px)',
+            WebkitBackdropFilter: 'blur(32px)',
+            boxShadow:      isNotebook
+              ? '0 6px 28px rgba(120,80,30,0.18), 0 1px 0 rgba(255,255,255,0.06) inset'
+              : '0 12px 45px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset',
+          }}
+        >
+          {/* 1. Home */}
+          <NavLink
+            to="/"
+            end
+            onClick={() => {
+              if (playChime) playChime('pop');
+              closeAllDropdowns();
+            }}
+            className={({ isActive }) =>
+              `relative flex items-center justify-center gap-2 min-w-[82px] px-3.5 py-2 rounded-[16px] text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer ${
+                isActive ? 'shadow-sm' : 'hover:opacity-90'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-primary)',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                    border: '1px solid var(--border-subtle)',
+                  }
+                : {
+                    color: 'var(--text-muted)',
+                    border: '1px solid transparent',
+                  }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Home
+                  size={16}
+                  strokeWidth={isActive ? 2.3 : 1.8}
+                  style={{ color: isActive ? 'var(--accent-color)' : 'inherit' }}
+                />
+                <span>Home</span>
+                {isActive && (
+                  <span
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-[3px] w-4 rounded-full"
+                    style={{ background: 'var(--accent-gradient)' }}
+                  />
+                )}
+              </>
+            )}
+          </NavLink>
+
+          {/* 2. Tasks */}
+          <NavLink
+            to="/tasks"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              closeAllDropdowns();
+            }}
+            className={({ isActive }) =>
+              `relative flex items-center justify-center gap-2 min-w-[84px] px-3.5 py-2 rounded-[16px] text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer ${
+                isActive ? 'shadow-sm' : 'hover:opacity-90'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-primary)',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                    border: '1px solid var(--border-subtle)',
+                  }
+                : {
+                    color: 'var(--text-muted)',
+                    border: '1px solid transparent',
+                  }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <CheckSquare
+                  size={16}
+                  strokeWidth={isActive ? 2.3 : 1.8}
+                  style={{ color: isActive ? 'var(--accent-color)' : 'inherit' }}
+                />
+                <span>Tasks</span>
+                {isActive && (
+                  <span
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-[3px] w-4 rounded-full"
+                    style={{ background: 'var(--accent-gradient)' }}
+                  />
+                )}
+              </>
+            )}
+          </NavLink>
+
+          {/* 3. Search (CENTER BUTTON) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              setSearchOpen(v => {
+                const next = !v;
+                if (next) setTimeout(() => desktopSearchInputRef.current?.focus(), 80);
+                return next;
+              });
+              setNotifOpen(false);
+              setProfileOpen(false);
+            }}
+            className={`relative flex items-center justify-center gap-2 min-w-[104px] px-4 py-2 rounded-[16px] text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer ${
+              searchOpen ? 'shadow-sm' : 'hover:opacity-90'
+            }`}
+            style={searchOpen
+              ? {
+                  background: 'color-mix(in srgb, var(--accent-color) 16%, var(--bg-surface))',
+                  color: 'var(--accent-color)',
+                  border: '1px solid var(--accent-color)',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                }
+              : {
+                  background: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-subtle)',
+                }
+            }
+            aria-label="Search"
+            title="Search (Ctrl+K)"
+          >
+            <Search size={15} strokeWidth={searchOpen ? 2.4 : 1.9} style={{ color: searchOpen ? 'var(--accent-color)' : 'var(--accent-color)' }} />
+            <span>Search</span>
+            <kbd
+              className="hidden sm:inline-flex items-center text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded border ml-0.5"
+              style={{
+                background: 'var(--bg-card)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              Ctrl+K
+            </kbd>
+          </button>
+
+          {/* 4. Calendar */}
+          <NavLink
+            to="/calendar"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              closeAllDropdowns();
+            }}
+            className={({ isActive }) =>
+              `relative flex items-center justify-center gap-2 min-w-[84px] px-3.5 py-2 rounded-[16px] text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer ${
+                isActive ? 'shadow-sm' : 'hover:opacity-90'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-primary)',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                    border: '1px solid var(--border-subtle)',
+                  }
+                : {
+                    color: 'var(--text-muted)',
+                    border: '1px solid transparent',
+                  }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <Calendar
+                  size={16}
+                  strokeWidth={isActive ? 2.3 : 1.8}
+                  style={{ color: isActive ? 'var(--accent-color)' : 'inherit' }}
+                />
+                <span>Calendar</span>
+                {isActive && (
+                  <span
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-[3px] w-4 rounded-full"
+                    style={{ background: 'var(--accent-gradient)' }}
+                  />
+                )}
+              </>
+            )}
+          </NavLink>
+
+          {/* 5. Notes */}
+          <NavLink
+            to="/notes"
+            onClick={() => {
+              if (playChime) playChime('pop');
+              closeAllDropdowns();
+            }}
+            className={({ isActive }) =>
+              `relative flex items-center justify-center gap-2 min-w-[82px] px-3.5 py-2 rounded-[16px] text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer ${
+                isActive ? 'shadow-sm' : 'hover:opacity-90'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive
+                ? {
+                    background: 'var(--bg-surface)',
+                    color: 'var(--text-primary)',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+                    border: '1px solid var(--border-subtle)',
+                  }
+                : {
+                    color: 'var(--text-muted)',
+                    border: '1px solid transparent',
+                  }
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <StickyNote
+                  size={16}
+                  strokeWidth={isActive ? 2.3 : 1.8}
+                  style={{ color: isActive ? 'var(--accent-color)' : 'inherit' }}
+                />
+                <span>Notes</span>
+                {isActive && (
+                  <span
+                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-[3px] w-4 rounded-full"
+                    style={{ background: 'var(--accent-gradient)' }}
+                  />
+                )}
+              </>
+            )}
+          </NavLink>
+
+          {/* ── Upward-popping Search Palette: Fluid Fly-up & Fly-down Animation ── */}
+          {searchRendered && (
+            <div
+              ref={desktopSearchBoxRef}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-full mb-3 left-1/2 w-[520px] max-w-[calc(100vw-32px)] rounded-[24px] border p-4 space-y-3 z-50 max-h-[72vh] overflow-y-auto custom-scrollbar"
+              style={{
+                background: 'var(--bg-card-solid)',
+                borderColor: 'var(--border-card)',
+                backdropFilter: 'blur(36px)',
+                WebkitBackdropFilter: 'blur(36px)',
+                transformOrigin: 'bottom center',
+                transform: searchAnimating
+                  ? 'translate(-50%, 0) scale(1)'
+                  : 'translate(-50%, 32px) scale(0.94)',
+                opacity: searchAnimating ? 1 : 0,
+                transition: searchAnimating
+                  ? 'transform 0.36s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.36s ease'
+                  : 'transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.20s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.24s ease',
+                boxShadow: searchAnimating
+                  ? '0 28px 70px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.08) inset'
+                  : '0 8px 20px rgba(0,0,0,0.3)',
+                pointerEvents: searchAnimating ? 'auto' : 'none',
+              }}
+            >
+              {/* Header search bar inside palette */}
+              <div
+                className="flex items-center gap-2 px-3.5 h-11 rounded-[16px] border shadow-inner transition-all focus-within:border-indigo-400"
+                style={{
+                  background: 'var(--bg-surface)',
+                  borderColor: 'var(--border-subtle)',
+                }}
+              >
+                <Search size={16} style={{ color: 'var(--accent-color)' }} />
+                <input
+                  ref={desktopSearchInputRef}
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Search tasks, notes, schedule, settings, themes…"
+                  className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm outline-none font-medium"
+                  style={{ color: 'var(--text-primary)' }}
+                  autoFocus
+                />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery('');
+                      desktopSearchInputRef.current?.focus();
+                    }}
+                    className="p-1 rounded-lg text-stone-400 hover:text-white transition-colors cursor-pointer"
+                    aria-label="Clear query"
+                  >
+                    <X size={14} />
+                  </button>
+                ) : (
+                  <kbd
+                    className="text-[10px] font-mono px-1.5 py-0.5 rounded border"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+                  >
+                    ESC
+                  </kbd>
+                )}
+              </div>
+
+              {/* Unified Search Dropdown View */}
+              <SearchDropdownView
+                results={results}
+                query={query}
+                totalCount={totalResultsCount}
+                theme={theme}
+                onSelect={handleSelectSearchResult}
+                onSeeCategory={(cat) => handleSelectSearchResult(null, cat)}
+              />
+            </div>
+          )}
+        </nav>
+      </div>
 
       {/* ════════════════════════════════════════════
           MOBILE TOP BAR  (< md)
